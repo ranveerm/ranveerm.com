@@ -29,6 +29,9 @@ url: "https://ranveerm.github.io" # the base hostname & protocol for your site, 
 twitter_username: escapehorizon
 github_username: ranveerm
 
+# Fields that minima uses, but are not present by default
+author: ranveerm
+
 # Build settings
 theme: minima
 plugins:
