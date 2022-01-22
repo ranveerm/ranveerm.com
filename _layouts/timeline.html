@@ -13,7 +13,8 @@ layout: default
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2">
           <ul class="timeline">
-            {% for timeline_object in site.timeline_objects %}
+            {% assign sorted_timeline_objects = site.timeline_objects | sort: "year" %}
+            {% for timeline_object in sorted_timeline_objects reversed %}
               {% assign loopindex = forloop.index | modulo: 2 %}
               {% capture class %}
                 {% if loopindex == 0 %}
