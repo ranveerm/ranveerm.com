@@ -30,7 +30,7 @@ github_username: ranveerm
 # Fields that minima uses, but are not present by default
 author: ranveerm
 copyright: "ranveerm LLC"
-title-logo: /images/title-logo.png
+title-logo: /assets/images/title-logo.png
 
 # Build settings
 theme: minima
@@ -55,3 +55,7 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+# Custom definitions
+collections:
+  - timeline_objects

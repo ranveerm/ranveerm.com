@@ -1,0 +1,46 @@
+---
+layout: default
+---
+
+<center> {{ content }} </center>
+
+<!-- #Reference: [Timeline Jekyll Theme](https://github.com/kirbyt/timeline-jekyll-theme) 5950786 -->
+
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/timeline.css">
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/shared-styling.css">
+
+<section class="container content-section text-center">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+          <ul class="timeline">
+            {% assign sorted_timeline_objects = site.timeline_objects | sort: "year" %}
+            {% for timeline_object in sorted_timeline_objects reversed %}
+              {% assign loopindex = forloop.index | modulo: 2 %}
+              {% capture class %}
+                {% if loopindex == 0 %}
+                  timeline-inverted
+                {% endif %}
+              {% endcapture %}
+
+              <li class="{{ class }}">
+                {% if timeline_object.image %}
+                  <div class="timeline-image">
+                      <img class="img-circle img-responsive" src="{{ site.baseurl }}/{{ timeline_object.image }}" alt="">
+                  </div>
+                {% endif %}
+                  <div class="timeline-panel">
+                      <div class="timeline-heading">
+                          <h4>{{ timeline_object.subtitle }}</h4>
+                          <p><b>{{ timeline_object.title }}</b></p>
+                      </div>
+                      <div class="timeline-body">
+                          <p>{{ timeline_object.content }}</p>
+                      </div>
+                  </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+        </div>
+    </div>
+</section>
