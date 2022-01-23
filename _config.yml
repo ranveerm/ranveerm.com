@@ -22,8 +22,11 @@ title: Escape Horizon
 email: contact@ranveerm.com
 description: >- # this means to ignore newlines until "baseurl:"
   One more time with feeling.
-baseurl: "/ranveerm.com" # the subpath of your site, e.g. /blog
-url: "https://ranveerm.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+
+# Base URL no longer used after transition to custom domain 
+# baseurl: "/ranveerm.com" # the subpath of your site, e.g. /blog
+url: "https://ranveerm.com" # the base hostname & protocol for your site, e.g. http://example.com
+
 twitter_username: escapehorizon
 github_username: ranveerm
 
