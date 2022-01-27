@@ -1,0 +1,35 @@
+---
+layout: default
+permalink: /sections/
+---
+
+<link
+  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="{{ site.baseurl }}/assets/css/shared-styling.css"
+/>
+
+<h2 id="categories">Categories</h2>
+<div>
+  <a href="/">Escape Horizon ({{ site.posts | size }})</a>
+  <a href="/blog/now">Now ({{ site.categories.now | size }})</a>
+  <a href="/swift">Swift ({{ site.categories.swift | size }})</a>
+  <a href="/photography">📷 ({{ site.categories.photography | size }})</a>
+</div>
+
+<br />
+
+<h2 id="tags">Tags</h2>
+
+{% assign sortedTags = site.tags | sort %}
+
+<div class="tag-list">
+  {% for tag in sortedTags %}
+  <a href="/tag/{{tag[0]}}" class="post-tag"
+    >{{ tag[0] }}&nbsp;({{ tag[1] | size }})</a
+  >
+  {% endfor %}
+</div>
