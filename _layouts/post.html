@@ -20,7 +20,10 @@ layout: default
       <!-- Tags -->
       {% if page.tags %} | 
         {% for tag in page.tags %}
-          <a href="{{ site.baseurl }}{{ site.tag_page }}#{{ tag | slugify }}" class="post-tag">{{ tag }}</a>
+          {% capture tag_name %}{{ tag }}{% endcapture %}
+          <a href="/tag/{{ tag_name }}", class="post-tag">
+            {{ tag_name }}
+          </a>&nbsp;
         {% endfor %}
       {% endif %}
 
