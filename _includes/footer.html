@@ -24,12 +24,15 @@
         </ul>
       </div>
 
-      <div class="footer-col footer-col-2">
-        {%- include social.html -%}
+      <div class="footer-col footer-col-3">
+        <ul class="contact-list">
+          <li>{{- site.description | escape -}}</li>
+          <a href="/sections/">Site Sections</a>&nbsp;
+        </ul>
       </div>
 
-      <div class="footer-col footer-col-3">
-        <p>{{- site.description | escape -}}</p>
+      <div class="footer-col footer-col-2">
+        {%- include social.html -%}
       </div>
     </div>
 
