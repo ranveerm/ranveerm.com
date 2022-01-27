@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # The following script was taken from https://github.com/qian256/qian256.github.io/blob/master/tag_generator.py. See [Jekyll Tags on Github Pages](https://longqian.me/2017/02/09/github-jekyll-tag/) for more details.
 
 """
@@ -55,12 +55,7 @@ if not os.path.exists(tag_dir):
 for tag in total_tags:
     tag_filename = tag_dir + tag.replace(" ", "_") + ".md"
     f = open(tag_filename, "a")
-    write_str = (
-        "---\nlayout: tag-page"
-        + "\ntag: "
-        + tag
-        + "\n---\n"
-    )
+    write_str = "---\nlayout: tag-page" + "\ntag: " + tag + "\n---\n"
     f.write(write_str)
     f.close()
 print("Tags generated, count", total_tags.__len__())
