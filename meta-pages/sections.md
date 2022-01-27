@@ -1,0 +1,4 @@
+---
+layout: sections
+permalink: /sections/
+---
