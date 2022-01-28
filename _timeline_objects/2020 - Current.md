@@ -1,7 +1,7 @@
 ---
 title: 2020 - Current
 subtitle: Mobile Applications Engineer
-image: assets/images/about/EYEfi logo.png
+image: assets/images/about/EYEfi Logo.png
 year: 2021
 ---
 
