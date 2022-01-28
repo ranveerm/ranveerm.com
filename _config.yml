@@ -62,3 +62,6 @@ plugins:
 # Custom definitions
 collections:
   - timeline_objects
+
+# Custom Settings
+excerpt_separator: <!--end-excerpt--> 
