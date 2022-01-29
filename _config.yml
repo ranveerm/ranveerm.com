@@ -66,3 +66,6 @@ collections:
 # Custom Settings
 excerpt_separator: <!--end-excerpt--> 
 show_excerpts: true
+header_pages:
+  - my-apps/journal-mapper.md
+  - about.markdown
