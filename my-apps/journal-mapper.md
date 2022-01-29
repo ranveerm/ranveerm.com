@@ -10,22 +10,23 @@ permalink: /journal-mapper/
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         grid-auto-rows: 600px;
+        /* grid-auto-rows: minmax(100px, 600px); */
+        align-items: center;
+        grid-gap: 20px;
     }
     .centered-image {
         max-width:100%; 
         max-height:100%; 
+    }
+
+    img { 
+        margin: auto;
         display: block;
     }
 
     .centered-text {
-        margin: 0;
-        position: relative;
-        top: 50%;
-        -ms-transform: translateY(-50%);
-        transform: translateY(-50%);
-        padding: 0px 20px 0px 20px;
         text-align: justify;
-        text-justify: inter-word;
+        text-justify: inter-word; 
     }
 </style>
 
