@@ -49,9 +49,11 @@ layout: default
         <!-- [Customising the Excerpt Separators in Jekyll](https://cjshelton.github.io/blog/2019/05/27/customising-jekyll-excerpt-start.html)  -->
           {% assign excerptParts = post.excerpt | split: "<!-- excerpt-start -->" %}
           {{ excerptParts[1] | strip_newlines | truncatewords: 50 }}
-          
+
         {%- endif -%}
       </li>
+      <br>
+      <hr class="post-divider">
       {%- endfor -%}
     </ul>
 
