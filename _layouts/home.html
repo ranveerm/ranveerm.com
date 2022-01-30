@@ -1,7 +1,9 @@
 ---
 layout: default
 ---
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/shared-styling.css">
+
 <img class="banner-image" src="/assets/images/default-banner-mage.png" alt="">
 <div class="home">
   {%- if page.title -%}
@@ -23,14 +25,35 @@ layout: default
             {{ post.title | escape }}
           </a>
         </h3>
+        
+        <!-- Note: Repeated code -->
+        <!-- Post Metadata -->
+        <div class="post-meta">
+          <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+            {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+            {{ post.date | date: date_format }}
+          </time>
+    
+          {% if post.tags %} | 
+            {% for tag in post.tags %}
+              {% capture tag_name %}{{ tag }}{% endcapture %}
+              <a href="/tag/{{ tag_name }}", class="post-tag">
+                {{ tag_name }}
+              </a>&nbsp;
+            {% endfor %}
+          {% endif %}
+
+        </div>
         {%- if site.show_excerpts -%}
 
         <!-- [Customising the Excerpt Separators in Jekyll](https://cjshelton.github.io/blog/2019/05/27/customising-jekyll-excerpt-start.html)  -->
           {% assign excerptParts = post.excerpt | split: "<!-- excerpt-start -->" %}
           {{ excerptParts[1] | strip_newlines | truncatewords: 50 }}
-          
+
         {%- endif -%}
       </li>
+      <br>
+      <hr class="post-divider">
       {%- endfor -%}
     </ul>
 

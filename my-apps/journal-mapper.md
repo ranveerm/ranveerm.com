@@ -33,7 +33,7 @@ permalink: /journal-mapper/
 <h3 style="text-align:center;" class="text-muted">Diary on a map</h3>
 
 <br/>
-<hr/> 
+<hr class="post-divider"/> 
 <br/>
 
 <p style="text-align:center;">Your spatial journal to store 💾, organise 🗂 and review 📖 information related to points of interest 📍 in the real world 🌏.</p>
@@ -69,7 +69,7 @@ permalink: /journal-mapper/
 <img src="/assets/images/journal-mapper/multiple-devices.png" class="centered-image">
 
 <br/>
-<hr/> 
+<hr class="post-divider"/> 
 <br/>
 
 <h3 style="text-align:center;">Download now on the App Store</h3>
