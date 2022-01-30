@@ -17,9 +17,6 @@ permalink: /journal-mapper/
     .centered-image {
         max-width:100%; 
         max-height:100%; 
-    }
-
-    img { 
         margin: auto;
         display: block;
     }
