@@ -6,7 +6,11 @@ categories: jekyll update
 tags: [iOS, workflow]
 image-post-dir: /assets/images/posts
 ---
-{{ image-src-dir }}
+
+<style>
+    img { border-radius: 10px; }
+</style>
+
 _Originally posted on [reddit](https://www.reddit.com/r/swift/comments/js2o9u/reflecting_upon_developing_and_publishing_my/)_
 
 > "You can’t connect the dots looking forward; you can only connect them looking backwards. So you have to trust that the dots will somehow connect in your future. You have to trust in something—your gut, destiny, life, karma, whatever. This approach has never let me down, and it has made all the difference in my life." - __Steve Jobs__
