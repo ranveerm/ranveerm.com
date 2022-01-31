@@ -1,6 +1,5 @@
 ---
-layout: default
+layout: photography
 title: 📷
 permalink: /photo-gallery/
-photo-gallery-root-dir: /assets/images/photo-gallery
 ---
