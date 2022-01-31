@@ -43,5 +43,9 @@ photo-gallery-root-dir: /assets/images/photo-gallery
     <center><h2>{{ page.title }}</h2></center>
 {%- endif -%}
 
+{%- if page.year -%}
+    <h5 class="text-muted">{{ page.year }}</h5>
+{%- endif -%}
+
 {{ content }}
 
