@@ -24,10 +24,10 @@ permalink: /photo-gallery/
             <p class="text-muted">🇭🇰 2019</p>
         </span>
     </a>
-    <a href="/photo-gallery/vietnam-2017/" class="hover-zoom">
+    <a href="/photo-gallery/vietnam-2016/" class="hover-zoom">
         <span>
-            <img src="{{ layout.photo-gallery-root-dir | escape }}/vietnam-2017/cover.jpg" class="centered-image">
-            <p class="text-muted">🇻🇳 2017</p>
+            <img src="{{ layout.photo-gallery-root-dir | escape }}/vietnam-2016/cover.jpg" class="centered-image">
+            <p class="text-muted">🇻🇳 2016</p>
         </span>
     </a>
 </div>
