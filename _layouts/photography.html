@@ -1,0 +1,51 @@
+---
+layout: default
+photo-gallery-root-dir: /assets/images/photo-gallery
+---
+
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        /* grid-auto-rows: minmax(100px, 600px); */
+        align-items: center;
+        grid-gap: 50px;
+    }
+
+    .centered-image {
+        border-radius: 10px;
+        margin: auto;
+        width:100%;
+        height:100%;
+        object-fit: cover;
+        overflow: hidden;
+        aspect-ratio: 7 / 5;
+    }
+
+    .hover-zoom:hover {
+        transition: transform .3s; /* Animation */
+        transform: scale(1.05); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+    }
+
+    h2, h5 {
+        font-weight: 500;
+        line-height: 1.1;
+    }
+
+    .text-muted {
+        color: #777;
+        text-align: center;
+    }
+
+</style>
+
+{%- if page.show-title -%}
+    <center><h2>{{ page.title }}</h2></center>
+{%- endif -%}
+
+{%- if page.year -%}
+    <h5 class="text-muted">{{ page.year }}</h5>
+{%- endif -%}
+
+{{ content }}
+

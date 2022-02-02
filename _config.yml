@@ -67,5 +67,6 @@ collections:
 excerpt_separator: <!--end-excerpt--> 
 show_excerpts: true
 header_pages:
+  - photo-gallery/photo-gallery.md
   - my-apps/journal-mapper.md
   - about.markdown
