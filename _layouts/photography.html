@@ -98,6 +98,16 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 
 </style>
 
+{%- if page.show-title-image -%}
+<figure class='cover-figure'>
+    <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/cover.jpg">
+</figure>
+{%- endif -%}
+
+<br>
+
+<br>
+
 {%- if page.show-title -%}
     <center><h2>{{ page.title }}</h2></center>
 {%- endif -%}
