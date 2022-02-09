@@ -14,19 +14,19 @@ permalink: /photo-gallery/
 <div class="grid">
     <a href="/photo-gallery/phillipines-2019/" class="hover-zoom">
         <span>
-            <img src="{{ layout.photo-gallery-root-dir | escape }}/philippines-2019/cover.jpg" class="centered-image">
+            <img src="{{ layout.photo-gallery-root-dir | escape }}/philippines-2019/cover.jpg" class="cover-image-thumbnail">
             <p class="text-muted">🇵🇭 2019</p>
         </span>
     </a>
     <a href="/photo-gallery/hong-kong-2019/" class="hover-zoom">
         <span>
-            <img src="{{ layout.photo-gallery-root-dir | escape }}/hong-kong-2019/cover.jpg" class="centered-image">
+            <img src="{{ layout.photo-gallery-root-dir | escape }}/hong-kong-2019/cover.jpg" class="cover-image-thumbnail">
             <p class="text-muted">🇭🇰 2019</p>
         </span>
     </a>
     <a href="/photo-gallery/vietnam-2016/" class="hover-zoom">
         <span>
-            <img src="{{ layout.photo-gallery-root-dir | escape }}/vietnam-2016/cover.jpg" class="centered-image">
+            <img src="{{ layout.photo-gallery-root-dir | escape }}/vietnam-2016/cover.jpg" class="cover-image-thumbnail">
             <p class="text-muted">🇻🇳 2016</p>
         </span>
     </a>
