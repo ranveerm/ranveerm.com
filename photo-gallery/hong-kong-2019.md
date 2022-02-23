@@ -4,6 +4,7 @@ title: 🇭🇰
 permalink: /photo-gallery/hong-kong-2019/
 show-title: true
 show-title-image: true
+show-map-image: true
 year: 2019
 parent-dir: hong-kong-2019
 ---
