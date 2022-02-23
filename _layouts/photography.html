@@ -106,7 +106,7 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 
 <br>
 
-<br>
+<br/>
 
 {%- if page.show-title -%}
     <center><h2>{{ page.title }}</h2></center>
@@ -118,3 +118,9 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 
 {{ content }}
 
+<br/>
+
+{%- if page.show-map-image -%}
+<img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/map.jpeg" class="centered-image">
+<figcaption>Generated using <a href="/journal-mapper">Journal Mapper</a></figcaption>
+{%- endif -%}
