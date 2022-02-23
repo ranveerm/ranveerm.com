@@ -4,6 +4,7 @@ title: 🇻🇳
 permalink: /photo-gallery/vietnam-2016/
 show-title-image: true
 show-title: true
+show-map-image: true
 year: 2016
 parent-dir: vietnam-2016
 ---
@@ -153,10 +154,3 @@ parent-dir: vietnam-2016
 <br/>
 
 <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160721-DSC_0467.jpg" class="centered-image">
-
-<br/>
-
-<img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/map.jpeg" class="centered-image">
-<figcaption>Generated using <a href="/journal-mapper">Journal Mapper</a></figcaption>
-
-<br/>
