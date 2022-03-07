@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Reflecting upon developing and publishing my first application on the App Store
-date: 2022-01-15 19:44:51 +1100
+date: 2020-11-11 19:44:51 +1100
 categories: jekyll update
 tags: [iOS, workflow]
 image-post-dir: /assets/images/posts
@@ -77,8 +77,6 @@ Visual elements of finished projects
 
 # Value Proposition
 
-
-
 So what problem was my App going to solve? I did not dedicate a specific time for this activity, but engaged with it passively whenever it approached me subconsciously. A few considerations that affected my decision-
 
 - Tempering my imagination by being aware of my present skillset
@@ -92,19 +90,13 @@ Some of you might note that I did not include a time constraint and a financial 
 
 # Investigating Competition
 
-
-
 I decided to address the problem of visualising personal data on a map, an idea that a lot of Apps solved as an afterthought (eg. [Apple Maps](https://support.apple.com/en-au/guide/maps/mpsa4871840a/mac) and [Google Maps](https://support.google.com/maps/answer/3184808?co=GENIE.Platform%3DiOS&hl=en) with saved locations, [Day One](https://help.dayoneapp.com/en/articles/840054-journal-views-in-day-one-for-ios) and [Apple Photos](https://support.apple.com/en-au/guide/ipad/ipad0352bf82/ipados) with geographic data attached to individual entries) but very few did so [intentionally](https://apps.apple.com/au/app/keeptrax-location-journal/id887857687). Investigating how existing Apps solved the problem helped me gain a concrete understanding of why someone (with the narrow use case as defined by the project) should download my App as opposed to those that I've mentioned. Investigating the competition also had the added benefit of bringing my awareness to the numerous UI elements available along with the deployment of these elements by other developers to achieve a specific task.
 
 # Project Workflow
 
-
-
 I choose to divide the project into major functions (eg. search bar, data persistence, map interaction, etc.) that I would prototype and then implement individually and finally integrate at the end. Individual Xcode projects were created for each of these functions. Whilst this is a piecemeal approach, I found that I was better able to concentrate on the problem at hand and also keeping the scope focused. In order to mitigate an incompatible mess, I tried to define the functions to be as independent to each other as possible. I completely acknowledge that this is not the most efficient approach and presume that this would not be feasible for a lot of projects. I'd welcome a discussion for a workflow that would keep segments of a project independent and focused while also maintaining a holistic view.
 
 # Prototyping
-
-
 
 Without any real experience with UI design (and a heavy reliance on intuition), I found drawing out UI elements and creating trivial storyboards to be really helpful as-
 
@@ -157,8 +149,6 @@ _Figure 5: Monodraw- code comments as logic diagrams_
 
 # Bringing it all together
 
-
-
 Until it was time to bring all the pieces together, I did not really employ any form of version control. I'd imagine this would be frowned upon, but projects so far were small enough and focused for this not to be too much of an issue (however, there were occasions when it was an issue) and worth the overhead (I understand that the process of adopting version control might be so ingrained in standard software development that it might not even be considered an overhead, but personally keeping track of checkpoints was still an overhead- I'd imagine this is a sign of a more serious systemic issue with my approach).
 
 Xcode's standard git integration was leveraged and multiple branches were used for each of the major functions of the App (eg. map interface, menus, data persistence). However, I avoided concurrently working on multiple branches due to constant merge conflicts with the `.pbxproj` file (I was able to overcome the merge conflicts that I experienced with the help of [this](https://thoughtbot.com/blog/xcode-and-git-bridging-the-gap) article). I'd be curious to hear how others handle merge conflicts with this file (especially teams with multiple developers). Hence, the benefits of using multiple branches was not capitalised and using them did not make a practical difference to the project. However, the project "felt" more organised, but I'm unable to quantify or articulate how.
@@ -175,15 +165,11 @@ Bringing all the elements together proved to take longer than I had anticipated.
 
 # Admin
 
-
-
 The App was now more or less a representation of what I envisioned it to be; so it's only a push of a button away from making it to the App Store right? Well, there is still the matter of creating a developer account, registering a business, soliciting tester feedback, creating an App icon, settling on a suitable name, creating a developer website and preparing the App for the App review process. In honesty, the following tasks were not as mentally draining as I anticipated them to be, primarily because the finish line was now in sight.
 
 Registering for a developer account was the first piece of real administrative task within the project. The reason I did not complete this until now was that for this project specifically, there was no real need for it until the it had to be distributed via TestFlight (this is not exactly true as you need a developer account for CloudKit integration and perhaps other frameworks as well, but this was a trivial task) for beta testing (which I'll discuss below). Thanks to [this](https://www.raywenderlich.com/120-how-to-submit-an-app-to-apple-from-no-account-to-app-store-part-1) very handy tutorial, the process was fairly straightforward (with the added benefit of setting up development/distribution certificates that will come in handy down the track). I also needed to register a business for taxation purposes in my country, which was reasonably seamless as the entire process was digital (your mileage may vary based on your local requirements).
 
 # App Icon and Name
-
-
 
 Focusing on a purely design problem was a breath of fresh air after all that time spent in Xcode. The approach I adopted was to lay out my requirements for the icon and address them individually-
 
@@ -202,8 +188,6 @@ Tools used-
 
 # Testing
 
-
-
 It's time to address the elephant in the room. Several readers would have noticed that I did not mention testing throughout the post. This is because I just did not prioritise it in the project. Despite reading the [several benefits](https://www.toptal.com/qa/how-to-write-testable-code-and-why-it-matters) of implementing testing as an integral part of the development process, I failed to dedicate time to writing tests for my code (apart from some trivial unit tests as part of my learning). In addition, the further I progressed through the project, the more I was disincentivized to spend time on writing tests as-
 
 - I had that task of going through an ever increasing number of test cases
@@ -215,8 +199,6 @@ I did however distribute my App via TestFlight for beta testing. Another fantast
 
 # Developer Website
 
-
-
 I was surprised to find out that all Apps required a privacy policy along with a developer website and a contact email. Fortunately for me, I already had a domain registered that I could utilise. Generating a privacy policy however, was a bit more involved, not only in terms of the content that was required, but also the format. I came across [this](https://www.reddit.com/r/iOSProgramming/comments/9j7jdl/where_to_generate_privacy_policy_for_ios_app/) post and followed the advice of using the [privacy policy from Overcast](https://overcast.fm/privacy) as a guide to structure my policy (as a side note, I've been a long time [ATP](https://atp.fm/) listener). I also developed a product/market page, which required a non-trivial amount of effort, but helped me streamline my message for the App. All this is to say that this aspect caught me off guard and ensured that I would be cognisant of this requirement and make sure to allocate the appropriate budget (time and money) to this task in the future.
 
 Resources used-
@@ -225,8 +207,6 @@ Resources used-
 - [Squarespace](https://www.squarespace.com/)for web hosting, developing my product page and privacy policy and to create an email address for my custom domain (rationale for choosing this is the same as above; there are several alternatives here that could better suit your needs)
 
 # Release
-
-
 
 Submitting the App for App Store review was again fairly streamlined with the help of a [previously mentioned walkthrough](https://www.raywenderlich.com/119-how-to-submit-an-app-to-apple-from-no-account-to-app-store-part-2). This more or less involved filling in a lot of information (name, keywords, description, etc.) that was already prepared. Supplying screenshots for the required devices took a surprisingly long time and I would like to hear about any tools that simplified this process.
 
