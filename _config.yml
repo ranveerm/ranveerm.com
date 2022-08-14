@@ -62,11 +62,13 @@ plugins:
 # Custom definitions
 collections:
   - timeline_objects
+  - programming_posts
 
 # Custom Settings
 excerpt_separator: <!--end-excerpt--> 
 show_excerpts: true
 header_pages:
+  - programming/programming.md
   - photo-gallery/photo-gallery.md
   - my-apps/journal-mapper.md
   - about.markdown

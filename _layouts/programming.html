@@ -1,0 +1,54 @@
+---
+layout: default
+---
+
+<link
+  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="{{ site.baseurl }}/assets/css/shared-styling.css"
+/>
+
+<div class="home">
+  {{ content }}
+
+  <br />
+
+  <ul class="post-list">
+    {%- for post in site.programming_posts reversed -%}
+    <li>
+      <!-- Note: Repeated code -->
+      {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y"
+      -%}
+      <h3>
+        <a class="post-link" href="/programming/{{ post.relativeLink }}">
+          {{ post.title | escape }}
+        </a>
+      </h3>
+      <div class="post-meta">
+        <time
+          class="dt-published"
+          datetime="{{ page.date | date_to_xmlschema }}"
+          itemprop="datePublished"
+        >
+          {%- assign date_format = site.minima.date_format | default: "%b %-d,
+          %Y" -%} {{ post.date | date: date_format }}
+        </time>
+
+        {% if post.tags %} | {% for tag in post.tags %} {% capture tag_name %}{{
+        tag }}{% endcapture %}
+        <a href="/tag/{{ tag_name }}" , class="post-tag"> {{ tag_name }} </a
+        >&nbsp; {% endfor %} {% endif %}
+      </div>
+
+      {{ post.excerpt }}
+
+      <br />
+      <br />
+      <hr class="post-divider" />
+    </li>
+    {%- endfor -%}
+  </ul>
+</div>
