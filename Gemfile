@@ -29,3 +29,5 @@ end
 # Performance-booster for watching directories on Windows
 gem "wdm", "~> 0.1.1", :platforms => [:mingw, :x64_mingw, :mswin]
 
+# TODO- The below is added in response to the following error after updating to ruby 3- `cannot load such file -- webrick (LoadError)`. Below is the workaround suggested in [Load error: cannot load such file – webrick](https://talk.jekyllrb.com/t/load-error-cannot-load-such-file-webrick/5417). Perform an audit to determine if this is necessary in the future.  
+gem "webrick", "~> 1.8"
