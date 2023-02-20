@@ -148,9 +148,12 @@ blockquote {
  */
 pre,
 code {
+  font-family: "courier-prime", monospace;
+  font-weight: 400;
+  font-style: normal;
   @include relative-font-size(0.9375);
   border: 1px solid $grey-color-light;
-  border-radius: 3px;
+  border-radius: 7px;
   background-color: #eef;
 }
 
