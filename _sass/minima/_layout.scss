@@ -2,10 +2,7 @@
  * Site header
  */
 .site-header {
-  border-top: 5px solid $grey-color-dark;
   border-bottom: 1px solid $grey-color-light;
-  min-height: $spacing-unit * 1.865;
-
   // Positioning context for the mobile navigation icon
   position: relative;
 }
@@ -13,7 +10,6 @@
 .site-title {
   @include relative-font-size(1.625);
   font-weight: 300;
-  line-height: $base-line-height * $base-font-size * 2.25;
   letter-spacing: -1px;
   margin-bottom: 0;
   float: left;
@@ -24,9 +20,14 @@
   }
 }
 
+.site-header-home-icon {
+  line-height: $base-font-size + $spacing-unit;
+}
+
 .site-nav {
   float: right;
-  line-height: $base-line-height * $base-font-size * 2.25;
+  // TODO: The below is added to ensure the navigation links are placed "close to" the separation line below. The absence of this results in the contents being pushed to the top, which is not desirable. The result of this excess space because this is the minimum size that allows `site-header-home-icon` (controlling home icon) to look pleasing. However, the below value is hardcoded, and not ideal. Determine a better alternative.
+  padding-top: 20px;
 
   .nav-trigger {
       display: none;
