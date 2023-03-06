@@ -3,6 +3,7 @@ layout: default
 title: Journal Mapper
 permalink: /journal-mapper/
 ---
+
 <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/shared-styling.css">
 
 <style>
@@ -27,7 +28,7 @@ permalink: /journal-mapper/
     }
 </style>
 
-<center><img src="/assets/images/journal-mapper/app-icon.jpg" style="height: 50%; width: 50%; border-radius: 100px; margin: 10px 0px 30px 0px" ></center>
+<div class="center-justify"><img src="/assets/images/journal-mapper/app-icon.jpg" style="height: 50%; width: 50%; border-radius: 100px; margin: 10px 0px 30px 0px" ></div>
 
 <h1 style="text-align:center;">Journal Mapper</h1>
 <h3 style="text-align:center;" class="text-muted">Diary on a map</h3>
@@ -52,14 +53,15 @@ permalink: /journal-mapper/
     <div><img src="/assets/images/journal-mapper/categories.png" class="centered-image"></div>
 
     <div><img src="/assets/images/journal-mapper/icon.png" class="centered-image"></div>
-    <div> 
+    <div>
         <p class="centered-text">Modify the appearance of any annotation and category to create a visual description that matches their identity.</p>
     </div>
-    
-    <div> 
+
+    <div>
         <p class="centered-text">Add notes and images to each annotation to associate them with a traditional journal.</p>
     </div>
     <div><img src="/assets/images/journal-mapper/location.png" class="centered-image"></div>
+
 </div>
 
 <br/>

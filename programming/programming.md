@@ -11,6 +11,6 @@ permalink: /programming/
     }
 </style>
 
-<center>
+<div class="center-justify">
     <h5 class="text-muted">The thecnical stuff ... mostly Apple related.</h5>
-</center>
+</div>

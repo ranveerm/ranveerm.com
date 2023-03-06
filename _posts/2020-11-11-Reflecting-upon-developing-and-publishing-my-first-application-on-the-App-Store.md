@@ -230,8 +230,8 @@ Tools used-
 
 Despite planning ahead and constantly reviewing progress, the project at times felt like a constant uphill battle. While this challenge itself acted as a motivation, confronting situations when the output did not meet my expectations was disheartening. As a concrete example, in my mind's eye, I visualised an aesthetically pleasing icon and went about implementing it. However, when I completed my first draft, the result was underwhelming to say the least-
 
-<center><img src="{{ page.image-post-dir | escape }}/2020-11-11-Reflecting-upon-developing-and-publishing-my-first-application-on-the-App-Store/app-icon-early-iteration.png">
-</center>
+<div class="center-justify"><img src="{{ page.image-post-dir | escape }}/2020-11-11-Reflecting-upon-developing-and-publishing-my-first-application-on-the-App-Store/app-icon-early-iteration.png">
+</div>
 
 _Figure 7: App Icon- early iteration_
 
@@ -239,8 +239,8 @@ _Figure 7: App Icon- early iteration_
 
 However, recognising that this was a preliminary draft, identifying the foundations that could be built upon (eg. the general shape and layout) and determining improvements (eg. use of shadows and highlights to create depth) that would allow me to get closer to what I envisioned was vital in methodically recreating the design with a focus on improvement. Spending time away performing other tasks also allowed me to approach the next iteration with a mentally refreshed attitude. With a few more of these iterations, I was able to get closer to what I wanted the icon to look like-
 
-<center><img src="{{ page.image-post-dir | escape }}/2020-11-11-Reflecting-upon-developing-and-publishing-my-first-application-on-the-App-Store/app-icon-final-iteration.png" style="border-radius: 40px;">
-</center>
+<div class="center-justify"><img src="{{ page.image-post-dir | escape }}/2020-11-11-Reflecting-upon-developing-and-publishing-my-first-application-on-the-App-Store/app-icon-final-iteration.png" style="border-radius: 40px;">
+</div>
 
 _Figure 8: App Icon- final iteration_
 

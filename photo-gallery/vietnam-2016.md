@@ -17,11 +17,12 @@ parent-dir: vietnam-2016
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160717-DSC_0020.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160718-DSC_0239.jpg" class="centered-image grid-full-width">
+
 </div>
 
 <br/>
 
-<center><h5>💦☀️🥵 · plucking 🌿 for my 🍜</h5></center>
+<div class="center-justify"><h5>💦☀️🥵 · plucking 🌿 for my 🍜</h5></div>
 
 <br/>
 
@@ -33,11 +34,12 @@ parent-dir: vietnam-2016
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160718-DSC_0137.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160719-DSC_0310.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5>🥥 everywhere with some 🐝</h5></center>
+<div class="center-justify"><h5>🥥 everywhere with some 🐝</h5></div>
 
 <br/>
 
@@ -51,7 +53,7 @@ parent-dir: vietnam-2016
 
 <br/>
 
-<center><h5>🐸🤔</h5></center>
+<div class="center-justify"><h5>🐸🤔</h5></div>
 
 <br/>
 
@@ -65,7 +67,7 @@ parent-dir: vietnam-2016
 
 <br/>
 
-<center><h5>😌🚿</h5></center>
+<div class="center-justify"><h5>😌🚿</h5></div>
 
 <br/>
 
@@ -75,7 +77,7 @@ parent-dir: vietnam-2016
 
 <br/>
 
-<center><h5>🚲 · ✂️👔</h5></center>
+<div class="center-justify"><h5>🚲 · ✂️👔</h5></div>
 
 <br/>
 
@@ -83,11 +85,12 @@ parent-dir: vietnam-2016
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160720-DSC_0348.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160720-DSC_0364.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5>🏔🏍🤩💨</h5></center>
+<div class="center-justify"><h5>🏔🏍🤩💨</h5></div>
 
 <br/>
 
@@ -101,11 +104,12 @@ parent-dir: vietnam-2016
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160722-DSC_0579.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160721-DSC_0380.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5><🛶 I’ll have you know that the chef approved of my spring roll rolling technique 🥋</h5></center>
+<div class="center-justify"><h5><🛶 I’ll have you know that the chef approved of my spring roll rolling technique 🥋</h5></div>
 
 <br/>
 
@@ -123,13 +127,13 @@ parent-dir: vietnam-2016
 
 <br/>
 
-<center><h5>🚠 Low in oxygen 🌾 · 🩹 Relentless 🌧  · But then there was the view ⛰</h5></center>
+<div class="center-justify"><h5>🚠 Low in oxygen 🌾 · 🩹 Relentless 🌧  · But then there was the view ⛰</h5></div>
 
 <br/>
 
 <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160727-DSC_0778.jpg" class="centered-image">
 
-<br/>   
+<br/>
 
 <figure class='full-width'>
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160727-DSC_0907.jpg" class="centered-image">
@@ -137,7 +141,7 @@ parent-dir: vietnam-2016
 
 <br/>
 
-<center><h5>I tried to buy the smell … but they ran out</h5></center>
+<div class="center-justify"><h5>I tried to buy the smell … but they ran out</h5></div>
 
 <br/>
 
@@ -145,11 +149,12 @@ parent-dir: vietnam-2016
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160720-DSC_0344.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/20160723-DSC_0585.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5>CocoBox to the rescue 🧉</h5></center>
+<div class="center-justify"><h5>CocoBox to the rescue 🧉</h5></div>
 
 <br/>
 

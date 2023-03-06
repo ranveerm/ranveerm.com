@@ -4,10 +4,10 @@ title: 📷
 permalink: /photo-gallery/
 ---
 
-<center>
+<div class="center-justify">
     <h2>Raw Horizons B-Roll</h2>
     <h5 class="text-muted">Visit <a href="https://rawhorizons.gallery">Raw Horizons</a> for the good stuff</h5>
-</center>
+</div>
 
 <br/>
 <!-- Note that the clickable area needs to be span instead of div- https://stackoverflow.com/questions/4465923/a-href-link-for-entire-div-in-html-css -->

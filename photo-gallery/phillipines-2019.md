@@ -15,11 +15,12 @@ parent-dir: philippines-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0626.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0662.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5>⏱🛫</h5></center>
+<div class="center-justify"><h5>⏱🛫</h5></div>
 
 <br/>
 
@@ -29,6 +30,7 @@ parent-dir: philippines-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0723.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0784.jpg" class="centered-image grid-full-width">
+
 </div>
 
 <br/>
@@ -39,7 +41,7 @@ parent-dir: philippines-2019
 
 <br/>
 
-<center><h5>☀️🚤🥥</h5></center>
+<div class="center-justify"><h5>☀️🚤🥥</h5></div>
 
 <br/>
 
@@ -49,11 +51,12 @@ parent-dir: philippines-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0852.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0845.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5>🧗🏽</h5></center>
+<div class="center-justify"><h5>🧗🏽</h5></div>
 
 <br/>
 
@@ -63,7 +66,7 @@ parent-dir: philippines-2019
 
 <br/>
 
-<center><h5>🌅</h5></center>
+<div class="center-justify"><h5>🌅</h5></div>
 
 <br/>
 
@@ -71,11 +74,12 @@ parent-dir: philippines-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0734.jpg" class="centered-image grid-full-width">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0729.jpg" class="centered-image grid-full-width">
+
 </div>
 
 <br/>
 
-<center><h5>🪜</h5></center>
+<div class="center-justify"><h5>🪜</h5></div>
 
 <br/>
 
@@ -83,13 +87,14 @@ parent-dir: philippines-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0886.jpg" class="centered-image grid-full-width">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0673.jpg" class="centered-image grid-full-width">
+
 </div>
 
 <br/>
 
-<center><h5>🛺</h5></center>
+<div class="center-justify"><h5>🛺</h5></div>
 
-<br/> 
+<br/>
 
 <div class="grid">
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0831.jpg" class="centered-image">
@@ -97,4 +102,5 @@ parent-dir: philippines-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0817.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0834.jpg" class="centered-image grid-full-width">
+
 </div>

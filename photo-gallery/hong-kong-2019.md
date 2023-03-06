@@ -23,11 +23,12 @@ parent-dir: hong-kong-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0204.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0053.jpg" class="centered-image">
+
 </div>
 
 <br/>
 
-<center><h5>🚦</h5></center>
+<div class="center-justify"><h5>🚦</h5></div>
 
 <br/>
 
@@ -35,7 +36,7 @@ parent-dir: hong-kong-2019
 
 <br/>
 
-<center><h5>🏢</h5></center>
+<div class="center-justify"><h5>🏢</h5></div>
 
 <br/>
 
@@ -43,11 +44,12 @@ parent-dir: hong-kong-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0198.jpg" class="centered-image grid-full-width">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0193.jpg" class="centered-image grid-full-width">
+
 </div>
 
 <br/>
 
-<center><h5>⚫️⚪️</h5></center>
+<div class="center-justify"><h5>⚫️⚪️</h5></div>
 
 <br/>
 
@@ -61,7 +63,7 @@ parent-dir: hong-kong-2019
 
 <br/>
 
-<center><h5>🚏</h5></center>
+<div class="center-justify"><h5>🚏</h5></div>
 
 <br/>
 
@@ -69,6 +71,7 @@ parent-dir: hong-kong-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0056.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0187.jpg" class="centered-image">
+
 </div>
 
 <br/>
@@ -87,7 +90,7 @@ parent-dir: hong-kong-2019
 
 <br/>
 
-<center><h5>||</h5></center>
+<div class="center-justify"><h5>||</h5></div>
 
 <br/>
 
@@ -95,6 +98,7 @@ parent-dir: hong-kong-2019
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0200.jpg" class="centered-image">
 
     <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/DSC_0194.jpg" class="centered-image">
+
 </div>
 
 <br/>
@@ -107,7 +111,7 @@ parent-dir: hong-kong-2019
 
 <br/>
 
-<center><h5>🌙🚶🏽</h5></center>
+<div class="center-justify"><h5>🌙🚶🏽</h5></div>
 
 <br/>
 
@@ -117,7 +121,7 @@ parent-dir: hong-kong-2019
 
 <br/>
 
-<center><h5>➗</h5></center>
+<div class="center-justify"><h5>➗</h5></div>
 
 <br/>
 

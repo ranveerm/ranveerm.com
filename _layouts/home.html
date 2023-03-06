@@ -14,10 +14,10 @@ layout: default
 
   {%- if site.posts.size > 0 -%}
     <!-- Title -->
-    <center style="margin-bottom: 40px;">
+    <div class="center-justify" style="margin-bottom: 40px;">
       <h2 class="post-list-heading">{{ page.list_title | default: "Escape Horizon" }}</h2>
       <h5 class="text-muted">{{- site.description | escape -}}</h5>
-    </center>
+    </div>
 
     <ul class="post-list">
       {%- for post in site.posts -%} 
