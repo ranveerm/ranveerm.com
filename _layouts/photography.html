@@ -4,123 +4,129 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 ---
 
 <style>
-    .cover-image-thumbnail {
-        border-radius: 10px;
-        margin: auto;
-        width:100%;
-        height:100%;
-        object-fit: cover;
-        overflow: hidden;
-        aspect-ratio: 7 / 5;
-    }
+  .cover-image-thumbnail {
+    border-radius: 10px;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    overflow: hidden;
+    aspect-ratio: 7 / 5;
+  }
 
-    .cover-figure {
-        width: 100vw;
-        position: relative;
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        margin-top: 0px;
-        z-index: -1;
-    }
+  .cover-figure {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: 0px;
+    z-index: -1;
+  }
 
-    .centered-image {
-        border-radius: 10px;
-        margin: auto;
-        width:100%;
-        height:100%;
-    }
+  .centered-image {
+    border-radius: 10px;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+  }
 
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        /* grid-auto-rows: minmax(100px, 600px); */
-        align-items: center;
-        grid-gap: 20px;
-    }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* grid-auto-rows: minmax(100px, 600px); */
+    align-items: center;
+    grid-gap: 20px;
+  }
 
-    .grid-full-width {
-        grid-column: span 2;
-    }
+  .grid-full-width {
+    grid-column: span 2;
+  }
 
-    .hover-zoom:hover {
-        transition: transform .3s; /* Animation */
-        transform: scale(1.05); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
-    }
+  .hover-zoom:hover {
+    transition: transform 0.3s; /* Animation */
+    transform: scale(
+      1.05
+    ); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+  }
 
-    h2, h5 {
-        font-weight: 500;
-        line-height: 1.1;
-    }
+  h2,
+  h5 {
+    font-weight: 500;
+    line-height: 1.1;
+  }
 
-    .text-muted {
-        color: #777;
-        text-align: center;
-    }
+  .text-muted {
+    color: #777;
+    text-align: center;
+  }
 
-    body {
-        overflow-x: hidden;
-        font: 100%/1.5 system-ui, sans-serif;
-    }
+  body {
+    overflow-x: hidden;
+    font: 100%/1.5 system-ui, sans-serif;
+  }
 
-    img { 
-        max-width: 100%; 
-    }
+  img {
+    max-width: 100%;
+  }
 
-    main {
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
+  main {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
-    .full-width {
-        width: 100vw;
-        position: relative;
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-    }
+  .full-width {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
 
-    p, figure {
-        margin: 15px 0;
-    }
+  p,
+  figure {
+    margin: 15px 0;
+  }
 
-    figcaption {
-        text-align: center;
-        color: #999;
-    }
+  figcaption {
+    text-align: center;
+    color: #999;
+  }
 
-    .page-content {
-        padding-top: 0;
-    }
-
+  .page-content {
+    padding-top: 0;
+  }
 </style>
 
 {%- if page.show-title-image -%}
-<figure class='cover-figure'>
-    <img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/cover.jpg">
+<figure class="cover-figure">
+  <img
+    src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/cover.jpg"
+  />
 </figure>
 {%- endif -%}
 
-<br>
+<br />
 
-<br/>
+<br />
 
 {%- if page.show-title -%}
-    <center><h2>{{ page.title }}</h2></center>
-{%- endif -%}
+<div class="center-justify"><h2>{{ page.title }}</h2></div>
+{%- endif -%} {%- if page.year -%}
+<h5 class="text-muted">{{ page.year }}</h5>
+{%- endif -%} {{ content }}
 
-{%- if page.year -%}
-    <h5 class="text-muted">{{ page.year }}</h5>
-{%- endif -%}
-
-{{ content }}
-
-<br/>
+<br />
 
 {%- if page.show-map-image -%}
-<img src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/map.jpeg" class="centered-image">
-<figcaption>Generated using <a href="/journal-mapper">Journal Mapper</a></figcaption>
+<img
+  src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/map.jpeg"
+  class="centered-image"
+/>
+<figcaption>
+  Generated using <a href="/journal-mapper">Journal Mapper</a>
+</figcaption>
 {%- endif -%}

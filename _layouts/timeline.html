@@ -7,7 +7,7 @@ layout: default
 <div class="center-justify">{{ content }}</div>
 
 <!-- #Reference: [Timeline Jekyll Theme](https://github.com/kirbyt/timeline-jekyll-theme) 5950786 -->
-<section class="container content-section text-center">
+<section class="container content-section">
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2">
           <ul class="timeline">
@@ -23,7 +23,7 @@ layout: default
               <li class="{{ class }}">
                 {% if timeline_object.image %}
                   <div class="timeline-image">
-                      <img class="panel-img img-responsive" src="{{ site.baseurl }}/{{ timeline_object.image }}" alt="">
+                      <img class="panel-img" src="{{ site.baseurl }}/{{ timeline_object.image }}" alt="">
                   </div>
                 {% endif %}
                   <div class="timeline-panel">

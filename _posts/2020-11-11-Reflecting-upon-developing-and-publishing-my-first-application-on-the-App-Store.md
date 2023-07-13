@@ -13,13 +13,14 @@ image-post-dir: /assets/images/posts
 
 _Originally posted on [reddit](https://www.reddit.com/r/swift/comments/js2o9u/reflecting_upon_developing_and_publishing_my/)_
 
-> "You can’t connect the dots looking forward; you can only connect them looking backwards. So you have to trust that the dots will somehow connect in your future. You have to trust in something—your gut, destiny, life, karma, whatever. This approach has never let me down, and it has made all the difference in my life." - __Steve Jobs__
+> "You can’t connect the dots looking forward; you can only connect them looking backwards. So you have to trust that the dots will somehow connect in your future. You have to trust in something—your gut, destiny, life, karma, whatever. This approach has never let me down, and it has made all the difference in my life." - **Steve Jobs**
 
-* 
-{:toc}
+- {:toc}
 
 # Purpose
+
 <!-- excerpt-start -->
+
 I recently published my first application on the iOS App Store and would like to use this post as a good opportunity to-
 
 - Provide insight into the entire process from my perspective for anyone considering iOS App development (i.e. a post that I would share with my past self)
@@ -213,6 +214,7 @@ Submitting the App for App Store review was again fairly streamlined with the he
 Apple is known to reject a sizeable proportion of first time submissions as a result of failing to adhere to its [review guiltiness](https://developer.apple.com/app-store/review/guidelines/), and I really did not know what to expect from this process after submitting my App. I received a response within a day and my app did in fact get rejected. However, this was due to a failure to provide a demo video, which was easily remedied. After resubmitting my App, I was able to find it on the App Store the next day.
 
 # Valuable Lessons
+
 #### Time Tracking
 
 I was introduced to the concept of time tracking by [CGP Grey](http://timeryapp.com/) a while back, but only realised it's impact once I fully adopted it into my workflow. I can not overstate the impact that it had on my project, which was evident in analysing my output before and after adopting time tracking. Apart from creating a record for time spent on the project (which would regularly be used for financial purposes such as billing and cost analysis), time tracking more importantly-
