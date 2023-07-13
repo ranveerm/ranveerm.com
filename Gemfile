@@ -5,6 +5,8 @@ source "https://rubygems.org"
 #
 #     bundle exec jekyll serve
 #     bundle exec jekyll serve --livereload
+#     bundle exec jekyll serve --livereload --drafts
+#     bundle exec jekyll serve --livereload --drafts --host 0.0.0.0 ([Accessing a Jekyll site over your local wifi network](https://zarino.co.uk/post/jekyll-local-network/))
 #
 # This will help ensure the proper Jekyll version is running.
 # Happy Jekylling!
