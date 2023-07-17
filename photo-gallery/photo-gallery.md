@@ -12,6 +12,12 @@ permalink: /photo-gallery/
 <br/>
 <!-- Note that the clickable area needs to be span instead of div- https://stackoverflow.com/questions/4465923/a-href-link-for-entire-div-in-html-css -->
 <div class="grid">
+    <a href="/photo-gallery/new-zealand-2022/" class="hover-zoom">
+        <span>
+            <img src="{{ layout.photo-gallery-root-dir | escape }}/new-zealand-2022/cover.jpg" class="cover-image-thumbnail">
+            <p class="text-muted">🇵🇳 2022</p>
+        </span>
+    </a>
     <a href="/photo-gallery/phillipines-2019/" class="hover-zoom">
         <span>
             <img src="{{ layout.photo-gallery-root-dir | escape }}/philippines-2019/cover.jpg" class="cover-image-thumbnail">
