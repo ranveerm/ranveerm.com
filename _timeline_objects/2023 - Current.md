@@ -1,12 +1,12 @@
 ---
 title: 2023 - Current
-subtitle: Sernior iOS Developer
+subtitle: Senior iOS Developer
 image: assets/images/about/Cochlear Logo.png
 year: 2023
 ---
 
-Developed intraoperative surgical care applications
+Involved in customer software and development intra-operative applications.
 
 <!-- 
-Involed in the development of SmartNav- an application used during cochlear implant surgery to improve patient outcomes.
+Contributor to the [SmartNav](https://www.cochlear.com/us/en/professionals/connected-care/surgical-care) team, which develops surgical care applications to improve the successful outcome of a surgery.
  -->
