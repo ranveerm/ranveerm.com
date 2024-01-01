@@ -1,0 +1,12 @@
+/**
+ Select any range in {h1, h2, h3, h4, h5, h6}.
+ - Usage:  #{headings('', 1, 6, '.--attr')} { ... }
+ - Reference: [Easily select h1, h2, ... through SCSS functions](https://dev.to/nirlanka/h1-h2-all-through-scss-functions-4049)
+ */
+@function headings($before:'', $from:1, $to:6, $after:'') {
+  @if $from == $to {
+    @return '#{$before} h#{$from}#{$after}';
+  } @else {
+    @return '#{$before} h#{$from}#{$after}, ' + headings($before, $from+1, $to, $after);
+  }
+}

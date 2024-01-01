@@ -2,8 +2,69 @@
 # // Only the main Sass file needs front matter (the # within dashes is enough)
 ---
 
-@import "minima";
+@import "../_sass/minima";
+@import "../_sass/helpers";
 
-.center-justify { 
+// --- Headings ---
+#{headings($from:1, $to:3)} {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#{headings($from:4, $to:6)} {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+// --- Content ---
+.banner-image {
+    border-radius: 10px;
+    width: 100%;
+}
+
+.page-content {
+    padding: 10px 0 10px 0;
+}
+.center-justify {
     text-align: center;
+}
+
+.text-muted {
+    color: #777;
+}
+
+// --- Meta ---
+// Post scroll-view divider
+// - Reference: https://css-tricks.com/examples/hrs/
+hr {
+    &.post-divider {
+        border: 0;
+        height: 2px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.01));
+    }
+}
+
+// Tags
+// - References: [Use Tags and Categories in your Jekyll based Github Pages without plugins](https://codinfox.github.io/dev/2015/03/06/use-tags-and-categories-in-your-jekyll-based-github-pages/)
+.post-tag {
+    display: inline-block;
+    background: rgba(106, 159, 181, 0.15);
+    padding: 0 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    /* font-size: 90%; */
+    color:  rgba(106, 159, 181, 0.65);
+    /* @include transition(all 0.1s ease-in-out); */
+
+    &:before {
+        content: "\f02b";
+        font-family: FontAwesome, sans-serif;
+        padding-right: 0.5em;
+    }
+
+    &:hover {
+        text-decoration: none;
+        background: #6a9fb5;
+        color: #fff;;
+    }
 }

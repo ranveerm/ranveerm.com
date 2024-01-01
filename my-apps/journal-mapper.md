@@ -4,8 +4,6 @@ title: Journal Mapper
 permalink: /journal-mapper/
 ---
 
-<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/shared-styling.css">
-
 <style>
     .grid {
         display: grid;
