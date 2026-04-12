@@ -1,0 +1,17 @@
+<script>
+(function() {
+  function markLoaded(img) {
+    img.classList.add('loaded');
+  }
+
+  // Mark already-cached images as loaded immediately
+  document.querySelectorAll('img').forEach(function(img) {
+    if (img.complete && img.naturalHeight !== 0) {
+      markLoaded(img);
+    } else {
+      img.addEventListener('load', function() { markLoaded(img); });
+      img.addEventListener('error', function() { markLoaded(img); });
+    }
+  });
+})();
+</script>
