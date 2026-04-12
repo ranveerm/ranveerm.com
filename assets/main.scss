@@ -44,6 +44,19 @@ hr {
     }
 }
 
+// --- Progressive Image Loading ---
+// Scoped to content images only — excludes header logo and UI chrome
+.page-content img,
+.cover-figure img,
+.banner-image {
+    filter: blur(8px);
+    transition: filter 0.6s ease-out;
+
+    &.loaded {
+        filter: blur(0);
+    }
+}
+
 // Tags
 // - References: [Use Tags and Categories in your Jekyll based Github Pages without plugins](https://codinfox.github.io/dev/2015/03/06/use-tags-and-categories-in-your-jekyll-based-github-pages/)
 .post-tag {

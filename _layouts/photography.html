@@ -105,6 +105,8 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 <figure class="cover-figure">
   <img
     src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/cover.jpg"
+    alt="{{ page.title }} cover photo"
+    loading="lazy"
   />
 </figure>
 {%- endif -%}
@@ -124,7 +126,9 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 {%- if page.show-map-image -%}
 <img
   src="{{ layout.photo-gallery-root-dir | escape }}/{{ page.parent-dir | escape }}/map.jpeg"
+  alt="{{ page.title }} route map"
   class="centered-image"
+  loading="lazy"
 />
 <figcaption>
   Generated using <a href="/journal-mapper">Journal Mapper</a>
