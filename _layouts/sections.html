@@ -165,7 +165,7 @@ layout: default
   }
 
   function getFilteredPosts() {
-    if (selectedTags.length === 0) return allPosts;
+    if (selectedTags.length === 0) return [];
     return allPosts.filter(function(post) {
       return post.tags.some(function(t) {
         return selectedTags.indexOf(t) !== -1;
@@ -184,7 +184,7 @@ layout: default
     var pagePosts = filtered.slice(start, start + postsPerPage);
 
     if (pagePosts.length === 0) {
-      container.innerHTML = '<p class="no-results">No posts match the selected tags.</p>';
+      container.innerHTML = selectedTags.length === 0 ? '' : '<p class="no-results">No posts match the selected tags.</p>';
       document.getElementById('pagination').innerHTML = '';
       return;
     }
