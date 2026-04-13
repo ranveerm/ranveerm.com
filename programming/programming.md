@@ -2,6 +2,7 @@
 title: 👨🏾‍💻
 layout: programming
 permalink: /programming/
+sitemap: false
 ---
 
 <style>

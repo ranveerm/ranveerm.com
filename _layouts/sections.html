@@ -1,6 +1,5 @@
 ---
 layout: default
-permalink: /sections/
 ---
 
 <link
@@ -8,23 +7,231 @@ permalink: /sections/
   rel="stylesheet"
 />
 
-<h2 id="categories">Categories</h2>
-<div>
-  <a href="/">Escape Horizon ({{ site.posts | size }})</a>
-  <a href="/programming">👨🏾‍💻 ({{ site.categories.programming | size }})</a>
-  <a href="/photo-gallery">📷 ({{ site.categories.photography | size }})</a>
+<style>
+  .tag-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .tag-header h2 {
+    margin: 0;
+  }
+  .selected-tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .tag-pool {
+    margin-bottom: 2rem;
+  }
+  .post-tag {
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+  .post-tag.selected {
+    background: #6a9fb5;
+    color: #fff;
+  }
+  /* Animate tags moving between pool and header */
+  .post-tag.animating {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  .filtered-posts {
+    margin-top: 1rem;
+  }
+  .filtered-posts .post-item {
+    margin-bottom: 1.5rem;
+  }
+  .filtered-posts .post-item h3 {
+    margin-bottom: 0.25rem;
+  }
+  .filtered-posts .post-item .post-meta {
+    margin-bottom: 0.5rem;
+  }
+  .pagination {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  .pagination button {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid rgba(106, 159, 181, 0.4);
+    background: rgba(106, 159, 181, 0.1);
+    border-radius: 4px;
+    color: rgba(106, 159, 181, 0.8);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .pagination button.active {
+    background: #6a9fb5;
+    color: #fff;
+    border-color: #6a9fb5;
+  }
+  .pagination button:hover:not(.active) {
+    background: rgba(106, 159, 181, 0.3);
+  }
+  .no-results {
+    color: #777;
+    font-style: italic;
+    margin-top: 1rem;
+  }
+</style>
+
+<!-- Tag header with selected tags inline -->
+<div class="tag-header">
+  <h2 id="tags">Tags</h2>
+  <div class="selected-tags" id="selected-tags"></div>
 </div>
 
-<br />
-
-<h2 id="tags">Tags</h2>
-
+<!-- Tag pool (unselected tags) -->
 {% assign sortedTags = site.tags | sort %}
-
-<div class="tag-list">
+<div class="tag-pool" id="tag-pool">
   {% for tag in sortedTags %}
-  <a href="/tag/{{tag[0]}}" class="post-tag"
-    >{{ tag[0] }}&nbsp;({{ tag[1] | size }})</a
-  >
+  <a class="post-tag" data-tag="{{ tag[0] }}" onclick="toggleTag(this)">{{ tag[0] }}</a>
   {% endfor %}
 </div>
+
+<hr class="post-divider">
+
+<!-- Filtered posts container -->
+<div class="filtered-posts" id="filtered-posts"></div>
+
+<!-- Pagination -->
+<div class="pagination" id="pagination"></div>
+
+<script>
+  // Build post data from Jekyll at build time
+  var allPosts = [
+    {% for post in site.posts %}
+    {
+      title: {{ post.title | jsonify }},
+      url: {{ post.url | relative_url | jsonify }},
+      date: {{ post.date | date: "%b %-d, %Y" | jsonify }},
+      tags: {{ post.tags | jsonify }},
+      excerpt: {{ post.excerpt | strip_html | truncatewords: 50 | jsonify }}
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ];
+
+  var selectedTags = [];
+  var currentPage = 1;
+  var postsPerPage = 10;
+
+  function toggleTag(el) {
+    var tag = el.getAttribute('data-tag');
+    var idx = selectedTags.indexOf(tag);
+
+    // Brief animation
+    el.classList.add('animating');
+    setTimeout(function() { el.classList.remove('animating'); }, 150);
+
+    if (idx === -1) {
+      // Select: move to header
+      selectedTags.push(tag);
+      el.classList.add('selected');
+      document.getElementById('selected-tags').appendChild(el);
+    } else {
+      // Deselect: move back to pool in sorted position
+      selectedTags.splice(idx, 1);
+      el.classList.remove('selected');
+      insertSorted(el);
+    }
+
+    currentPage = 1;
+    renderPosts();
+  }
+
+  function insertSorted(el) {
+    var pool = document.getElementById('tag-pool');
+    var children = pool.querySelectorAll('.post-tag');
+    var tag = el.getAttribute('data-tag').toLowerCase();
+    var inserted = false;
+
+    for (var i = 0; i < children.length; i++) {
+      if (children[i].getAttribute('data-tag').toLowerCase() > tag) {
+        pool.insertBefore(el, children[i]);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) {
+      pool.appendChild(el);
+    }
+  }
+
+  function getFilteredPosts() {
+    if (selectedTags.length === 0) return allPosts;
+    return allPosts.filter(function(post) {
+      return post.tags.some(function(t) {
+        return selectedTags.indexOf(t) !== -1;
+      });
+    });
+  }
+
+  function renderPosts() {
+    var filtered = getFilteredPosts();
+    var container = document.getElementById('filtered-posts');
+    var totalPages = Math.ceil(filtered.length / postsPerPage);
+
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+
+    var start = (currentPage - 1) * postsPerPage;
+    var pagePosts = filtered.slice(start, start + postsPerPage);
+
+    if (pagePosts.length === 0) {
+      container.innerHTML = '<p class="no-results">No posts match the selected tags.</p>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    var html = '<ul class="post-list">';
+    pagePosts.forEach(function(post) {
+      html += '<li>';
+      html += '<h3><a class="post-link" href="' + post.url + '">' + escapeHtml(post.title) + '</a></h3>';
+      html += '<div class="post-meta"><time>' + post.date + '</time>';
+      if (post.tags && post.tags.length > 0) {
+        html += ' | ';
+        post.tags.forEach(function(tag) {
+          html += '<span class="post-tag">' + escapeHtml(tag) + '</span>&nbsp;';
+        });
+      }
+      html += '</div>';
+      html += '<p>' + post.excerpt + '</p>';
+      html += '</li>';
+      html += '<br><hr class="post-divider">';
+    });
+    html += '</ul>';
+    container.innerHTML = html;
+
+    // Pagination
+    var pagHtml = '';
+    if (totalPages > 1) {
+      for (var i = 1; i <= totalPages; i++) {
+        pagHtml += '<button' + (i === currentPage ? ' class="active"' : '') +
+          ' onclick="goToPage(' + i + ')">' + i + '</button>';
+      }
+    }
+    document.getElementById('pagination').innerHTML = pagHtml;
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    renderPosts();
+    // Scroll to top of posts
+    document.getElementById('filtered-posts').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // Initial render — show all posts
+  renderPosts();
+</script>
