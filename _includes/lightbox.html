@@ -1,0 +1,226 @@
+<style>
+  .lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+  }
+
+  .lightbox-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .lightbox-overlay.animate {
+    transition: background 0.35s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease, opacity 0.35s ease, visibility 0.35s ease;
+  }
+
+  .lightbox-wrapper {
+    position: fixed;
+    overflow: hidden;
+    border-radius: 6px;
+    z-index: 1001;
+    pointer-events: none;
+  }
+
+  .lightbox-wrapper.animate-geometry {
+    transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .lightbox-wrapper.animate-close {
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .lightbox-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: none !important;
+  }
+
+  img.lightbox-eligible {
+    cursor: pointer;
+    transition: filter 0.6s ease-out, transform 0.2s ease;
+  }
+
+  img.lightbox-eligible:hover {
+    transform: scale(1.02);
+  }
+
+  img.lightbox-source-hidden {
+    visibility: hidden;
+  }
+</style>
+
+<div class="lightbox-overlay" id="lightbox-overlay"></div>
+
+<script>
+(function() {
+  var overlay = document.getElementById('lightbox-overlay');
+  if (!overlay) return;
+
+  var activeWrapper = null;
+  var sourceImg = null;
+  var isOpen = false;
+  var scrollDismissing = false;
+
+  document.querySelectorAll('.centered-image').forEach(function(img) {
+    if (img.closest('.full-width') || img.closest('.cover-figure')) return;
+    img.classList.add('lightbox-eligible');
+
+    img.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openLightbox(img);
+    });
+  });
+
+  function openLightbox(img) {
+    sourceImg = img;
+    scrollDismissing = false;
+    var rect = img.getBoundingClientRect();
+
+    // Create wrapper at the source's exact container rect
+    var wrapper = document.createElement('div');
+    wrapper.className = 'lightbox-wrapper';
+    wrapper.style.top = rect.top + 'px';
+    wrapper.style.left = rect.left + 'px';
+    wrapper.style.width = rect.width + 'px';
+    wrapper.style.height = rect.height + 'px';
+
+    // Inner img uses object-fit:cover — matches the source's cropped appearance
+    var clone = document.createElement('img');
+    clone.src = img.src;
+    clone.alt = img.alt || '';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+    activeWrapper = wrapper;
+
+    // Hide source
+    img.classList.add('lightbox-source-hidden');
+
+    // Show overlay
+    overlay.classList.add('animate');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    isOpen = true;
+
+    // Compute target: fit to 92vw/92vh at the image's natural aspect ratio
+    var vw = window.innerWidth * 0.92;
+    var vh = window.innerHeight * 0.92;
+    var ratio = img.naturalWidth / img.naturalHeight;
+    var targetW, targetH;
+
+    if (vw / vh > ratio) {
+      targetH = vh;
+      targetW = vh * ratio;
+    } else {
+      targetW = vw;
+      targetH = vw / ratio;
+    }
+
+    var targetTop = (window.innerHeight - targetH) / 2;
+    var targetLeft = (window.innerWidth - targetW) / 2;
+
+    // Trigger reflow then animate
+    // As the wrapper animates from container aspect ratio to natural aspect ratio,
+    // object-fit:cover smoothly reveals more of the image — no snap.
+    wrapper.offsetHeight;
+    wrapper.classList.add('animate-geometry');
+    wrapper.style.top = targetTop + 'px';
+    wrapper.style.left = targetLeft + 'px';
+    wrapper.style.width = targetW + 'px';
+    wrapper.style.height = targetH + 'px';
+  }
+
+  function closeWithGeometry() {
+    if (!activeWrapper || !sourceImg) return;
+
+    var wrapper = activeWrapper;
+    var src = sourceImg;
+    activeWrapper = null;
+    sourceImg = null;
+    isOpen = false;
+
+    var rect = src.getBoundingClientRect();
+
+    overlay.classList.remove('active');
+
+    wrapper.classList.remove('animate-geometry');
+    wrapper.offsetHeight;
+    wrapper.classList.add('animate-close');
+    wrapper.style.top = rect.top + 'px';
+    wrapper.style.left = rect.left + 'px';
+    wrapper.style.width = rect.width + 'px';
+    wrapper.style.height = rect.height + 'px';
+
+    wrapper.addEventListener('transitionend', function handler(e) {
+      if (e.target !== wrapper) return;
+      wrapper.removeEventListener('transitionend', handler);
+      src.classList.remove('lightbox-source-hidden');
+      wrapper.remove();
+      document.body.style.overflow = '';
+      overlay.classList.remove('animate');
+    });
+  }
+
+  function closeWithScroll() {
+    if (!activeWrapper || !sourceImg || scrollDismissing) return;
+    scrollDismissing = true;
+
+    var wrapper = activeWrapper;
+    var src = sourceImg;
+    activeWrapper = null;
+    sourceImg = null;
+    isOpen = false;
+
+    src.classList.remove('lightbox-source-hidden');
+    document.body.style.overflow = '';
+
+    overlay.style.transition = 'background 0.8s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+    overlay.classList.remove('active');
+
+    wrapper.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+    wrapper.style.opacity = '0';
+
+    wrapper.addEventListener('transitionend', function handler(e) {
+      if (e.target !== wrapper) return;
+      wrapper.removeEventListener('transitionend', handler);
+      wrapper.remove();
+      overlay.classList.remove('animate');
+      overlay.style.transition = '';
+      scrollDismissing = false;
+    });
+  }
+
+  overlay.addEventListener('click', closeWithGeometry);
+
+  window.addEventListener('wheel', function() {
+    if (isOpen) {
+      closeWithScroll();
+    }
+  }, { passive: true });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && isOpen) {
+      closeWithGeometry();
+    }
+  });
+})();
+</script>
