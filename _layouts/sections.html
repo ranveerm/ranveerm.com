@@ -232,6 +232,14 @@ layout: default
     return div.innerHTML;
   }
 
-  // Initial render — show all posts
+  // Pre-select a tag from ?tag= query param (e.g. when arriving from home/post tag links)
+  var params = new URLSearchParams(window.location.search);
+  var preselect = params.get('tag');
+  if (preselect) {
+    var el = document.querySelector('[data-tag="' + preselect + '"]');
+    if (el) toggleTag(el);
+  }
+
+  // Initial render
   renderPosts();
 </script>

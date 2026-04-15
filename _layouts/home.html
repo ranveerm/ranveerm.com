@@ -37,7 +37,7 @@ layout: default
           {% if post.tags %} | 
             {% for tag in post.tags %}
               {% capture tag_name %}{{ tag }}{% endcapture %}
-              <a href="/tag/{{ tag_name }}", class="post-tag">
+              <a href="/sections/?tag={{ tag_name }}", class="post-tag">
                 {{ tag_name }}
               </a>&nbsp;
             {% endfor %}
