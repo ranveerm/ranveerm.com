@@ -453,11 +453,6 @@
       });
     }
 
-    // Intro
-    root.appendChild(el('p', { class: 'ce-intro' },
-      'Click a layer band to see the files inside it; click a file to jump back to its layer.'
-    ));
-
     var grid = el('div', { class: 'ce-grid' });
     root.appendChild(grid);
 
