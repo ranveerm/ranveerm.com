@@ -56,12 +56,33 @@ APPLE_EPOCH_OFFSET = 978307200  # = unix timestamp of 2001-01-01 UTC
 MOMENT_RE = re.compile(r"!\[[^\]]*\]\(dayone-moment://([A-Fa-f0-9]+)\)")
 H1_RE     = re.compile(r"^#\s+(.+?)\s*$",     re.MULTILINE)
 H3_RE     = re.compile(r"^###\s+(.+?)\s*$",   re.MULTILINE)
+# A markdown horizontal rule: a line that is exactly `---` (with optional
+# surrounding whitespace). Anything below such a rule in an entry is
+# considered private notes and is not published.
+HR_RE     = re.compile(r"^\s*-{3,}\s*$")
 
 
 def unescape_md(text):
     """Day One escapes punctuation in markdown (e.g. `\\.`). Strip the backslashes."""
     # Remove backslash before any non-alphanumeric character (common markdown escapes).
     return re.sub(r"\\([^\w\s])", r"\1", text).strip()
+
+
+def strip_below_hr(markdown):
+    """Discard everything at or below the first markdown horizontal rule.
+
+    Authors use `---` inside Day One entries to separate the public summary
+    (title/subtitle/photo/description shown on the site) from private notes
+    that should not be surfaced.
+    """
+    if not markdown:
+        return markdown
+    out = []
+    for line in markdown.splitlines():
+        if HR_RE.match(line):
+            break
+        out.append(line)
+    return "\n".join(out)
 
 
 def parse_entry(markdown):
@@ -72,9 +93,14 @@ def parse_entry(markdown):
         ### Subtitle               (optional)
         ![](dayone-moment://UUID)  (optional)
         <description paragraphs>   (optional)
+
+    Anything below a markdown horizontal rule (`---`) is treated as a
+    private-notes section and stripped before parsing.
     """
     if not markdown:
         return {"title": "", "subtitle": "", "description": "", "moment_uuid": None}
+
+    markdown = strip_below_hr(markdown)
 
     title = ""
     subtitle = ""
@@ -188,8 +214,12 @@ def main():
         data_dir.mkdir(parents=True, exist_ok=True)
         photos_dir.mkdir(parents=True, exist_ok=True)
 
-    # Use read-only immutable mode so an open Day One app can't block us.
-    conn = sqlite3.connect(f"file:{DAY_ONE_DB}?mode=ro&immutable=1", uri=True)
+    # Open read-only (`mode=ro`). We deliberately do NOT set `immutable=1`:
+    # that flag tells SQLite to ignore the write-ahead log (`-wal`) file,
+    # which would cause us to miss any entries Day One has written since its
+    # last checkpoint — a real problem when the app is open on the desktop
+    # while the script runs. `mode=ro` is sufficient for read-only safety.
+    conn = sqlite3.connect(f"file:{DAY_ONE_DB}?mode=ro", uri=True)
 
     # Apple-epoch timestamp (matches the style used in the 2020 JSON).
     export_ts = time.time() - APPLE_EPOCH_OFFSET

@@ -33,9 +33,11 @@ and the available alternatives to the user and let them decide.
 
 `scripts/generate-year-in-review.py` reads the local Day One SQLite database
 (stdlib-only Python) to generate `_data/year-in-review/year-<YEAR>/*.json`
-and copy photo assets. It opens the database with `mode=ro&immutable=1` and
-uses only `SELECT` statements — it must remain strictly read-only with respect
-to Day One's data.
+and copy photo assets. It opens the database with `mode=ro` and uses only
+`SELECT` statements — it must remain strictly read-only with respect to Day
+One's data. Note: `immutable=1` must NOT be added to the SQLite URI — that
+flag tells SQLite to ignore the write-ahead log, causing the script to miss
+any recent edits Day One hasn't yet checkpointed.
 
 ## Post excerpts
 
