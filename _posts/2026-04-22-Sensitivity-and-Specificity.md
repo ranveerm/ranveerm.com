@@ -8,13 +8,7 @@ tags: [mathematics, LLM]
 
 <!-- excerpt-start -->
 
-Two numbers describe how well a binary classifier picks out the cases it is
-meant to find. **Sensitivity** is the chance the test flags a genuine
-positive; **specificity** is the chance it correctly clears a genuine
-negative. The widget below simulates a population of 200 people and lets you
-drag the three underlying dials — prevalence, sensitivity, specificity —
-to see how the confusion matrix, the positive/negative predictive values,
-and the four outcome groups shift in response.
+Sensitivity and Specificity are ratios to describe how accurately a binary classifier labels each case, both the ones it should flag and the ones it should leave alone. **Sensitivity** is the chance the test flags a genuine positive. **Specificity** is the chance the test correctly returns negative for a genuine negative.
 
 <!--end-excerpt-->
 

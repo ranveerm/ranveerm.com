@@ -46,10 +46,20 @@
       '.sensspec .sensspec-legend-swatch.square { border-radius: 2px; }',
       '.sensspec .sensspec-legend-swatch.circle { border-radius: 50%; }',
       '.sensspec .sensspec-legend-shapes { width: 100%; text-align: center; font-size: 0.75rem; color: ' + COLORS.muted + '; }',
-      '.sensspec .sensspec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }',
+      /* 2x2 layout. align-items: stretch lets each row pull both cells
+         to the taller side's height so the left-hand and right-hand cards
+         line up. */
+      '.sensspec .sensspec-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(0, auto); gap: 18px 22px; align-items: stretch; }',
       '@media (max-width: 720px) { .sensspec .sensspec-grid { grid-template-columns: 1fr; } }',
-      '.sensspec .sensspec-card { background: ' + COLORS.card + '; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }',
-      '.sensspec .sensspec-card.center { display: flex; justify-content: center; }',
+      '.sensspec .sensspec-card { background: ' + COLORS.card + '; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; flex-direction: column; }',
+      /* Sliders card: spread vertically so extra height stretches the
+         gaps between sliders rather than leaving an empty block below. */
+      '.sensspec .sensspec-card.sliders { justify-content: space-around; }',
+      /* Population grid card: centre the SVG both axes so stretched height
+         doesn\'t leave the dots floating at the top. */
+      '.sensspec .sensspec-card.center { justify-content: center; align-items: center; }',
+      /* Confusion-matrix card: centre vertically too, same reason. */
+      '.sensspec .sensspec-card.matrix { justify-content: center; }',
 
       /* Slider */
       '.sensspec-slider { margin-bottom: 18px; }',
@@ -70,9 +80,10 @@
       '.sensspec-matrix-cell-count { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }',
       '.sensspec-matrix-cell-label { color: ' + COLORS.muted + '; font-size: 0.72rem; margin-top: 2px; }',
 
-      /* Metrics */
-      '.sensspec-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }',
-      '.sensspec-metric { background: ' + COLORS.card + '; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 8px; padding: 12px 14px; transition: background 0.25s ease, border-color 0.25s ease; }',
+      /* Metrics — uniform heights within a row (and across rows) so the
+         four cards form a clean 2x2 regardless of label length. */
+      '.sensspec-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; grid-auto-rows: 1fr; align-items: stretch; }',
+      '.sensspec-metric { background: ' + COLORS.card + '; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 8px; padding: 12px 14px; transition: background 0.25s ease, border-color 0.25s ease; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }',
       '.sensspec-metric-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }',
       '.sensspec-metric-label { font-size: 0.82rem; font-weight: 600; color: ' + COLORS.text + '; }',
       '.sensspec-metric-value { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }',
@@ -80,9 +91,9 @@
       '.sensspec-metric-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }',
       '.sensspec-metric-formula { color: ' + COLORS.muted + '; font-size: 0.72rem; font-family: ui-monospace, "SF Mono", Menlo, monospace; }',
 
-      /* Explanation */
-      '.sensspec-notes { border: 1px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 14px 16px; font-size: 0.82rem; line-height: 1.6; color: ' + COLORS.muted + '; background: ' + COLORS.card + '; }',
-      '.sensspec-notes p { margin: 0 0 5px; }',
+      /* Explanation — spans the full container width beneath the two-column grid */
+      '.sensspec-notes { margin-top: 18px; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 16px 20px; font-size: 0.88rem; line-height: 1.65; color: ' + COLORS.muted + '; background: ' + COLORS.card + '; }',
+      '.sensspec-notes p { margin: 0 0 8px; }',
       '.sensspec-notes p:last-child { margin-bottom: 0; }',
 
       /* Dot-grid SVG */
@@ -170,11 +181,10 @@
     root.appendChild(legend);
 
     // ---------------------------- main grid ----------------------------
+    // Flat 2x2 CSS grid so each row can stretch independently — keeping
+    // the sliders card and the matrix card at matching heights, and
+    // likewise the population grid and the metrics cluster.
     var grid = el('div', { class: 'sensspec-grid' });
-    var leftCol  = el('div', null);
-    var rightCol = el('div', null);
-    grid.appendChild(leftCol);
-    grid.appendChild(rightCol);
     root.appendChild(grid);
 
     // ------ sliders ------
@@ -202,16 +212,14 @@
     var sensitivitySlider = buildSlider('sensitivity', 'Sensitivity', COLORS.tp,     0,    1);
     var specificitySlider = buildSlider('specificity', 'Specificity', COLORS.tn,     0,    1);
 
-    var slidersCard = el('div', { class: 'sensspec-card' }, [
+    var slidersCard = el('div', { class: 'sensspec-card sliders' }, [
       prevalenceSlider.wrap, sensitivitySlider.wrap, specificitySlider.wrap
     ]);
-    leftCol.appendChild(slidersCard);
 
     // ------ population grid ------
     var popCard = el('div', { class: 'sensspec-card center' });
     var popSvg  = svgEl('svg', { class: 'sensspec-popgrid' });
     popCard.appendChild(popSvg);
-    leftCol.appendChild(popCard);
 
     // ------ confusion matrix ------
     var matrixContainer = el('div', null);
@@ -240,7 +248,7 @@
       matrixContainer.appendChild(r);
     });
 
-    rightCol.appendChild(el('div', { class: 'sensspec-card' }, matrixContainer));
+    var matrixCard = el('div', { class: 'sensspec-card matrix' }, matrixContainer);
 
     // ------ metrics ------
     function buildMetric(label, formula, color) {
@@ -267,18 +275,23 @@
     var metricsGrid = el('div', { class: 'sensspec-metrics' }, [
       metrics.sensitivity.el, metrics.specificity.el, metrics.ppv.el, metrics.npv.el
     ]);
-    rightCol.appendChild(metricsGrid);
 
-    // ------ explanation ------
-    rightCol.appendChild(el('div', { class: 'sensspec-notes' }, [
+    // Populate the outer grid in row-major order: (sliders, matrix) / (popgrid, metrics)
+    grid.appendChild(slidersCard);
+    grid.appendChild(matrixCard);
+    grid.appendChild(popCard);
+    grid.appendChild(metricsGrid);
+
+    // ------ explanation (spans full width below the two-column grid) ------
+    root.appendChild(el('div', { class: 'sensspec-notes' }, [
       buildNote(COLORS.tp, 'Sensitivity',
-        ' — Of all truly sick people, how many does the test catch?'),
+        ' — Of all truly positive cases, what fraction does the classifier correctly flag?'),
       buildNote(COLORS.tn, 'Specificity',
-        ' — Of all truly healthy people, how many does the test correctly clear?'),
-      buildNote('#d4a017', 'PPV',
-        ' — If you test positive, what\u2019s the chance you\u2019re actually sick?'),
-      buildNote('#0899a9', 'NPV',
-        ' — If you test negative, what\u2019s the chance you\u2019re actually healthy?')
+        ' — Of all truly negative cases, what fraction does the classifier correctly leave alone?'),
+      buildNote('#d4a017', 'PPV (Positive Predictive Value)',
+        ' — When the classifier flags a case, what is the chance it is truly positive?'),
+      buildNote('#0899a9', 'NPV (Negative Predictive Value)',
+        ' — When the classifier leaves a case alone, what is the chance it is truly negative?')
     ]));
 
     function buildNote(color, name, rest) {
