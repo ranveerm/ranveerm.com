@@ -54,8 +54,11 @@
       '  text-align: center;',
       '  padding: 0 20px;',
       '  max-width: 600px;',
-      '  margin: 0 auto 40px;',
-      '  min-height: 140px;',
+      '  margin: 0 auto 20px;',
+      /* Minimum height prevents layout shift when transitioning between
+         entries of different length. Keep it small enough that sections
+         with only title + subtitle don\'t leave large empty space. */
+      '  min-height: 60px;',
       '  transition: opacity 0.25s ease, transform 0.25s ease;',
       '}',
       '.carousel-text.out-left {',
@@ -99,14 +102,20 @@
       '  font-variant-numeric: tabular-nums;',
       '  white-space: nowrap;',
       '}',
-      /* Single-item layout — no scroll track, just a centred image + caption */
+      /* Single-item layout — no scroll track, just a centred image + caption.
+         Min-height and bottom margin are relaxed vs. the multi-item carousel
+         because there's no transition buffer to reserve. */
       '.carousel-single {',
       '  display: flex;',
       '  flex-direction: column;',
       '  align-items: center;',
       '  justify-content: center;',
-      '  gap: 20px;',
-      '  padding: 30px 0;',
+      '  gap: 12px;',
+      '  padding: 20px 0;',
+      '}',
+      '.carousel-single .carousel-text {',
+      '  min-height: 0;',
+      '  margin-bottom: 0;',
       '}',
       '.carousel-single .carousel-single-image {',
       '  max-width: 280px;',
