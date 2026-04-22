@@ -55,11 +55,13 @@
       '  padding: 0 20px;',
       '  max-width: 600px;',
       '  margin: 0 auto 20px;',
-      /* Minimum height prevents layout shift when transitioning between
-         entries of different length. Keep it small enough that sections
-         with only title + subtitle don\'t leave large empty space. */
-      '  min-height: 60px;',
-      '  transition: opacity 0.25s ease, transform 0.25s ease;',
+      /* A small floor so very short entries don\'t look cramped. The
+         actual height is JS-animated between entries — see changeText. */
+      '  min-height: 40px;',
+      '  overflow: hidden;',
+      '  transition: opacity 0.25s ease,',
+      '              transform 0.25s ease,',
+      '              height 0.32s cubic-bezier(0.4, 0, 0.2, 1);',
       '}',
       '.carousel-text.out-left {',
       '  opacity: 0;',
@@ -217,6 +219,7 @@
 
     var currentIndex = -1;
     var textSwitchTimer = null;
+    var heightReleaseTimer = null;
     var rafId = null;
 
     function setText(i) {
@@ -232,6 +235,16 @@
       countEl.textContent = (i + 1) + ' / ' + totalItems;
     }
 
+    // Measure the natural height of `textWrap` as if style.height were
+    // unset, without leaving it in that state on the next paint.
+    function measureNaturalHeight() {
+      var saved = textWrap.style.height;
+      textWrap.style.height = 'auto';
+      var h = textWrap.getBoundingClientRect().height;
+      textWrap.style.height = saved;
+      return h;
+    }
+
     function changeText(newIndex, direction) {
       if (newIndex === currentIndex) return;
       var outClass = direction > 0 ? 'out-left' : 'out-right';
@@ -242,12 +255,35 @@
       textWrap.classList.add(outClass);
       clearTimeout(textSwitchTimer);
       textSwitchTimer = setTimeout(function() {
+        // Lock the current rendered height before swapping text so that the
+        // subsequent `setText` can't cause an instant layout jump of the
+        // content below us. We then animate from this locked height to the
+        // new natural height via the `height` CSS transition.
+        var fromHeight = textWrap.getBoundingClientRect().height;
+        textWrap.style.height = fromHeight + 'px';
+
         setText(newIndex);
         textWrap.classList.remove(outClass);
         textWrap.classList.add(inClass);
         // Force reflow so the 'in' state animates
         textWrap.offsetHeight;
         textWrap.classList.remove(inClass);
+
+        // Measure the new natural height (post-setText) and kick off the
+        // height transition on the next frame — doing it in the same frame
+        // as the style.height assignment above won't produce a transition.
+        var toHeight = measureNaturalHeight();
+        requestAnimationFrame(function() {
+          textWrap.style.height = toHeight + 'px';
+        });
+
+        // After the transition completes, release the explicit height so
+        // subsequent renders can grow/shrink naturally (e.g. window
+        // resize, font loading).
+        clearTimeout(heightReleaseTimer);
+        heightReleaseTimer = setTimeout(function() {
+          textWrap.style.height = '';
+        }, 360);
       }, 200);
     }
 
