@@ -1,6 +1,6 @@
 ---
 layout: post
-title: The Claude Code Environment
+title: Claude Code Environment
 date: 2026-04-23 00:05:00 +1100
 categories: jekyll update
 tags: [LLM]
@@ -8,7 +8,7 @@ tags: [LLM]
 
 <!-- excerpt-start -->
 
-A cartography of the context layers between your prompt and the model. Each component in the Claude Code environment — instructions files, settings, skills, agents, hooks, MCP servers — shapes how the model interprets intent, chooses tools, and produces output. The widget below lets you step through the layers and see which files sit where, with a bidirectional map: click a layer to see its files, click a file to jump back to its layer.
+Each component in the Claude Code environment, including instructions files, settings, skills, agents, hooks and MCP servers, shapes how the model interprets intent, chooses tools, and produces output. The widget below lets you step through the layers and see which files sit where, with a bidirectional map: click a layer to see its files, click a file to jump back to its layer.
 
 <!--end-excerpt-->
 

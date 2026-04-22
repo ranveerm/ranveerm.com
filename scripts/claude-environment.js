@@ -13,63 +13,63 @@
 
   var LAYERS = {
     entry: {
-      label: 'Layer 0 — Entry',
+      label: 'Layer 0: Entry',
       sublabel: "the user's request",
       color: '#d97706',
       description: 'The prompt. Everything else exists to shape how this is interpreted before reaching the model.',
       nodes: ['prompt']
     },
     memory: {
-      label: 'Layer 1 — Persistent Memory',
+      label: 'Layer 1: Persistent Memory',
       sublabel: 'instructions loaded into system prompt',
       color: '#0891b2',
-      description: 'Markdown files merged into the system prompt. Claude sees these as **instructions** — persistent, session-wide guidance for how to behave, what conventions to follow, and what commands exist.',
+      description: 'Markdown files merged into the system prompt. Claude sees these as **instructions**, persistent, session-wide guidance for how to behave, what conventions to follow, and what commands exist.',
       nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'rules']
     },
     config: {
-      label: 'Layer 2 — Configuration',
+      label: 'Layer 2: Configuration',
       sublabel: 'behavioural controls',
       color: '#7c3aed',
       description: 'Permissions, model selection, and feature toggles. Defines what Claude can do without asking.',
       nodes: ['settings-local', 'settings-project', 'settings-global']
     },
     tools: {
-      label: 'Layer 3 — Tools',
+      label: 'Layer 3: Tools',
       sublabel: 'primitive actions',
       color: '#db2777',
       description: 'The fundamental actions Claude can take. Built-ins like Read, Write, Bash, Grep are always available. Everything else in the environment either restricts these, orchestrates them, or extends them.',
       nodes: ['builtin-tools']
     },
     invocable: {
-      label: 'Layer 4 — Invocable Knowledge',
+      label: 'Layer 4: Invocable Knowledge',
       sublabel: 'workflows & commands',
       color: '#d97706',
       description: 'Reusable patterns. Skills auto-load based on natural language; commands are invoked explicitly with a slash.',
       nodes: ['skills', 'commands']
     },
     delegation: {
-      label: 'Layer 5 — Delegation',
+      label: 'Layer 5: Delegation',
       sublabel: 'specialised actors',
       color: '#e11d48',
       description: 'Spawn focused subagents that run in their own fresh context windows. Only a summary returns to the main conversation.',
       nodes: ['agents']
     },
     automation: {
-      label: 'Layer 6 — Automation',
+      label: 'Layer 6: Automation',
       sublabel: 'event-driven scripts',
       color: '#059669',
-      description: 'Shell scripts triggered by tool events. Enforce standards without model involvement — formatters, linters, validators.',
+      description: 'Shell scripts triggered by tool events. Enforce standards without model involvement, formatters, linters, validators.',
       nodes: ['hooks']
     },
     external: {
-      label: 'Layer 7 — External Tools',
+      label: 'Layer 7: External Tools',
       sublabel: 'protocol-based integrations',
       color: '#2563eb',
       description: 'MCP is the odd one out: an OPEN PROTOCOL, not a Claude Code convention. Portable across Cursor, VS Code, and other clients.',
       nodes: ['mcp']
     },
     state: {
-      label: 'Layer 8 — State & Isolation',
+      label: 'Layer 8: State & Isolation',
       sublabel: 'session management',
       color: '#64748b',
       description: 'How Claude remembers across sessions and isolates parallel work.',
@@ -88,7 +88,7 @@
     'claude-local': {
       layer: 'memory', label: 'CLAUDE.local.md', icon: 'file-text-o',
       title: 'CLAUDE.local.md',
-      description: 'Personal **instructions** for this project. Gitignored — only you see it. Personal inputs (`.local`) take precedence over the team-level CLAUDE.md.',
+      description: 'Personal **instructions** for this project. Gitignored, only you see it. Personal inputs (`.local`) take precedence over the team-level CLAUDE.md.',
       example: '# My personal tweaks\nUse pnpm instead of npm locally\nMy debug port is 3001\nSkip the Docker setup, I run Postgres natively',
       priority: 'Highest-priority instruction file'
     },
@@ -109,16 +109,16 @@
     rules: {
       layer: 'memory', label: 'rules/', icon: 'book',
       title: 'rules/',
-      description: "Modular **instruction** files that load alongside CLAUDE.md. The ~200-line threshold is a guideline, not a hard rule — split out when CLAUDE.md becomes unwieldy, or when different team members own different areas. Filenames don't affect behaviour; path-scoping is controlled entirely by frontmatter.",
+      description: "Modular **instruction** files that load alongside CLAUDE.md. The ~200-line threshold is a guideline, not a hard rule, split out when CLAUDE.md becomes unwieldy, or when different team members own different areas. Filenames don't affect behaviour; path-scoping is controlled entirely by frontmatter.",
       example: '# .claude/rules/api-conventions.md\n---\npaths:\n  - "src/handlers/**/*.ts"\n  - "src/api/**/*.ts"\n---\n# API Development Rules\n- All endpoints must validate with zod\n- Return { data, error } shape\n- Never expose internal error details',
       priority: 'Two loading modes depending on frontmatter',
       extended: {
         heading: 'What determines whether a rule loads',
         body: [
-          { label: 'No frontmatter', text: 'Loaded unconditionally at session start, same priority as CLAUDE.md. Always in context — use for things that apply everywhere.' },
-          { label: 'With `paths:` frontmatter', text: 'Path-scoped. Only injected into context when Claude touches a file matching the glob pattern. Saves context window space — use for area-specific conventions.' },
+          { label: 'No frontmatter', text: 'Loaded unconditionally at session start, same priority as CLAUDE.md. Always in context, use for things that apply everywhere.' },
+          { label: 'With `paths:` frontmatter', text: 'Path-scoped. Only injected into context when Claude touches a file matching the glob pattern. Saves context window space, use for area-specific conventions.' },
           { label: 'Glob syntax', text: 'Supports `*`, `**`, `?`, `[abc]`, and brace expansion like `{ts,tsx}`. Example: `src/**/*.{ts,tsx}` matches all TypeScript files under src recursively.' },
-          { label: 'Discovery', text: 'All `.md` files under `.claude/rules/` are discovered recursively — you can organise into subdirectories like `frontend/` or `backend/`.' },
+          { label: 'Discovery', text: 'All `.md` files under `.claude/rules/` are discovered recursively, you can organise into subdirectories like `frontend/` or `backend/`.' },
           { label: 'Rules vs skills', text: "Rules load automatically (conditional on path or always). Skills only load when Claude decides they're relevant based on your prompt. Use rules for 'always apply this' and skills for 'invoke this workflow'." }
         ]
       }
@@ -126,7 +126,7 @@
     'settings-local': {
       layer: 'config', label: 'settings.local.json', icon: 'cog',
       title: 'settings.local.json',
-      description: 'Personal inputs (`.local`) take precedence over team settings. Gitignored — your personal permission overrides for this project.',
+      description: 'Personal inputs (`.local`) take precedence over team settings. Gitignored, your personal permission overrides for this project.',
       priority: 'Highest-priority config for this project',
       example: '{\n  "permissions": {\n    "allow": ["Bash(docker:*)"]\n  }\n}'
     },
@@ -146,16 +146,16 @@
     'builtin-tools': {
       layer: 'tools', label: 'built-in tools', icon: 'wrench',
       title: 'Built-in Tools',
-      description: "The primitive actions Claude can take in your environment. These aren't files — they're capabilities baked into Claude Code. Every other layer interacts with tools: settings control which are allowed, skills describe when to use them, hooks fire around them, MCP adds new ones.",
-      example: 'Read         — read a file\nWrite        — create a new file\nEdit         — modify an existing file\nBash         — run shell commands\nGrep         — search across files\nGlob         — match file patterns\nTask         — delegate to a subagent\nWebFetch     — fetch a URL',
-      priority: 'Always available — cannot be removed, only restricted',
+      description: "The primitive actions Claude can take in your environment. These aren't files, they're capabilities baked into Claude Code. Every other layer interacts with tools: settings control which are allowed, skills describe when to use them, hooks fire around them, MCP adds new ones.",
+      example: 'Read        , read a file\nWrite       , create a new file\nEdit        , modify an existing file\nBash        , run shell commands\nGrep        , search across files\nGlob        , match file patterns\nTask        , delegate to a subagent\nWebFetch    , fetch a URL',
+      priority: 'Always available, cannot be removed, only restricted',
       extended: {
         heading: 'How the environment shapes tools',
         body: [
           { label: 'settings.json', text: 'Allowlist/denylist which tools Claude can invoke without asking permission.' },
-          { label: 'Agents', text: 'Each subagent can have a restricted subset of tools — e.g., a security-auditor with only `[Read, Grep]`.' },
+          { label: 'Agents', text: 'Each subagent can have a restricted subset of tools, e.g., a security-auditor with only `[Read, Grep]`.' },
           { label: 'Skills', text: "Describe procedural knowledge for sequencing tools (e.g., 'to deploy: run tests, bump version, tag, push')." },
-          { label: 'Hooks', text: 'Run shell commands on tool lifecycle events — PreToolUse, PostToolUse, SubagentStop.' },
+          { label: 'Hooks', text: 'Run shell commands on tool lifecycle events, PreToolUse, PostToolUse, SubagentStop.' },
           { label: 'MCP', text: 'Adds entirely new tools from external servers (query_database, create_jira_ticket, etc.).' }
         ]
       }
@@ -163,33 +163,33 @@
     skills: {
       layer: 'invocable', label: 'skills/', icon: 'file-code-o',
       title: 'skills/',
-      description: "Markdown workflows invoked via natural language. Claude auto-loads them when your phrasing matches the skill's description. Each skill lives in its own folder with a SKILL.md file and optional supporting files. **Not** part of MCP — Claude Code-specific convention.",
+      description: "Markdown workflows invoked via natural language. Claude auto-loads them when your phrasing matches the skill's description. Each skill lives in its own folder with a SKILL.md file and optional supporting files. **Not** part of MCP, Claude Code-specific convention.",
       example: '# .claude/skills/deploy/SKILL.md\n---\nname: deploy\ndescription: Triggered when user says\n  "deploy", "ship it", "push to prod"\nallowed-tools: [Read, Bash]\n---\n1. Run full test suite\n2. Bump version in package.json\n3. Create git tag\n4. Push to main',
       priority: 'Auto-invoked by natural-language match'
     },
     commands: {
       layer: 'invocable', label: 'commands/', icon: 'bolt',
       title: 'commands/',
-      description: 'Custom slash commands. Every `.md` file becomes `/project:name`. Explicit invocation — you type the command.',
+      description: 'Custom slash commands. Every `.md` file becomes `/project:name`. Explicit invocation, you type the command.',
       example: '# .claude/commands/review.md\n---\ndescription: Review current branch\n---\n## Diff\n!`git diff main...HEAD`\n\nReview for security issues and missing tests.',
       priority: 'Manual invocation (/project:review)'
     },
     agents: {
       layer: 'delegation', label: 'agents/', icon: 'android',
       title: 'agents/ (subagents)',
-      description: 'Specialised subagents that run in their own **fresh context windows**. They have their own system prompt, restricted tool access, and optional model choice. The parent conversation receives only the subagent\u2019s final summary — not the files it read, tools it called, or intermediate reasoning.',
+      description: 'Specialised subagents that run in their own **fresh context windows**. They have their own system prompt, restricted tool access, and optional model choice. The parent conversation receives only the subagent\u2019s final summary, not the files it read, tools it called, or intermediate reasoning.',
       example: '# .claude/agents/security-auditor.md\n---\nname: security-auditor\ndescription: Use PROACTIVELY after code\n  changes to check for security issues.\ntools: [Read, Grep, Glob]\nmodel: inherit\n---\nYou are a senior security specialist.\nFocus only on auth, input validation,\nand data exposure risks.\nReport findings with severity ratings.',
       priority: 'Invoked by description match, `@agent-name`, or via /agents',
       extended: {
         heading: 'Why subagents matter',
         body: [
-          { label: 'Context isolation', text: "Main session stays clean. An audit that reads 40 files doesn\u2019t pollute your main conversation — only the summary returns. This is the primary reason to use them." },
-          { label: 'Parallel execution', text: 'Multiple subagents run concurrently. A code review can dispatch style-checker, security-scanner, and test-coverage at once — minutes → seconds.' },
+          { label: 'Context isolation', text: "Main session stays clean. An audit that reads 40 files doesn\u2019t pollute your main conversation, only the summary returns. This is the primary reason to use them." },
+          { label: 'Parallel execution', text: 'Multiple subagents run concurrently. A code review can dispatch style-checker, security-scanner, and test-coverage at once, minutes → seconds.' },
           { label: 'Tool restriction', text: "Scope each agent\u2019s tools precisely. A read-only reviewer doesn\u2019t need Write or Bash; a security auditor doesn\u2019t need Edit." },
           { label: 'Scope (project vs user)', text: 'Define in `.claude/agents/` (team-shared) or `~/.claude/agents/` (personal, portable across projects). Project-level takes precedence on name collision.' },
           { label: 'Skill vs agent', text: 'Use a **skill** when you want procedural knowledge injected into the current context. Use an **agent** when the work is noisy and only the summary matters.' },
           { label: 'Agent vs worktree', text: 'Agents isolate context; worktrees isolate filesystems. Combine them for truly parallel multi-branch work.' },
-          { label: "Can't nest", text: 'Subagents cannot spawn further subagents. Depth is exactly one — this prevents infinite recursion.' },
+          { label: "Can't nest", text: 'Subagents cannot spawn further subagents. Depth is exactly one, this prevents infinite recursion.' },
           { label: 'Invocation', text: "Three ways: phrase your request to match the description (implicit), name it in natural language ('use the security-auditor'), or `@mention` it (guaranteed)." }
         ]
       }
@@ -204,7 +204,7 @@
     mcp: {
       layer: 'external', label: '.mcp.json', icon: 'server',
       title: '.mcp.json',
-      description: 'MCP server configuration. Unlike everything else here, MCP is an OPEN PROTOCOL — portable across Cursor, VS Code, and other clients. Extends Claude with external tools (databases, GitHub, Jira).',
+      description: 'MCP server configuration. Unlike everything else here, MCP is an OPEN PROTOCOL, portable across Cursor, VS Code, and other clients. Extends Claude with external tools (databases, GitHub, Jira).',
       example: '{\n  "mcpServers": {\n    "postgres": {\n      "command": "npx",\n      "args": ["@modelcontextprotocol/server-postgres"]\n    },\n    "github": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-github"]\n    }\n  }\n}',
       priority: 'Works with ANY MCP-compatible client'
     },
@@ -275,7 +275,10 @@
       '.claudeenv { max-width: 960px; margin: 0 auto; padding: 8px 0 24px; color: #333; --accent: #6a9fb5; --border: rgba(106, 159, 181, 0.22); --hairline: rgba(106, 159, 181, 0.12); --muted: #777; --card: #ffffff; }',
       '.claudeenv .ce-intro { color: #777; font-size: 0.92rem; max-width: 620px; margin: 0 auto 20px; line-height: 1.5; }',
       '.claudeenv .ce-section-label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: #999; }',
-      '.claudeenv .ce-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 22px; align-items: start; }',
+      /* Two equal columns. minmax(0, 1fr) prevents long strings inside the
+         file tree or inspector from pushing either column wider than its
+         share, which would make the layout jiggle on selection change. */
+      '.claudeenv .ce-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }',
       '@media (max-width: 760px) { .claudeenv .ce-grid { grid-template-columns: 1fr; } }',
 
       /* Layer bands */
@@ -355,7 +358,7 @@
       '.claudeenv .ce-inspector-extended-item-text { font-size: 0.77rem; color: #555; line-height: 1.55; margin: 0; }',
       '.claudeenv .ce-inspector-example { background: #fafafa; border: 1px solid var(--hairline); border-radius: 6px; padding: 10px 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.72rem; color: #333; white-space: pre; overflow-x: auto; line-height: 1.5; margin: 0; }',
 
-      /* Layer detail — pyramid list */
+      /* Layer detail: pyramid list */
       '.claudeenv .ce-pyramid { display: flex; flex-direction: column; gap: 6px; }',
       '.claudeenv .ce-pyramid-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; text-align: left; font: inherit; transition: border-color 0.2s, background 0.2s; }',
       '.claudeenv .ce-pyramid-item:hover { border-color: var(--accent); }',
@@ -421,11 +424,38 @@
 
     function selectLayer(id) { state.selectedLayer = id; state.selectedNode = null; rerender(); }
     function selectNode(id)  { state.selectedNode  = id; state.selectedLayer = null; rerender(); }
-    function clearSelection() { state.selectedLayer = null; state.selectedNode = null; rerender(); }
+    function clearSelection() {
+      if (state.selectedLayer === null && state.selectedNode === null) return;
+      state.selectedLayer = null;
+      state.selectedNode = null;
+      rerender();
+    }
+
+    // Click anywhere outside the widget's interactive surfaces deselects
+    // the current layer/file. Interactive surfaces call stopPropagation
+    // on their own handlers so the document listener only fires for
+    // clicks that landed in empty space.
+    //
+    // Using stopPropagation rather than a closest-match check dodges a
+    // timing bug: internal click handlers rerender the widget, which
+    // detaches the original event target from the DOM before the
+    // document listener runs — so `target.closest()` would see no
+    // ancestors and misclassify the click as "outside".
+    document.addEventListener('click', function() {
+      clearSelection();
+    });
+
+    // Helper: wraps a click handler so it won't bubble to the document.
+    function hook(el, fn) {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fn(e);
+      });
+    }
 
     // Intro
     root.appendChild(el('p', { class: 'ce-intro' },
-      'A cartography of the context layers between your prompt and the model. Each component shapes how Claude interprets intent, chooses tools, and produces output. Click a layer band to see the files inside it; click a file to jump back to its layer.'
+      'Click a layer band to see the files inside it; click a file to jump back to its layer.'
     ));
 
     var grid = el('div', { class: 'ce-grid' });
@@ -447,7 +477,7 @@
     leftCol.appendChild(leftHeader);
 
     var entryBand = el('button', { class: 'ce-entry-band', type: 'button' });
-    entryBand.addEventListener('click', function() { selectLayer('entry'); });
+    hook(entryBand, function() { selectLayer('entry'); });
     leftCol.appendChild(entryBand);
 
     var entryConnector = el('div', { class: 'ce-connector' });
@@ -459,7 +489,7 @@
     // Right: file tree panel + inspector panel + MCP callout
     var treePanel = el('div', { class: 'ce-panel' });
     treePanel.appendChild(el('div', { class: 'ce-panel-head' }, [
-      el('span', { class: 'ce-panel-head-label' }, '§ 02 — Filesystem'),
+      el('span', { class: 'ce-panel-head-label' }, '§ 02: Filesystem'),
       fa('sitemap')
     ]));
     var treeBody = el('div', { class: 'ce-tree' });
@@ -481,7 +511,7 @@
       (function() {
         var p = el('p', null, 'Of all these components, ');
         p.appendChild(el('span', { class: 'hl' }, 'only MCP is portable'));
-        p.appendChild(document.createTextNode('. Everything else — CLAUDE.md, skills, hooks, agents — is a Claude Code convention.'));
+        p.appendChild(document.createTextNode('. Everything else, CLAUDE.md, skills, hooks, agents, is a Claude Code convention.'));
         return p;
       })()
     ]);
@@ -499,7 +529,7 @@
       entryBand.innerHTML = '';
       entryBand.appendChild(el('div', { class: 'ce-entry-head' }, [
         fa('terminal'),
-        el('span', { class: 'ce-layer-label' }, 'Layer 0 — Entry')
+        el('span', { class: 'ce-layer-label' }, 'Layer 0: Entry')
       ]));
       var cmd = el('div', { class: 'ce-entry-cmd' });
       cmd.appendChild(el('span', { class: 'dim' }, '$ '));
@@ -518,7 +548,7 @@
       LAYER_ORDER.forEach(function(id) {
         var layer = LAYERS[id];
         var band = el('button', { class: 'ce-band' + (a === id ? ' active' : a && a !== id ? ' dimmed' : ''), type: 'button', style: 'color: ' + layer.color });
-        band.addEventListener('click', function() { selectLayer(id); });
+        hook(band, function() { selectLayer(id); });
         band.appendChild(el('div', { class: 'ce-band-head' }, [
           el('div', { style: 'display: flex; align-items: baseline; gap: 10px; min-width: 0;' }, [
             el('span', { class: 'ce-band-title', style: 'color: ' + layer.color }, layer.label),
@@ -539,7 +569,7 @@
       while (leftHeader.children.length > 1) leftHeader.removeChild(leftHeader.lastChild);
       if (activeLayer()) {
         var btn = el('button', { class: 'ce-clear-btn', type: 'button' }, [fa('times'), document.createTextNode(' clear')]);
-        btn.addEventListener('click', clearSelection);
+        hook(btn, clearSelection);
         leftHeader.appendChild(btn);
       } else {
         leftHeader.appendChild(document.createElement('span'));
@@ -560,7 +590,7 @@
           type: 'button',
           style: 'padding-left: ' + (indent * 14 + 8) + 'px;'
         });
-        btn.addEventListener('click', function() { selectNode(id); });
+        hook(btn, function() { selectNode(id); });
         if (highlighted && !selected) {
           btn.appendChild(el('span', { class: 'ce-layer-dot', style: 'background: ' + layerColor + '; left: ' + (indent * 14) + 'px;' }));
         }
@@ -576,7 +606,7 @@
         el('span', { class: 'ce-label' }, '~/.claude/'),
         el('span', { class: 'ce-scope' }, 'user-level')
       ]);
-      userRoot.addEventListener('click', function() { state.expandedUser = !state.expandedUser; rerender(); });
+      hook(userRoot, function() { state.expandedUser = !state.expandedUser; rerender(); });
       treeBody.appendChild(userRoot);
 
       if (state.expandedUser) {
@@ -596,7 +626,7 @@
         el('span', { class: 'ce-label' }, 'your-project/'),
         el('span', { class: 'ce-scope' }, 'project-level')
       ]);
-      projectRoot.addEventListener('click', function() { state.expandedProject = !state.expandedProject; rerender(); });
+      hook(projectRoot, function() { state.expandedProject = !state.expandedProject; rerender(); });
       treeBody.appendChild(projectRoot);
 
       if (state.expandedProject) {
@@ -624,11 +654,11 @@
       inspectorPanel.innerHTML = '';
 
       var head = el('div', { class: 'ce-panel-head' }, [
-        el('span', { class: 'ce-panel-head-label' }, '§ 03 — Inspector')
+        el('span', { class: 'ce-panel-head-label' }, '§ 03: Inspector')
       ]);
       if (state.selectedNode || state.selectedLayer) {
         var closeBtn = el('button', { class: 'ce-close-btn', type: 'button' }, fa('times'));
-        closeBtn.addEventListener('click', clearSelection);
+        hook(closeBtn, clearSelection);
         head.appendChild(closeBtn);
       }
       inspectorPanel.appendChild(head);
@@ -658,7 +688,7 @@
         body.appendChild(desc);
 
         body.appendChild(el('div', { class: 'ce-inspector-section-label' },
-          layer.nodes.length > 1 ? 'Files in this layer — higher = takes precedence' : 'File in this layer'));
+          layer.nodes.length > 1 ? 'Files in this layer, higher = takes precedence' : 'File in this layer'));
 
         var pyramid = el('div', { class: 'ce-pyramid' });
         layer.nodes.forEach(function(nodeId, idx) {
@@ -669,7 +699,7 @@
             style: 'border-color: ' + (idx === 0 ? layer.color + '60' : 'var(--border)') +
                    (layer.nodes.length > 1 ? '; margin-left: ' + (idx * 6) + 'px; margin-right: ' + (idx * 6) + 'px' : '')
           });
-          item.addEventListener('click', function() { selectNode(nodeId); });
+          hook(item, function() { selectNode(nodeId); });
           if (layer.nodes.length > 1) {
             item.appendChild(el('span', { class: 'ce-pyramid-num', style: 'color: ' + (idx === 0 ? layer.color : '#aaa') }, String(idx + 1)));
           }
@@ -692,7 +722,7 @@
       crumb.appendChild(el('span', { class: 'ce-inspector-layer-dot', style: 'background: ' + pLayer.color }));
       var layerLink = el('button', { class: 'ce-inspector-layer-label', type: 'button', style: 'color: ' + pLayer.color },
         '\u2190 ' + pLayer.label);
-      layerLink.addEventListener('click', function() { selectLayer(node.layer); });
+      hook(layerLink, function() { selectLayer(node.layer); });
       crumb.appendChild(layerLink);
       body.appendChild(crumb);
 
