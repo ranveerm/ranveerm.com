@@ -285,7 +285,7 @@
       '.claudeenv .ce-bands { display: flex; flex-direction: column; gap: 2px; }',
       '.claudeenv .ce-bands-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }',
       '.claudeenv .ce-bands-header h3 { margin: 4px 0 0; font-size: 1.15rem; font-weight: 500; color: #222; }',
-      '.claudeenv .ce-entry-band { width: 100%; text-align: left; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s, background 0.2s, opacity 0.2s; font: inherit; color: inherit; }',
+      '.claudeenv .ce-entry-band { width: 100%; text-align: left; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; cursor: pointer; transition: border-color 0.2s, background 0.2s, opacity 0.2s; font: inherit; color: inherit; }',
       '.claudeenv .ce-entry-band.active { border-color: #d97706; background: rgba(217, 119, 6, 0.06); }',
       '.claudeenv .ce-entry-band.dimmed { opacity: 0.35; }',
       '.claudeenv .ce-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }',
@@ -295,8 +295,8 @@
       '.claudeenv .ce-entry-cmd .dim { color: #aaa; }',
       '.claudeenv .ce-entry-cmd .mark { color: #b45309; }',
       '.claudeenv .ce-entry-note { font-size: 0.78rem; color: #777; margin: 0; }',
-      '.claudeenv .ce-connector { display: flex; justify-content: center; margin: 6px 0; }',
-      '.claudeenv .ce-connector::before { content: ""; width: 1px; height: 14px; background: linear-gradient(to bottom, transparent, var(--border), transparent); }',
+      '.claudeenv .ce-connector { display: flex; justify-content: center; margin: 2px 0; }',
+      '.claudeenv .ce-connector::before { content: ""; width: 1px; height: 8px; background: linear-gradient(to bottom, transparent, var(--border), transparent); }',
       '.claudeenv .ce-band { width: 100%; text-align: left; border: none; background: transparent; padding: 10px 0 10px 14px; position: relative; cursor: pointer; transition: opacity 0.2s, background 0.2s; font: inherit; color: inherit; border-left: 2px solid currentColor; }',
       '.claudeenv .ce-band.dimmed { opacity: 0.3; }',
       '.claudeenv .ce-band.active { background: linear-gradient(90deg, rgba(0,0,0,0.02), transparent); }',
@@ -453,6 +453,13 @@
       });
     }
 
+    // Entry band (Layer 0) spans the full width above the two-column grid.
+    var entryBand = el('button', { class: 'ce-entry-band', type: 'button' });
+    hook(entryBand, function() { selectLayer('entry'); });
+    root.appendChild(entryBand);
+
+    root.appendChild(el('div', { class: 'ce-connector' }));
+
     var grid = el('div', { class: 'ce-grid' });
     root.appendChild(grid);
 
@@ -460,23 +467,6 @@
     var rightCol = el('div', null);
     grid.appendChild(leftCol);
     grid.appendChild(rightCol);
-
-    // Left: header + entry band + regular bands
-    var leftHeader = el('div', { class: 'ce-bands-header' }, [
-      el('div', null, [
-        el('span', { class: 'ce-section-label' }, '§ 01'),
-        el('h3', null, 'Flow of influence')
-      ]),
-      null // clear button goes here, rebuilt each render
-    ]);
-    leftCol.appendChild(leftHeader);
-
-    var entryBand = el('button', { class: 'ce-entry-band', type: 'button' });
-    hook(entryBand, function() { selectLayer('entry'); });
-    leftCol.appendChild(entryBand);
-
-    var entryConnector = el('div', { class: 'ce-connector' });
-    leftCol.appendChild(entryConnector);
 
     var bandsWrap = el('div', { class: 'ce-bands' });
     leftCol.appendChild(bandsWrap);
@@ -498,7 +488,7 @@
     var inspectorPanel = el('div', { class: 'ce-panel ce-inspector' });
     rightCol.appendChild(inspectorPanel);
 
-    var mcpCallout = el('div', { class: 'ce-mcp-callout' }, [
+    var mcpCallout = el('div', { class: 'ce-mcp-callout', style: 'margin-top: 16px;' }, [
       el('div', { class: 'ce-mcp-callout-head' }, [
         fa('server'),
         el('span', { class: 'ce-mcp-label' }, 'Portability note')
@@ -510,7 +500,7 @@
         return p;
       })()
     ]);
-    rightCol.appendChild(mcpCallout);
+    root.appendChild(mcpCallout);
 
     // Ordered layer ids (excluding 'entry' which has its own featured band)
     var LAYER_ORDER = ['memory', 'config', 'tools', 'invocable', 'delegation', 'automation', 'external', 'state'];
@@ -557,18 +547,6 @@
         band.appendChild(desc);
         bandsWrap.appendChild(band);
       });
-    }
-
-    function renderClearButton() {
-      // Remove existing clear button (second child of leftHeader)
-      while (leftHeader.children.length > 1) leftHeader.removeChild(leftHeader.lastChild);
-      if (activeLayer()) {
-        var btn = el('button', { class: 'ce-clear-btn', type: 'button' }, [fa('times'), document.createTextNode(' clear')]);
-        hook(btn, clearSelection);
-        leftHeader.appendChild(btn);
-      } else {
-        leftHeader.appendChild(document.createElement('span'));
-      }
     }
 
     function renderTree() {
@@ -758,7 +736,6 @@
     function rerender() {
       renderEntryBand();
       renderBands();
-      renderClearButton();
       renderTree();
       renderInspector();
     }
