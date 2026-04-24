@@ -49,8 +49,14 @@ collections:
   - programming_posts
 
 # Custom Settings
-excerpt_separator: <!--end-excerpt--> 
+excerpt_separator: <!--end-excerpt-->
 show_excerpts: true
+
+# RSS feed: only include the summary (excerpt). Many posts embed interactive
+# JS widgets or external scripts that can't render in native RSS readers, so
+# we ship just the excerpt and let readers click through to the web post.
+feed:
+  excerpt_only: true
 header_pages:
   - photo-gallery/photo-gallery.md
   - my-apps/journal-mapper.md
