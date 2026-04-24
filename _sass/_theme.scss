@@ -180,7 +180,10 @@ blockquote {
         display: grid;
         grid-template-columns: 100px 1fr;
         gap: 18px;
-        padding: 28px 0;
+        // Tighter bottom padding than top -- the "Continue reading" link
+        // below is already visually separated by its coloured underline,
+        // so a full 28px beneath it makes the divider feel too far away.
+        padding: 28px 0 18px;
         margin-bottom: 0;
         border-bottom: 2px solid var(--color-hairline);
 
@@ -229,8 +232,15 @@ blockquote {
         color: var(--color-ink-2);
         font-size: 0.98rem;
         line-height: 1.6;
-        margin: 0 0 14px;
+        margin: 0 0 10px;
         max-width: 640px;
+
+        // Jekyll wraps the excerpt text in a <p>, which minima gives a
+        // 15px bottom margin. On non-YIR posts this compounds with the
+        // excerpt block's own bottom margin and leaves a visible gap
+        // before "Continue reading". Zero it out so spacing is governed
+        // by .post-stream-excerpt's margin alone.
+        > p:last-child { margin-bottom: 0; }
     }
 
     .post-stream-more {
