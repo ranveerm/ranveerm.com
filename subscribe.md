@@ -5,21 +5,26 @@ permalink: /subscribe/
 ---
 
 <style>
+  /*
+   * All colours below come from the site's design-system tokens defined
+   * in _sass/_theme.scss. Palette follows data-theme automatically --
+   * no need for a separate dark-mode block.
+   */
   .subscribe-wrap {
     max-width: 640px;
     margin: 1.5rem auto 3rem;
-    color: #333;
+    color: var(--color-ink-2);
   }
   .subscribe-wrap p { line-height: 1.6; }
   .subscribe-url {
     display: flex;
     align-items: stretch;
     gap: 0;
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--color-hairline);
     border-radius: 6px;
     overflow: hidden;
     margin: 1.2rem 0 1.8rem;
-    background: #fafafa;
+    background: var(--color-surface-2);
   }
   .subscribe-url input {
     flex: 1;
@@ -29,32 +34,38 @@ permalink: /subscribe/
     padding: 0.65rem 0.9rem;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 0.85rem;
-    color: #333;
+    color: var(--color-ink);
     outline: none;
   }
   .subscribe-url button {
     border: 0;
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
-    background: #fff;
+    border-left: 1px solid var(--color-hairline);
+    background: var(--color-surface);
     padding: 0 1rem;
     font-size: 0.8rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: #555;
+    color: var(--color-muted);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
   }
-  .subscribe-url button:hover { background: #6a9fb5; color: #fff; }
-  .subscribe-url button.copied { background: #2e8b57; color: #fff; }
+  .subscribe-url button:hover {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .subscribe-url button.copied {
+    background: #2e8b57;
+    color: #fff;
+  }
 
   .subscribe-raw {
     font-size: 0.85rem;
-    color: #777;
+    color: var(--color-muted);
     margin-top: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--color-hairline);
   }
-  .subscribe-raw a { color: #6a9fb5; }
+  /* Inherit the global <a> rule (coral accent) -- don't override. */
 </style>
 
 <div class="subscribe-wrap">
