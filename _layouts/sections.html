@@ -80,6 +80,32 @@ layout: default
     background: #fff;
     opacity: 1;
   }
+  /*
+   * Hovering a selected pill keeps the coral palette -- we just dim
+   * the whole pill slightly so the state change is legible without
+   * swapping to the base .post-tag:hover surface colour. The leading
+   * dot morphs into an "×" using a stacked linear-gradient so its
+   * bounding box stays identical to the dot's (6x6), preventing the
+   * pill from resizing and shifting layout on hover.
+   */
+  .post-tag.selected:hover {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+    opacity: 0.82;
+  }
+  .post-tag.selected:hover:before {
+    content: "";
+    background:
+      linear-gradient(45deg,  transparent 42%, #fff 42%, #fff 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, #fff 42%, #fff 58%, transparent 58%);
+    background-size: 100% 100%;
+    background-color: transparent;
+    width: 6px;
+    height: 6px;
+    border-radius: 0;
+    opacity: 1;
+  }
   .post-tag.animating {
     transform: scale(0.9);
     opacity: 0.7;

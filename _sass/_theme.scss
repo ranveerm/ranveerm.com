@@ -100,8 +100,42 @@ a {
     text-decoration: none;
 }
 
+// --- Mobile nav overrides ----------------------------------------------
+// Minima's mobile collapsed menu uses the baked `$background-color`
+// white plus `$grey-color-light` border -- both bake in at compile
+// time, so neither follows the runtime theme. We override them with
+// tokens here and also lift the stacking so the expanded menu doesn't
+// slide behind the banner image on the homepage.
+@media screen and (max-width: 600px) {
+    .site-nav {
+        background-color: var(--color-surface);
+        border-color: var(--color-hairline);
+        z-index: 20;
+    }
+    .site-nav .menu-icon > svg { fill: var(--color-ink); }
+    // When the menu expands, give the theme-toggle a little more room
+    // on the right so it doesn't hug the pill's border.
+    .site-nav .theme-toggle {
+        margin-right: 16px;
+        margin-left: 20px;
+        top: 0;
+    }
+}
+
 .text-muted {
     color: var(--color-muted);
+}
+
+// --- Post-page meta row -------------------------------------------------
+// Individual post pages render the date, a literal `|` pipe, and the tag
+// pills inline inside .post-meta. Widen the whitespace around the pipe
+// but pack consecutive tag pills closer together so they read as a
+// cluster, not a comma-separated list.
+.post-meta {
+    time { margin-right: 8px; }
+    .post-tag { margin-left: 0; margin-right: 0; }
+    .post-tag:first-of-type { margin-left: 8px; }
+    .post-tag + .post-tag { margin-left: 2px; }
 }
 
 // Post-scroll divider -- inherit the hairline token.
@@ -140,6 +174,10 @@ blockquote {
     letter-spacing: 0.02em;
     line-height: 1.55;
     text-decoration: none;
+    // Centre the pill vertically against neighbouring inline text
+    // (e.g. the date on post pages) instead of sitting on its own
+    // baseline -- otherwise the pill drops below the text baseline.
+    vertical-align: middle;
     // Capitalise only the first letter of the tag. Relies on Liquid
     // passing through the source casing for special tags like 'LLM' and
     // 'iOS' -- `capitalize` uppercases the leading character and leaves
@@ -149,8 +187,8 @@ blockquote {
     &:before {
         content: "";
         display: inline-block;
-        width: 5px;
-        height: 5px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
         background: var(--color-accent);
         opacity: 0.75;
@@ -178,14 +216,20 @@ blockquote {
 
     > li {
         display: grid;
-        grid-template-columns: 100px 1fr;
-        gap: 18px;
+        grid-template-columns: 90px 1fr;
+        gap: 20px;
         // Tighter bottom padding than top -- the "Continue reading" link
         // below is already visually separated by its coloured underline,
         // so a full 28px beneath it makes the divider feel too far away.
         padding: 28px 0 18px;
         margin-bottom: 0;
         border-bottom: 2px solid var(--color-hairline);
+
+        // Strip the top padding on the first card so the stream hugs
+        // the intro block ("One more time with feeling") instead of
+        // leaving a two-margin gap stacked with the intro's own bottom
+        // spacing.
+        &:first-child { padding-top: 0; }
 
         &:last-child { border-bottom: none; }
 
@@ -199,7 +243,12 @@ blockquote {
         font-size: 0.82rem;
         color: var(--color-muted);
         letter-spacing: 0.02em;
-        padding-top: 6px;
+        align-self: start;
+        // Align the date's baseline with the title's first-line
+        // baseline. Title is 1.55rem at line-height 1.25 (~20px
+        // baseline from top); date is 0.82rem at default line-height
+        // (~10px baseline from top). Padding-top closes that gap.
+        padding-top: 10px;
     }
 
     .post-stream-title {
@@ -225,7 +274,9 @@ blockquote {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin: 0 0 12px;
+        // Sits in the top row of the body so its baseline lines up with
+        // the date on the left. Tight bottom margin before the title.
+        margin: 0 0 10px;
     }
 
     .post-stream-excerpt {
@@ -297,6 +348,34 @@ blockquote {
 [data-theme="dark"] .theme-toggle {
     .theme-icon-light { display: none; }
     .theme-icon-dark  { display: inline-block; }
+}
+
+// --- Mobile nav ---------------------------------------------------------
+// Minima's palm-width breakpoint collapses the nav into a hamburger and
+// stamps a hardcoded white background on the open menu. These overrides
+// make the drawer theme-aware, lift it above the home-page banner image
+// (which otherwise paints on top of the positioned nav), and give the
+// theme-toggle circle some breathing room on the right edge inside the
+// expanded drawer.
+@media screen and (max-width: 600px) {
+    .site-nav {
+        background-color: var(--color-bg) !important;
+        border-color: var(--color-hairline) !important;
+        // Lift above .banner-image and any positioned post content.
+        z-index: 10;
+    }
+    .site-nav .page-link {
+        color: var(--color-ink);
+    }
+    .site-nav .theme-toggle {
+        // Reset the desktop vertical lift (it was anchored to the
+        // header hairline) and give space from the drawer's right edge.
+        top: 0;
+        margin-left: 20px;
+        margin-right: 12px;
+        margin-top: 4px;
+        margin-bottom: 6px;
+    }
 }
 
 // --- Claude Code Environment widget: dark mode --------------------------
