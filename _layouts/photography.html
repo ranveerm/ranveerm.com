@@ -15,6 +15,12 @@ photo-gallery-root-dir: /assets/images/photo-gallery
   }
 
   .cover-figure {
+    /*
+     * Full-bleed hero: stretch to the viewport edges regardless of the
+     * content column. Dropped the `z-index: -1` that the old layout
+     * used, because the body now paints an opaque background token and
+     * was burying the image.
+     */
     width: 100vw;
     position: relative;
     left: 50%;
@@ -22,7 +28,7 @@ photo-gallery-root-dir: /assets/images/photo-gallery
     margin-left: -50vw;
     margin-right: -50vw;
     margin-top: 0px;
-    z-index: -1;
+    margin-bottom: 24px;
   }
 
   .centered-image {
@@ -58,8 +64,23 @@ photo-gallery-root-dir: /assets/images/photo-gallery
   }
 
   .text-muted {
-    color: #777;
+    color: var(--color-muted);
     text-align: center;
+  }
+
+  /*
+   * Photo-gallery card wrappers: strip the default link hover-underline
+   * so the caption below each cover image doesn't grow a coral line when
+   * the card is hovered. The whole card is the interaction target; a
+   * text underline on a caption reads as a glitch, not an affordance.
+   */
+  .hover-zoom,
+  .hover-zoom:hover {
+    text-decoration: none;
+  }
+
+  .hover-zoom .text-muted {
+    color: var(--color-muted);
   }
 
   body {
@@ -93,7 +114,7 @@ photo-gallery-root-dir: /assets/images/photo-gallery
 
   figcaption {
     text-align: center;
-    color: #999;
+    color: var(--color-muted);
   }
 
   .page-content {
@@ -110,10 +131,6 @@ photo-gallery-root-dir: /assets/images/photo-gallery
   />
 </figure>
 {%- endif -%}
-
-<br />
-
-<br />
 
 {%- if page.show-title -%}
 <div class="center-justify"><h2>{{ page.title }}</h2></div>
