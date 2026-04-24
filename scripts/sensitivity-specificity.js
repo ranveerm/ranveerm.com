@@ -231,7 +231,7 @@
     ]);
     matrixContainer.appendChild(headerRow);
 
-    [['Actually Sick', ['tp', 'fn']], ['Actually Healthy', ['fp', 'tn']]].forEach(function(row) {
+    [['Actually +', ['tp', 'fn']], ['Actually \u2212', ['fp', 'tn']]].forEach(function(row) {
       var r = el('div', { class: 'sensspec-matrix-row' });
       r.appendChild(el('div', { class: 'sensspec-matrix-rowlabel' }, row[0]));
       row[1].forEach(function(key) {
