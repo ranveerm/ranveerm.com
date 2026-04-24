@@ -20,7 +20,7 @@ layout: default
     flex: 0 0 18px;
     width: 18px;
     text-align: center;
-    color: #888;
+    color: var(--color-muted);
     font-size: 0.95rem;
   }
   .yir-overview-thumbs {
@@ -60,84 +60,79 @@ layout: default
       <h5 class="text-muted">{{- site.description | escape -}}</h5>
     </div>
 
-    <ul class="post-list">
-      {%- for post in site.posts -%} 
+    <ul class="post-list post-stream">
+      {%- for post in site.posts -%}
+      {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
       <li>
-        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
-        <h3>
-          <a class="post-link" href="{{ post.url | relative_url }}">
-            {{ post.title | escape }}
-          </a>
-        </h3>
-        
-        <!-- Note: Repeated code -->
-        <!-- Post Metadata -->
-        <div class="post-meta">
-          <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
-            {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+        <div class="post-stream-date">
+          <time class="dt-published" datetime="{{ post.date | date_to_xmlschema }}" itemprop="datePublished">
             {{ post.date | date: date_format }}
           </time>
-    
-          {% if post.tags %} | 
+        </div>
+        <div class="post-stream-body">
+          <h3 class="post-stream-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+          </h3>
+
+          {% if post.tags and post.tags.size > 0 %}
+          <div class="post-stream-tags">
             {% for tag in post.tags %}
               {% capture tag_name %}{{ tag }}{% endcapture %}
-              <a href="/sections/?tag={{ tag_name }}", class="post-tag">
-                {{ tag_name }}
-              </a>&nbsp;
+              <a href="/sections/?tag={{ tag_name }}" class="post-tag">{{ tag_name }}</a>
             {% endfor %}
+          </div>
           {% endif %}
 
-        </div>
-        {%- if site.show_excerpts -%}
-
-        <!-- [Customising the Excerpt Separators in Jekyll](https://cjshelton.github.io/blog/2019/05/27/customising-jekyll-excerpt-start.html)  -->
-          {% assign excerptParts = post.excerpt | split: "<!-- excerpt-start -->" %}
-          {{ excerptParts[1] | strip_newlines | truncatewords: 50 }}
-
-        {%- endif -%}
-
-        {%- comment -%}
-          Visual overview for Year-in-Review posts. Derives the year from the
-          post's `image-assets-dir` front-matter (last path segment), looks up
-          the matching `_data/year-in-review/year-<YEAR>/*.json` files, and
-          renders one row per category with a Font Awesome icon on the left
-          and small thumbnails on the right.
-        {%- endcomment -%}
-        {%- if post.image-assets-dir contains "/year-in-review/" -%}
-          {%- assign yir_parts = post.image-assets-dir | split: "/" -%}
-          {%- assign yir_year = yir_parts | last -%}
-          {%- assign yir_key = "year-" | append: yir_year -%}
-          {%- assign yir_data = site.data.year-in-review[yir_key] -%}
-          {%- if yir_data -%}
-          <div class="yir-overview">
-            {%- assign yir_sections = "Books-processed,fa-book|Movies-processed,fa-film|TV-shows-processed,fa-television|Games-processed,fa-gamepad|Beverages-processed,fa-beer" | split: "|" -%}
-            {%- for section in yir_sections -%}
-              {%- assign pair = section | split: "," -%}
-              {%- assign key = pair[0] -%}
-              {%- assign icon = pair[1] -%}
-              {%- assign cat = yir_data[key] -%}
-              {%- if cat and cat.entries.size > 0 -%}
-              <div class="yir-overview-row">
-                <i class="fa {{ icon }} yir-overview-icon" aria-hidden="true"></i>
-                <div class="yir-overview-thumbs">
-                  {%- for entry in cat.entries -%}
-                    {%- if entry.photo and entry.photo != "" -%}
-                    <img class="yir-overview-thumb" loading="lazy"
-                         src="{{ post.image-assets-dir }}/day-one-exports/{{ entry.photo }}"
-                         alt="{{ entry.title | escape }}"
-                         title="{{ entry.title | escape }}{% if entry.subtitle != '' %} — {{ entry.subtitle | escape }}{% endif %}">
-                    {%- endif -%}
-                  {%- endfor -%}
-                </div>
-              </div>
-              {%- endif -%}
-            {%- endfor -%}
+          {%- if site.show_excerpts -%}
+          <div class="post-stream-excerpt">
+            {% assign excerptParts = post.excerpt | split: "<!-- excerpt-start -->" %}
+            {{ excerptParts[1] | strip_newlines | truncatewords: 50 }}
           </div>
           {%- endif -%}
-        {%- endif -%}
+
+          {%- comment -%}
+            Visual overview for Year-in-Review posts. Kept from the previous
+            design — derives the year from the post's `image-assets-dir`
+            front-matter (last path segment), looks up the matching
+            `_data/year-in-review/year-<YEAR>/*.json` files, and renders one
+            row per category with a Font Awesome icon + thumbnails.
+          {%- endcomment -%}
+          {%- if post.image-assets-dir contains "/year-in-review/" -%}
+            {%- assign yir_parts = post.image-assets-dir | split: "/" -%}
+            {%- assign yir_year = yir_parts | last -%}
+            {%- assign yir_key = "year-" | append: yir_year -%}
+            {%- assign yir_data = site.data.year-in-review[yir_key] -%}
+            {%- if yir_data -%}
+            <div class="yir-overview">
+              {%- assign yir_sections = "Books-processed,fa-book|Movies-processed,fa-film|TV-shows-processed,fa-television|Games-processed,fa-gamepad|Beverages-processed,fa-beer" | split: "|" -%}
+              {%- for section in yir_sections -%}
+                {%- assign pair = section | split: "," -%}
+                {%- assign key = pair[0] -%}
+                {%- assign icon = pair[1] -%}
+                {%- assign cat = yir_data[key] -%}
+                {%- if cat and cat.entries.size > 0 -%}
+                <div class="yir-overview-row">
+                  <i class="fa {{ icon }} yir-overview-icon" aria-hidden="true"></i>
+                  <div class="yir-overview-thumbs">
+                    {%- for entry in cat.entries -%}
+                      {%- if entry.photo and entry.photo != "" -%}
+                      <img class="yir-overview-thumb" loading="lazy"
+                           src="{{ post.image-assets-dir }}/day-one-exports/{{ entry.photo }}"
+                           alt="{{ entry.title | escape }}"
+                           title="{{ entry.title | escape }}{% if entry.subtitle != '' %} — {{ entry.subtitle | escape }}{% endif %}">
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+            {%- endif -%}
+          {%- endif -%}
+
+          <a class="post-stream-more" href="{{ post.url | relative_url }}">Continue reading &rarr;</a>
+        </div>
       </li>
-      <br>
-      <hr class="post-divider">
       {%- endfor -%}
     </ul>
 

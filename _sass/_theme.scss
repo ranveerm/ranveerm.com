@@ -1,0 +1,412 @@
+// Design system -- light / dark tokens and site-wide overrides.
+//
+// Tokens derived from the `Escape Horizon.html` design bundle: warm paper
+// (Anthropic-leaning) light mode, warm graphite (Apple-leaning) dark mode,
+// coral accent reserved for inline links.
+//
+// All palette usage goes through CSS custom properties so the runtime
+// theme toggle is a single `data-theme` attribute swap on <html>.
+
+:root {
+    --color-bg:           #FAF9F7;   // page canvas, warm paper
+    --color-surface:      #FFFFFF;   // elevated blocks
+    --color-surface-2:    #F3F1EC;   // inset / tag fill
+    --color-ink:          #1D1D1F;   // primary text, titles
+    --color-ink-2:        #3A3A3D;   // body copy
+    --color-muted:        #6E6E73;   // dates, captions
+    --color-faint:        #9A9A9F;   // eyebrows, micro-labels
+    --color-hairline:     #E8E6E1;   // dividers, 1px borders
+    --color-accent:       #C96442;   // muted coral, inline links
+    --color-accent-ink:   #A54F32;   // hover state
+    --color-tag-bg:       #EFEDE7;
+    --color-tag-ink:      #4A4744;
+}
+
+[data-theme="dark"] {
+    --color-bg:           #26262A;
+    --color-surface:      #2F2F33;
+    --color-surface-2:    #36363A;
+    --color-ink:          #F5F5F7;
+    --color-ink-2:        #D9D9DE;
+    --color-muted:        #9A9AA0;
+    --color-faint:        #6E6E74;
+    --color-hairline:     #3A3A3E;
+    --color-accent:       #E8957A;
+    --color-accent-ink:   #F0A285;
+    --color-tag-bg:       #35353A;
+    --color-tag-ink:      #D1D1D6;
+}
+
+// Respect OS preference only when the user hasn't explicitly chosen a theme.
+// The inline script in head.html always sets `data-theme` before first paint,
+// so in practice this media query is a safety net; the explicit attribute
+// wins either way.
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-bg:         #26262A;
+        --color-surface:    #2F2F33;
+        --color-surface-2:  #36363A;
+        --color-ink:        #F5F5F7;
+        --color-ink-2:      #D9D9DE;
+        --color-muted:      #9A9AA0;
+        --color-faint:      #6E6E74;
+        --color-hairline:   #3A3A3E;
+        --color-accent:     #E8957A;
+        --color-accent-ink: #F0A285;
+        --color-tag-bg:     #35353A;
+        --color-tag-ink:    #D1D1D6;
+    }
+}
+
+// --- Site chrome --------------------------------------------------------
+
+html, body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+a {
+    color: var(--color-accent);
+    &:visited { color: var(--color-accent); }
+    &:hover   { color: var(--color-accent-ink); }
+}
+
+// Keep the site title readable on either palette regardless of what
+// minima's baked $grey-color-dark would have produced.
+.site-title,
+.site-title:visited {
+    color: var(--color-ink);
+}
+
+.site-header {
+    border-bottom-color: var(--color-hairline);
+    background-color: var(--color-bg);
+}
+
+.site-footer {
+    border-top-color: var(--color-hairline);
+    background-color: var(--color-bg);
+    color: var(--color-muted);
+}
+
+// Nav items should sit in ink, not the default blue link colour.
+.site-nav .page-link,
+.site-nav .page-link:visited {
+    color: var(--color-ink);
+}
+.site-nav .page-link:hover {
+    color: var(--color-accent-ink);
+    text-decoration: none;
+}
+
+.text-muted {
+    color: var(--color-muted);
+}
+
+// Post-scroll divider -- inherit the hairline token.
+hr.post-divider {
+    background: var(--color-hairline) !important;
+}
+
+// Inline code + pre blocks -- keep the existing Courier Prime family but
+// re-tint so they don't glow blue-white on dark backgrounds.
+pre, code {
+    background-color: var(--color-surface-2);
+    color: var(--color-ink-2);
+    border-color: var(--color-hairline);
+}
+
+blockquote {
+    color: var(--color-muted);
+    border-left-color: var(--color-accent);
+}
+
+// --- Tags -- pill with a coral dot ---------------------------------------
+// Replaces the old blue FontAwesome-prefixed tag.
+.post-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    // Padding tightened to compensate for the bumped font-size so the
+    // pill's outer footprint stays close to its previous dimensions.
+    padding: 1px 9px;
+    margin-right: 6px;
+    border-radius: 999px;
+    background: var(--color-tag-bg);
+    color: var(--color-tag-ink);
+    border: 1px solid var(--color-hairline);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    line-height: 1.55;
+    text-decoration: none;
+    // Capitalise only the first letter of the tag. Relies on Liquid
+    // passing through the source casing for special tags like 'LLM' and
+    // 'iOS' -- `capitalize` uppercases the leading character and leaves
+    // the rest untouched.
+    text-transform: capitalize;
+
+    &:before {
+        content: "";
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--color-accent);
+        opacity: 0.75;
+        padding: 0;
+        font-family: inherit;
+    }
+
+    &:hover {
+        text-decoration: none;
+        background: var(--color-surface-2);
+        color: var(--color-ink);
+        border-color: var(--color-accent);
+    }
+}
+
+// --- Home -- typographic post stream -------------------------------------
+// Used on the home page. Each entry is a two-column grid: date on the
+// left, title + tags + excerpt + YIR overview on the right. A hairline
+// divider separates entries -- the old <hr class="post-divider"> rows
+// between <li>s are no longer emitted.
+.post-stream {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    > li {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 18px;
+        padding: 28px 0;
+        margin-bottom: 0;
+        border-bottom: 2px solid var(--color-hairline);
+
+        &:last-child { border-bottom: none; }
+
+        @media (max-width: 720px) {
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+    }
+
+    .post-stream-date {
+        font-size: 0.82rem;
+        color: var(--color-muted);
+        letter-spacing: 0.02em;
+        padding-top: 6px;
+    }
+
+    .post-stream-title {
+        margin: 0 0 10px;
+        font-size: 1.55rem;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+        font-weight: 500;
+
+        a,
+        a:visited {
+            color: var(--color-ink);
+            text-decoration: none;
+        }
+        a:hover {
+            color: var(--color-accent-ink);
+            text-decoration: none;
+            border-bottom: 1px solid var(--color-accent);
+        }
+    }
+
+    .post-stream-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 0 0 12px;
+    }
+
+    .post-stream-excerpt {
+        color: var(--color-ink-2);
+        font-size: 0.98rem;
+        line-height: 1.6;
+        margin: 0 0 14px;
+        max-width: 640px;
+    }
+
+    .post-stream-more {
+        display: inline-block;
+        color: var(--color-accent);
+        font-size: 0.82rem;
+        letter-spacing: 0.01em;
+        text-decoration: none;
+        border-bottom: 1px solid var(--color-accent);
+        padding-bottom: 1px;
+
+        &:hover {
+            color: var(--color-accent-ink);
+            border-bottom-color: var(--color-accent-ink);
+        }
+    }
+}
+
+// --- Theme toggle -------------------------------------------------------
+// Lives inside the main site-nav trigger so it collapses with the menu
+// on mobile. The two glyphs (moon / sun) are both emitted in markup and
+// only the one relevant to the current theme is shown.
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--color-hairline);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    // Nudged up so the circle sits on the text baseline instead of
+    // overlapping the site-header's bottom hairline. The header's
+    // minima padding leaves the nav flush with the divider, so the
+    // button needs a small lift to clear it.
+    position: relative;
+    top: -4px;
+    vertical-align: middle;
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover {
+        color: var(--color-ink);
+        border-color: var(--color-ink);
+    }
+
+    .fa { font-size: 11px; line-height: 1; }
+
+    .theme-icon-dark   { display: none; }
+}
+[data-theme="dark"] .theme-toggle {
+    .theme-icon-light { display: none; }
+    .theme-icon-dark  { display: inline-block; }
+}
+
+// --- Claude Code Environment widget: dark mode --------------------------
+// The widget injects its own light-theme CSS at runtime. Rather than
+// touch the script, we lean on the fact that it exposes its palette
+// through local CSS variables on `.claudeenv` (--accent, --border,
+// --hairline, --muted, --card) and override them at the themed scope.
+// A handful of hard-coded colours (panel heads, band copy, code inline,
+// inspector bodies) need explicit re-tinting too.
+[data-theme="dark"] .claudeenv {
+    color: var(--color-ink);
+    --border:   var(--color-hairline);
+    --hairline: #2e2e32;
+    --muted:    var(--color-muted);
+    --card:     var(--color-surface);
+
+    .ce-intro,
+    .ce-band-sublabel,
+    .ce-band-desc,
+    .ce-entry-note,
+    .ce-pyramid-priority,
+    .ce-inspector-empty,
+    .ce-inspector-empty p,
+    .ce-panel-foot { color: var(--color-muted); }
+
+    .ce-section-label,
+    .ce-panel-head-label,
+    .ce-inspector-section-label,
+    .ce-band-count,
+    .ce-tree-root .ce-scope,
+    .ce-tree-static { color: var(--color-faint); }
+
+    .ce-bands-header h3,
+    .ce-inspector h3,
+    .ce-tree-root,
+    .ce-pyramid-label { color: var(--color-ink); }
+
+    .ce-entry-cmd { color: var(--color-ink); }
+    .ce-entry-cmd .dim { color: var(--color-faint); }
+
+    .ce-inspector-desc,
+    .ce-inspector-extended-item-text,
+    .ce-inspector-pill { color: var(--color-ink-2); }
+
+    .ce-panel-foot { background: rgba(255, 255, 255, 0.03); }
+    .ce-inspector-pill { background: rgba(106, 159, 181, 0.12); }
+    .ce-inspector-pill.flow { background: rgba(8, 145, 178, 0.14); }
+
+    .ce-tree-node { color: var(--color-muted); }
+    .ce-tree-node:hover { color: var(--color-ink); background: rgba(255, 255, 255, 0.04); }
+    .ce-tree-node.highlighted { background: rgba(106, 159, 181, 0.14); color: var(--color-ink); }
+    .ce-tree-node.selected { background: rgba(217, 119, 6, 0.22); color: #FBD38D; }
+    .ce-tree-root:hover { background: rgba(255, 255, 255, 0.03); }
+
+    .ce-inspector-example {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--color-ink-2);
+        border-color: var(--border);
+    }
+
+    .ce-mcp-callout {
+        background: rgba(37, 99, 235, 0.14);
+        border-color: rgba(37, 99, 235, 0.45);
+    }
+    .ce-mcp-callout p { color: var(--color-ink-2); }
+
+    .ce-close-btn,
+    .ce-clear-btn { color: var(--color-muted); border-color: var(--border); }
+    .ce-close-btn:hover,
+    .ce-clear-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
+
+    .ce-bold { color: #F6AD7B; }
+    .ce-code { background: rgba(8, 145, 178, 0.22); color: #5EEAD4; }
+
+    .ce-entry-band.active { background: rgba(217, 119, 6, 0.14); border-color: #D97706; }
+}
+
+// --- Sensitivity & Specificity widget: dark mode ------------------------
+// The widget's CSS is injected at runtime with hard-coded #fff /
+// rgba(106,159,181, ...) backgrounds. We re-tint each card surface,
+// border, and text colour to the dark palette. The four data colours
+// (tp/fn/fp/tn) already work against dark backgrounds.
+[data-theme="dark"] .sensspec {
+    color: var(--color-ink);
+
+    .sensspec-intro,
+    .sensspec-legend-item,
+    .sensspec-legend-shapes,
+    .sensspec-matrix-header > div,
+    .sensspec-matrix-rowlabel,
+    .sensspec-matrix-cell-label,
+    .sensspec-metric-formula,
+    .sensspec-notes { color: var(--color-muted); }
+
+    .sensspec-slider-label,
+    .sensspec-metric-label { color: var(--color-ink); }
+
+    .sensspec-card,
+    .sensspec-notes { background: var(--color-surface); border-color: var(--color-hairline); }
+
+    // The widget inlines `background` + `border-color` on matrix cells
+    // and metric cards per element (see sensitivity-specificity.js), so
+    // !important is required to beat the inline style. Keeping this
+    // localised -- most other rules win on specificity alone.
+    .sensspec-metric {
+        background: var(--color-surface) !important;
+        border-color: var(--color-hairline) !important;
+    }
+    .sensspec-matrix-cell {
+        background: var(--color-surface-2) !important;
+        border-color: var(--color-hairline) !important;
+    }
+    .sensspec-matrix-cell:hover { border-color: var(--color-accent) !important; }
+
+    .sensspec-metric-bar { background: var(--color-hairline); }
+
+    // Slider thumb: fill with the dark surface so the coloured ring stays
+    // legible on the light-ring-on-dark-surface pattern.
+    .sensspec-slider input[type=range]::-webkit-slider-thumb,
+    .sensspec-slider input[type=range]::-moz-range-thumb {
+        background: var(--color-surface);
+    }
+}

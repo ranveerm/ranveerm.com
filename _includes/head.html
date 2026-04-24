@@ -2,6 +2,27 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    Theme bootstrap — runs before first paint so the palette is correct
+    on first frame (no light-mode flash when the user prefers dark).
+    Reads the persisted choice from localStorage, falling back to
+    prefers-color-scheme. The toggle script at the bottom keeps storage
+    in sync on click.
+  -->
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('eh-theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
   {%- seo -%} <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
   {%- feed_meta -%} {%- if jekyll.environment == 'production' and
   site.google_analytics -%} {%- include google-analytics.html -%} {%- endif -%}
@@ -32,4 +53,5 @@
   <script type="text/javascript" src="/scripts/image-cloud.js"></script>
   <script type="text/javascript" src="/scripts/utilities.js"></script>
   <script type="text/javascript" src="/scripts/carousel.js"></script>
+  <script type="text/javascript" src="/scripts/theme-toggle.js" defer></script>
 </head>

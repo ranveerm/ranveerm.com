@@ -35,6 +35,14 @@
             <a class="page-link" style="text-decoration: none;" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
             {%- endif -%}
           {%- endfor -%}
+          <!--
+            Theme toggle — both glyphs are rendered; CSS shows whichever
+            matches the current data-theme. See scripts/theme-toggle.js.
+          -->
+          <button class="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+            <i class="fa fa-moon-o theme-icon-light" aria-hidden="true"></i>
+            <i class="fa fa-sun-o theme-icon-dark" aria-hidden="true"></i>
+          </button>
         </div>
       </nav>
     {%- endif -%}
