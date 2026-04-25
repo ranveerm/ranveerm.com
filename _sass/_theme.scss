@@ -436,18 +436,100 @@ blockquote {
         border-color: var(--border);
     }
 
+    // Portability note: subdued slate, not blue.
     .ce-mcp-callout {
-        background: rgba(37, 99, 235, 0.14);
-        border-color: rgba(37, 99, 235, 0.45);
+        background: rgba(148, 163, 184, 0.10);
+        border-color: rgba(148, 163, 184, 0.30);
     }
     .ce-mcp-callout p { color: var(--color-ink-2); }
+    .ce-mcp-callout-head .fa,
+    .ce-mcp-callout-head .ce-mcp-label,
+    .ce-mcp-callout .hl { color: #94A3B8; }
 
     .ce-close-btn,
     .ce-clear-btn { color: var(--color-muted); border-color: var(--border); }
     .ce-close-btn:hover,
     .ce-clear-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
 
-    .ce-bold { color: #F6AD7B; }
+    // Tree controls (select all / select none, totals row, file rows)
+    .ce-mini-btn { color: var(--color-muted); border-color: var(--border); background: transparent; }
+    .ce-mini-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
+    .ce-tree-node.excluded { color: var(--color-faint); text-decoration-color: rgba(255,255,255,0.25); }
+    .ce-tree-node .ce-token-tag { color: var(--color-faint); }
+    .ce-tree-node.included-bold .ce-token-tag { color: var(--color-ink); }
+    // Custom checkbox: identical visual in both states (filled grey).
+    .ce-tree-check { background: var(--color-faint); border-color: var(--color-faint); }
+    .ce-tree-check:checked::after { border-color: var(--color-surface); }
+    // Directory rows: same colour as files, label bold.
+    .ce-tree-static { color: var(--color-muted); }
+    .ce-tree-node .fa,
+    .ce-tree-static .fa,
+    .ce-tree-node.dir .fa,
+    .ce-tree-root .ce-home,
+    .ce-tree-root .ce-folder { color: var(--color-faint); }
+    // Layer-band hover/active visuals. Selection uses neutral grey, not orange.
+    .ce-band:hover:not(.dimmed) { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); }
+    .ce-band.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.20); }
+    // Inspector layer crumb: neutral, not per-layer accent.
+    .ce-inspector-layer-label { color: var(--color-muted); }
+    .ce-inspector-layer-label:hover { color: var(--color-ink); }
+    // Tree node selection -- also neutral grey, no orange tint.
+    .ce-tree-node.selected { background: rgba(255,255,255,0.08); color: var(--color-ink); }
+    // Precedence chain in the inspector
+    .ce-precedence-file { color: var(--color-ink); border-color: var(--border); background: transparent; }
+    .ce-precedence-file:hover { border-color: var(--color-ink); color: var(--color-ink); }
+    .ce-precedence-sep { color: var(--color-faint); }
+    // Section toggle "on" state -- also neutral grey.
+    .ce-section-toggle button.on,
+    .ce-section-toggle button.on.skill-mode { background: rgba(255,255,255,0.08); color: var(--color-ink); }
+    // Token-estimate caveat
+    .ce-impact-caveat { color: var(--color-faint); }
+
+    // Inspector pill variants (aggregation, token impact)
+    .ce-inspector-pill.aggregation { background: rgba(217, 119, 6, 0.14); border-left-color: #D97706; color: var(--color-ink-2); }
+    .ce-inspector-pill.token { background: rgba(180, 83, 9, 0.18); border-left-color: #F6AD7B; color: var(--color-ink-2); }
+
+    // Environment-impact summary
+    .ce-impact-stat { background: rgba(217, 119, 6, 0.08); border-color: var(--border); }
+    .ce-impact-stat.on-demand { background: rgba(8, 145, 178, 0.10); }
+    .ce-impact-stat-label { color: var(--color-faint); }
+    .ce-impact-stat-val { color: #F6AD7B; }
+    .ce-impact-stat.on-demand .ce-impact-stat-val { color: #5EEAD4; }
+    .ce-impact-stat-sub { color: var(--color-muted); }
+    .ce-impact-bar { background: rgba(255, 255, 255, 0.06); }
+    .ce-impact-legend { color: var(--color-ink-2); }
+    .ce-impact-list { color: var(--color-muted); }
+    .ce-impact-hint { background: rgba(217, 119, 6, 0.10); border-left-color: #D97706; color: var(--color-ink-2); }
+    .ce-impact-hint .ce-hint-link { color: #F6AD7B; }
+
+    // CLAUDE.md section editor
+    .ce-section-row { background: rgba(255, 255, 255, 0.03); border-color: var(--border); }
+    .ce-section-row.in-skill { background: rgba(8, 145, 178, 0.12); border-color: rgba(8, 145, 178, 0.40); }
+    .ce-section-label { color: var(--color-ink); }
+    .ce-section-label .ce-section-note { color: var(--color-muted); }
+    .ce-section-cost { color: #F6AD7B; }
+    .ce-section-row.in-skill .ce-section-cost { color: #5EEAD4; }
+    .ce-section-row.fixed .ce-section-cost { color: var(--color-faint); }
+    .ce-section-toggle { border-color: var(--border); }
+    .ce-section-toggle button { color: var(--color-muted); background: transparent; border-right-color: var(--border); }
+    .ce-section-toggle button.on { background: rgba(217, 119, 6, 0.22); color: #FBD38D; }
+    .ce-section-toggle button.on.skill-mode { background: rgba(8, 145, 178, 0.22); color: #5EEAD4; }
+    .ce-section-summary .label { color: var(--color-faint); }
+    .ce-section-summary .val { color: #F6AD7B; }
+    .ce-section-summary .val.on-demand { color: #5EEAD4; }
+
+    // Bold inline emphasis: weight only, inherit text colour.
+    .ce-bold { color: inherit; }
+    // Layer band titles + Layer 0 entry label/icon: same as body text.
+    .ce-band-title,
+    .ce-entry-head .fa,
+    .ce-entry-head .ce-layer-label,
+    .ce-entry-cmd { color: var(--color-ink); }
+    // Highlighted prompt text: website orange.
+    .ce-entry-cmd .mark { color: #F6AD7B; }
+    // Tree-root icons: neutral muted, not purple/orange.
+    .ce-tree-root .ce-home,
+    .ce-tree-root .ce-folder { color: var(--color-faint); }
     .ce-code { background: rgba(8, 145, 178, 0.22); color: #5EEAD4; }
 
     .ce-entry-band.active { background: rgba(217, 119, 6, 0.14); border-color: #D97706; }
