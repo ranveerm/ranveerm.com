@@ -2,7 +2,7 @@
 // Vanilla-JS widget. Bidirectional selection: click a layer to highlight its
 // files, click a file to highlight its layer. Now also lets the reader
 // include/exclude files via checkboxes and see the impact on the model's
-// always-loaded token budget — including a section-level breakdown of
+// always-loaded token budget - including a section-level breakdown of
 // CLAUDE.md that can be reshaped into on-demand skills.
 //
 // Usage:  <div id="claudeenv-demo"></div>
@@ -14,11 +14,11 @@
 
   var LAYERS = {
     entry: {
-      label: 'Layer 0: User input',
+      label: 'Layer 0: User Input',
       sublabel: "The user's request",
       color: '#d97706',
       description: 'The prompt. Everything else exists to shape how this is interpreted before reaching the model.',
-      aggregation: 'A single input — no precedence to resolve.',
+      aggregation: 'A single input - no precedence to resolve.',
       nodes: ['prompt']
     },
     memory: {
@@ -45,7 +45,7 @@
       sublabel: 'Behavioural controls',
       color: '#7c3aed',
       description: 'Permissions, model selection, and feature toggles. Defines what Claude can do without asking.',
-      aggregation: 'Permission `allow` and `deny` arrays **union** across all three files. Other keys deep-merge, with deeper files overriding shallower ones. None of this enters the model context — it only governs runtime behaviour.',
+      aggregation: 'Permission `allow` and `deny` arrays **union** across all three files. Other keys deep-merge, with deeper files overriding shallower ones. None of this enters the model context - it only governs runtime behaviour.',
       precedenceFiles: ['settings-local', 'settings-project', 'settings-global'],
       interactionExample:
         '# How three settings.json files merge\n' +
@@ -56,7 +56,7 @@
         '  settings.local.json:      ["Bash(docker:*)"]\n' +
         '  → final: ["Read(**)", "Bash(npm test:*)", "Bash(docker:*)"]\n' +
         '\n' +
-        'model               (DEEPER WINS — last writer)\n' +
+        'model               (DEEPER WINS - last writer)\n' +
         '  ~/.claude/settings.json:  "claude-haiku-4-5"\n' +
         '  settings.json:            "claude-opus-4-7"   ← chosen\n' +
         '  settings.local.json:      (not set)',
@@ -83,7 +83,7 @@
       sublabel: 'Specialised agents',
       color: '#e11d48',
       description: 'Spawn focused subagents that run in their own fresh context windows. Only a summary returns to the main conversation.',
-      aggregation: 'Only the agent\'s description is loaded into the parent system prompt. The agent\'s own system prompt and any files it reads stay isolated in its **fresh context window** — only the final summary returns.',
+      aggregation: 'Only the agent\'s description is loaded into the parent system prompt. The agent\'s own system prompt and any files it reads stay isolated in its **fresh context window** - only the final summary returns.',
       nodes: ['agents']
     },
     automation: {
@@ -91,7 +91,7 @@
       sublabel: 'Event-driven scripts',
       color: '#059669',
       description: 'Shell scripts triggered by tool events. Enforce standards without model involvement, formatters, linters, validators.',
-      aggregation: 'Hooks fire deterministically on tool lifecycle events. **Zero model context cost** — they run shell-side, outside the model loop.',
+      aggregation: 'Hooks fire deterministically on tool lifecycle events. **Zero model context cost** - they run shell-side, outside the model loop.',
       nodes: ['hooks']
     },
     external: {
@@ -99,7 +99,7 @@
       sublabel: 'Protocol-based integrations',
       color: '#2563eb',
       description: 'MCP is the odd one out: an OPEN PROTOCOL, not a Claude Code convention. Portable across Cursor, VS Code, and other clients.',
-      aggregation: 'When an MCP server is connected, its tool definitions are added to the system prompt — same context cost model as built-in tools.',
+      aggregation: 'When an MCP server is connected, its tool definitions are added to the system prompt - same context cost model as built-in tools.',
       nodes: ['mcp']
     },
     state: {
@@ -107,12 +107,12 @@
       sublabel: 'Session management',
       color: '#64748b',
       description: 'How Claude remembers across sessions and isolates parallel work.',
-      aggregation: 'On-disk only. Nothing here enters context until you `--resume` a session — and even then, only the prior turn transcript is replayed.',
+      aggregation: 'On-disk only. Nothing here enters context until you `--resume` a session - and even then, only the prior turn transcript is replayed.',
       nodes: ['sessions', 'worktrees']
     }
   };
 
-  // Token estimates are illustrative — real values depend on your files.
+  // Token estimates are illustrative - real values depend on your files.
   // `tokens` is what the file contributes to the **always-loaded** system
   // prompt at session start. 0 means the file is on-demand or shell-side.
   var NODES = {
@@ -142,7 +142,7 @@
       tokenNote: 'Sum of section tokens below. Sections can be moved to skills to defer loading.',
       sections: [
         { id: 'overview',        label: 'Project header and overview',     tokens:  90, fixed: true,
-          fixedNote: 'Stays inline — too generic to live anywhere else.' },
+          fixedNote: 'Stays inline - too generic to live anywhere else.' },
         { id: 'commands',        label: 'Build / test / deploy commands', tokens: 220,
           skillTarget: 'A `deploy` skill that loads only when you ask to ship.',
           skillCost: 240 },
@@ -164,7 +164,7 @@
       example: '## Global preferences\n- Always use TypeScript strict mode\n- Prefer functional patterns\n- Explain reasoning before big changes',
       priority: 'Lowest-priority instruction file (project-level takes precedence over these)',
       tokens: 600,
-      tokenNote: 'Loaded for **every** session on this machine — every project pays this cost.'
+      tokenNote: 'Loaded for **every** session on this machine - every project pays this cost.'
     },
     rules: {
       layer: 'memory', label: 'rules/', icon: 'book',
@@ -173,7 +173,7 @@
       example: '# .claude/rules/api-conventions.md\n---\npaths:\n  - "src/handlers/**/*.ts"\n  - "src/api/**/*.ts"\n---\n# API Development Rules\n- All endpoints must validate with zod\n- Return { data, error } shape\n- Never expose internal error details',
       priority: 'Two loading modes depending on frontmatter',
       tokens: 400,
-      tokenNote: 'Always-loaded rules count in full. Path-scoped rules only enter context when their globs match — much cheaper.',
+      tokenNote: 'Always-loaded rules count in full. Path-scoped rules only enter context when their globs match - much cheaper.',
       extended: {
         heading: 'What determines whether a rule loads',
         body: [
@@ -286,7 +286,7 @@
       example: '{\n  "mcpServers": {\n    "postgres": {\n      "command": "npx",\n      "args": ["@modelcontextprotocol/server-postgres"]\n    },\n    "github": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-github"]\n    }\n  }\n}',
       priority: 'Works with ANY MCP-compatible client',
       tokens: 500,
-      tokenNote: 'Tool definitions from each connected server join the system prompt — same cost model as built-in tools.'
+      tokenNote: 'Tool definitions from each connected server join the system prompt - same cost model as built-in tools.'
     },
     worktrees: {
       layer: 'state', label: 'worktrees/', icon: 'sitemap',
@@ -397,7 +397,7 @@
       '.claudeenv .ce-band.active { background: rgba(0,0,0,0.07); border-color: rgba(0,0,0,0.30); }',
       '.claudeenv .ce-band:hover:not(.dimmed) { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.20); }',
       '.claudeenv .ce-band-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 3px; }',
-      '.claudeenv .ce-band-title { display: block; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; color: #333; }',
+      '.claudeenv .ce-band-title { display: block; font-size: 0.95rem; font-weight: 400; color: #333; }',
       '.claudeenv .ce-band-sublabel { display: block; font-size: 0.78rem; color: #777; margin-top: 3px; }',
       '.claudeenv .ce-band .ce-entry-cmd { margin-top: 8px; margin-bottom: 0; }',
       '.claudeenv .ce-band-count { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.65rem; color: #aaa; flex-shrink: 0; }',
@@ -416,8 +416,8 @@
       '.claudeenv .ce-mini-btn { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: #777; background: transparent; border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; cursor: pointer; }',
       '.claudeenv .ce-mini-btn:hover { color: #222; border-color: var(--accent); }',
       '.claudeenv .ce-tree { padding: 8px 6px; }',
-      '.claudeenv .ce-tree-root { display: flex; align-items: center; gap: 6px; padding: 3px 8px; width: 100%; text-align: left; background: transparent; border: none; font: inherit; color: #555; cursor: pointer; border-radius: 4px; }',
-      '.claudeenv .ce-tree-root:hover { color: #222; background: rgba(0,0,0,0.02); }',
+      '.claudeenv .ce-tree-root { display: flex; align-items: center; gap: 6px; padding: 3px 8px; width: 100%; text-align: left; background: transparent; border: none; font: inherit; color: #777; cursor: pointer; border-radius: 4px; }',
+      '.claudeenv .ce-tree-root:hover { color: #333; background: rgba(0,0,0,0.03); }',
       '.claudeenv .ce-tree-root .ce-chevron { font-size: 0.65rem; color: #aaa; transition: transform 0.2s; width: 10px; }',
       '.claudeenv .ce-tree-root .ce-chevron.open { transform: rotate(90deg); }',
       /* All directory icons share the file-icon colour, but directory labels are emphasised (bold). */
@@ -449,10 +449,12 @@
       '.claudeenv .ce-tree-node .ce-token-tag { margin-left: auto; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.6rem; color: #aaa; padding-left: 6px; }',
       '.claudeenv .ce-tree-node.included-bold .ce-token-tag { color: #333; }',
       '.claudeenv .ce-tree-node .ce-layer-dot { position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; border-radius: 1px; }',
-      /* `.claude/` static row — matches the other directory rows visually. */
-      '.claudeenv .ce-tree-static { display: flex; align-items: center; gap: 6px; padding: 3px 8px 3px 35px; color: #777; }',
-      '.claudeenv .ce-tree-static .fa { color: #aaa; font-size: 0.75rem; }',
-      '.claudeenv .ce-tree-static .ce-label { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.76rem; font-weight: 600; }',
+      /* Spacer that mirrors a checkbox slot for non-toggleable folder rows. */
+      '.claudeenv .ce-tree-check-spacer { display: inline-block; width: 14px; flex-shrink: 0; margin: 0 2px 0 6px; }',
+      /* Non-interactive folder row (e.g. `.claude/`) - same visual as other */
+      /* folders but no hover / cursor. */
+      '.claudeenv .ce-tree-node.non-interactive { cursor: default; }',
+      '.claudeenv .ce-tree-node.non-interactive:hover { background: transparent; color: #777; }',
       '.claudeenv .ce-panel-foot { border-top: 1px solid var(--hairline); padding: 8px 14px; background: rgba(106, 159, 181, 0.04); font-size: 0.72rem; color: #777; line-height: 1.5; }',
       '.claudeenv .ce-panel-foot .star { color: #d97706; }',
       '.claudeenv .ce-tree-totals { border-top: 1px solid var(--hairline); padding: 10px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-family: ui-monospace, "SF Mono", Menlo, monospace; color: #555; background: rgba(217, 119, 6, 0.03); }',
@@ -832,10 +834,16 @@
         var projectChildren = el('div', { class: 'ce-tree-children' });
         projectChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 1));
         projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 1));
-        projectChildren.appendChild(el('div', { class: 'ce-tree-static' }, [
-          fa('folder-o'),
-          el('span', { class: 'ce-label' }, '.claude/')
-        ]));
+        // `.claude/` is non-selectable but should mirror other folder rows.
+        // Use the same `.ce-tree-row` + `.ce-tree-node.dir` structure with a
+        // checkbox spacer so the icon aligns with peer files at indent 1.
+        var claudeRow = el('div', { class: 'ce-tree-row', style: 'padding-left: 14px;' });
+        claudeRow.appendChild(el('span', { class: 'ce-tree-check-spacer' }));
+        var claudeNode = el('div', { class: 'ce-tree-node dir non-interactive' });
+        claudeNode.appendChild(fa('folder-o'));
+        claudeNode.appendChild(el('span', { class: 'ce-label' }, '.claude/'));
+        claudeRow.appendChild(claudeNode);
+        projectChildren.appendChild(claudeRow);
         projectChildren.appendChild(fileRow('settings-project', 'settings.json', 'cog', 2));
         projectChildren.appendChild(fileRow('settings-local', 'settings.local.json', 'cog', 2));
         projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'server', 2));
@@ -901,7 +909,7 @@
           var t = n.sections
             ? n.sections.reduce(function(s, sec) { return s + sec.tokens; }, 0)
             : (n.tokens || 0);
-          list.appendChild(el('li', null, n.label + (t > 0 ? ' — was ' + fmtTokens(t) + ' tokens' : '')));
+          list.appendChild(el('li', null, n.label + (t > 0 ? ' - was ' + fmtTokens(t) + ' tokens' : '')));
         });
         parent.appendChild(list);
       }
@@ -923,7 +931,7 @@
         var link = el('button', { class: 'ce-hint-link', type: 'button' }, 'CLAUDE.md (project)');
         hook(link, function() { selectNode('claude-md-project'); });
         hint.appendChild(link);
-        hint.appendChild(document.createTextNode(' to move sections into skills — they’ll only load when triggered, not in every session.'));
+        hint.appendChild(document.createTextNode(' to move sections into skills - they’ll only load when triggered, not in every session.'));
       } else {
         hint.appendChild(document.createTextNode(sectionsMoved + ' of ' + sectionsTotal + ' movable CLAUDE.md sections are deferred to skills. Open '));
         var link2 = el('button', { class: 'ce-hint-link', type: 'button' }, 'CLAUDE.md (project)');
@@ -935,7 +943,7 @@
     }
 
     function renderSectionEditor(parent, node) {
-      parent.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Sections — choose where each lives'));
+      parent.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Sections - choose where each lives'));
 
       // Roll-up totals so the user can see the impact of moving sections.
       var inlineSum = 0;
@@ -1136,11 +1144,18 @@
       }
     }
 
+    function renderPortabilityNote() {
+      // Only relevant when Layer 7 (External Tools / MCP) is the focus.
+      var visible = activeLayer() === 'external';
+      mcpCallout.style.display = visible ? '' : 'none';
+    }
+
     function rerender() {
       renderEntryBand();
       renderBands();
       renderTree();
       renderInspector();
+      renderPortabilityNote();
       updateBulkBtnLabel();
     }
 

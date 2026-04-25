@@ -461,12 +461,15 @@ blockquote {
     .ce-tree-check { background: var(--color-faint); border-color: var(--color-faint); }
     .ce-tree-check:checked::after { border-color: var(--color-surface); }
     // Directory rows: same colour as files, label bold.
-    .ce-tree-static { color: var(--color-muted); }
     .ce-tree-node .fa,
-    .ce-tree-static .fa,
     .ce-tree-node.dir .fa,
     .ce-tree-root .ce-home,
     .ce-tree-root .ce-folder { color: var(--color-faint); }
+    // Root rows hover identically to file rows: dim -> ink.
+    .ce-tree-root { color: var(--color-muted); }
+    .ce-tree-root:hover { color: var(--color-ink); background: rgba(255, 255, 255, 0.04); }
+    // Non-interactive folder row: same colour family, no hover lift.
+    .ce-tree-node.non-interactive:hover { background: transparent; color: var(--color-muted); }
     // Layer-band hover/active visuals. Selection uses neutral grey, not orange.
     .ce-band:hover:not(.dimmed) { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); }
     .ce-band.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.20); }
