@@ -1,4 +1,4 @@
-// Theme toggle — click the .theme-toggle button to flip between light
+// Theme toggle - click the .theme-toggle button to flip between light
 // and dark. Persists the choice to localStorage under 'eh-theme'; the
 // inline bootstrap script in head.html reads the same key *before first
 // paint* so the page never flashes the wrong palette.
@@ -24,7 +24,7 @@
   });
 
   // If the user hasn't set a preference and the OS preference flips
-  // mid-session, follow it. We only sync while unset — any explicit
+  // mid-session, follow it. We only sync while unset - any explicit
   // toggle via the button writes to storage and takes over.
   if (window.matchMedia) {
     var mql = window.matchMedia('(prefers-color-scheme: dark)');

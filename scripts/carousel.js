@@ -2,7 +2,7 @@
 // and dynamic text below for the currently highlighted item.
 //
 // Single-item collections are rendered as a static centred image
-// with the caption below — no scroll track, no progress indicator.
+// with the caption below - no scroll track, no progress indicator.
 
 (function() {
   var stylesInjected = false;
@@ -56,7 +56,7 @@
       '  max-width: 600px;',
       '  margin: 0 auto 20px;',
       /* A small floor so very short entries don\'t look cramped. The
-         actual height is JS-animated between entries — see changeText. */
+         actual height is JS-animated between entries - see changeText. */
       '  min-height: 40px;',
       '  overflow: hidden;',
       '  transition: opacity 0.25s ease,',
@@ -71,9 +71,11 @@
       '  opacity: 0;',
       '  transform: translateX(20px);',
       '}',
-      '.carousel-text .carousel-title { margin: 0 0 6px; }',
-      '.carousel-text .carousel-subtitle { color: #999; margin: 0 0 10px; font-style: italic; }',
-      '.carousel-text .carousel-description { margin: 0; }',
+      /* carousel-text -- post.title-feed (smaller) for the title, post.body */
+      /* for the description, system.muted italic for the subtitle.          */
+      '.carousel-text .carousel-title { margin: 0 0 6px; font-family: var(--font-display); font-size: var(--size-xl); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
+      '.carousel-text .carousel-subtitle { color: var(--ink-muted); font-family: var(--font-display); font-size: var(--size-md); margin: 0 0 10px; font-style: italic; }',
+      '.carousel-text .carousel-description { margin: 0; font-family: var(--font-display); font-size: var(--size-md); color: var(--ink-secondary); line-height: var(--lh-normal); }',
       '.carousel-text .carousel-subtitle:empty,',
       '.carousel-text .carousel-description:empty { display: none; }',
       '.carousel-indicator {',
@@ -83,19 +85,20 @@
       '  gap: 12px;',
       '  margin: 0 auto 10px;',
       '  max-width: 400px;',
-      '  font-size: 0.85em;',
-      '  color: #999;',
+      '  font-family: var(--font-text);',
+      '  font-size: var(--size-smd);',
+      '  color: var(--ink-muted);',
       '}',
       '.carousel-progress {',
       '  flex: 1;',
       '  height: 3px;',
-      '  background: rgba(106, 159, 181, 0.15);',
+      '  background: var(--paper-inset);',
       '  border-radius: 2px;',
       '  overflow: hidden;',
       '}',
       '.carousel-progress-bar {',
       '  height: 100%;',
-      '  background: rgba(106, 159, 181, 0.75);',
+      '  background: var(--coral);',
       '  border-radius: 2px;',
       '  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);',
       '  width: 0%;',
@@ -104,7 +107,7 @@
       '  font-variant-numeric: tabular-nums;',
       '  white-space: nowrap;',
       '}',
-      /* Single-item layout — no scroll track, just a centred image + caption.
+      /* Single-item layout - no scroll track, just a centred image + caption.
          Min-height and bottom margin are relaxed vs. the multi-item carousel
          because there's no transition buffer to reserve. */
       '.carousel-single {',
@@ -168,7 +171,7 @@
     if (!entries.length) return;
 
     // For single-item collections, render a centred static layout rather
-    // than a scroll track — the horizontal scroll affordance is misleading
+    // than a scroll track - the horizontal scroll affordance is misleading
     // when there is nothing to scroll through.
     if (entries.length === 1) {
       buildSingleItem(container, imageDir, entries[0]);
@@ -270,7 +273,7 @@
         textWrap.classList.remove(inClass);
 
         // Measure the new natural height (post-setText) and kick off the
-        // height transition on the next frame — doing it in the same frame
+        // height transition on the next frame - doing it in the same frame
         // as the style.height assignment above won't produce a transition.
         var toHeight = measureNaturalHeight();
         requestAnimationFrame(function() {
@@ -308,7 +311,7 @@
         var scale = 1 - t * 0.35;
         var opacity = 1 - t * 0.5;
 
-        // Single assignment per property per frame — cheaper than writing
+        // Single assignment per property per frame - cheaper than writing
         // both transform and opacity unconditionally in a forEach closure.
         item.style.transform = 'scale(' + scale + ')';
         item.style.opacity = opacity;

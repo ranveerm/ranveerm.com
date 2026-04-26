@@ -57,14 +57,27 @@ photo-gallery-root-dir: /assets/images/photo-gallery
     ); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
   }
 
-  h2,
-  h5 {
+  /* Gallery h2 -- post.title-feed treatment for the destination heading. */
+  h2 {
+    font-family: var(--font-display);
+    font-size: var(--size-h2b);
     font-weight: 500;
-    line-height: 1.1;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--track-snug);
+    color: var(--ink-primary);
+  }
+  /* Year subhead -- system.muted, italic standfirst feel. */
+  h5 {
+    font-family: var(--font-display);
+    font-size: var(--size-md);
+    font-weight: 400;
+    font-style: italic;
+    line-height: var(--lh-normal);
+    color: var(--ink-muted);
   }
 
   .text-muted {
-    color: var(--color-muted);
+    color: var(--ink-muted);
     text-align: center;
   }
 
@@ -80,12 +93,11 @@ photo-gallery-root-dir: /assets/images/photo-gallery
   }
 
   .hover-zoom .text-muted {
-    color: var(--color-muted);
+    color: var(--ink-muted);
   }
 
   body {
     overflow-x: hidden;
-    font: 100%/1.5 system-ui, sans-serif;
   }
 
   img {
@@ -112,9 +124,14 @@ photo-gallery-root-dir: /assets/images/photo-gallery
     margin: 15px 0;
   }
 
+  /* Photo caption -- system.faint micro-label (mono eyebrow). */
   figcaption {
     text-align: center;
-    color: var(--color-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-sm);
+    color: var(--ink-faint);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
   }
 
   .page-content {

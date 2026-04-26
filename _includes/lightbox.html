@@ -104,7 +104,7 @@
     wrapper.style.width = rect.width + 'px';
     wrapper.style.height = rect.height + 'px';
 
-    // Inner img uses object-fit:cover — matches the source's cropped appearance
+    // Inner img uses object-fit:cover - matches the source's cropped appearance
     var clone = document.createElement('img');
     clone.src = img.src;
     clone.alt = img.alt || '';
@@ -140,7 +140,7 @@
 
     // Trigger reflow then animate
     // As the wrapper animates from container aspect ratio to natural aspect ratio,
-    // object-fit:cover smoothly reveals more of the image — no snap.
+    // object-fit:cover smoothly reveals more of the image - no snap.
     wrapper.offsetHeight;
     wrapper.classList.add('animate-geometry');
     wrapper.style.top = targetTop + 'px';

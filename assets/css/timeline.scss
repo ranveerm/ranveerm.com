@@ -21,8 +21,8 @@
         width: 3px;
         margin-left: 4px;
         // Theme-aware spine colour: picks up the light/dark hairline
-        // automatically via _sass/_theme.scss tokens.
-        background-color: var(--color-hairline);
+        // automatically via the design-language foundation tokens.
+        background-color: var(--line);
     }
 
     > li {
@@ -68,7 +68,7 @@
 
             h5 {
                 margin-bottom: 4px;
-                color: var(--color-muted);
+                color: var(--ink-muted);
             }
         }
 
@@ -81,11 +81,11 @@
             margin-left: 0;
             // Ring + fill use the inset surface token so the avatar
             // circles sit correctly on both warm paper and graphite.
-            border: 7px solid var(--color-surface-2);
+            border: 7px solid var(--paper-inset);
             border-radius: 100%;
             text-align: center;
-            color: var(--color-ink);
-            background-color: var(--color-surface-2);
+            color: var(--ink-primary);
+            background-color: var(--paper-inset);
         }
 
         &:last-child {

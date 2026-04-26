@@ -20,7 +20,7 @@ layout: default
     flex: 0 0 18px;
     width: 18px;
     text-align: center;
-    color: var(--color-muted);
+    color: var(--ink-muted);
     font-size: 0.95rem;
   }
   .yir-overview-thumbs {
@@ -92,7 +92,7 @@ layout: default
 
           {%- comment -%}
             Visual overview for Year-in-Review posts. Kept from the previous
-            design — derives the year from the post's `image-assets-dir`
+            design - derives the year from the post's `image-assets-dir`
             front-matter (last path segment), looks up the matching
             `_data/year-in-review/year-<YEAR>/*.json` files, and renders one
             row per category with a Font Awesome icon + thumbnails.
@@ -119,7 +119,7 @@ layout: default
                       <img class="yir-overview-thumb" loading="lazy"
                            src="{{ post.image-assets-dir }}/day-one-exports/{{ entry.photo }}"
                            alt="{{ entry.title | escape }}"
-                           title="{{ entry.title | escape }}{% if entry.subtitle != '' %} — {{ entry.subtitle | escape }}{% endif %}">
+                           title="{{ entry.title | escape }}{% if entry.subtitle != '' %} - {{ entry.subtitle | escape }}{% endif %}">
                       {%- endif -%}
                     {%- endfor -%}
                   </div>

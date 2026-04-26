@@ -402,7 +402,10 @@
       /* design's coral inset shadow).                                  */
       '.claudeenv .ce-band { width: 100%; text-align: left; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; position: relative; cursor: pointer; transition: opacity 0.2s, background 0.2s, border-color 0.2s; font: inherit; color: inherit; }',
       '.claudeenv .ce-band.dimmed { opacity: 0.3; }',
-      '.claudeenv .ce-band.active { background: var(--paper-inset); border-color: var(--ink-muted); }',
+      /* viz.row-selected: paper-inset bg, ink-muted border, coral inset
+         shadow on the left edge -- matches the design language\'s
+         `viz.* + code.* in context` exemplar. */
+      '.claudeenv .ce-band.active { background: var(--paper-inset); border-color: var(--ink-muted); box-shadow: inset 3px 0 0 var(--coral); }',
       '.claudeenv .ce-band:hover:not(.dimmed) { background: var(--paper-inset); border-color: var(--ink-faint); }',
       '.claudeenv .ce-band-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 3px; }',
       /* viz.row-title: ink-primary, display, lg, weight 500, snug. */

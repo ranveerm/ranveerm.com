@@ -10,20 +10,21 @@
 (function() {
   var TOTAL = 200;
 
-  // Colours: semantic hues for the four outcome groups are kept from the
-  // original (green/orange/red/blue carry information), surrounding chrome
-  // retuned for the light site theme.
+  // Categorical hues for the four outcome groups (kept from the original
+  // -- they carry information). Chrome colours route through the design
+  // language tokens declared in _sass/_theme.scss so dark-mode and any
+  // future palette retune happens at the foundation layer.
   var COLORS = {
-    tp: '#22c55e',  // green   — true positive
-    fn: '#f97316',  // orange  — false negative
-    fp: '#ef4444',  // red     — false positive
-    tn: '#3b82f6',  // blue    — true negative
-    card: '#ffffff',
-    cardBorder: 'rgba(106, 159, 181, 0.22)',
-    hairline: 'rgba(106, 159, 181, 0.12)',
-    text: '#333',
-    muted: '#777',
-    accent: '#6a9fb5'
+    tp: '#22c55e',  // green   - true positive
+    fn: '#f97316',  // orange  - false negative
+    fp: '#ef4444',  // red     - false positive
+    tn: '#3b82f6',  // blue    - true negative
+    card:       'var(--paper-raised)',
+    cardBorder: 'var(--line)',
+    hairline:   'var(--line)',
+    text:       'var(--ink-primary)',
+    muted:      'var(--ink-muted)',
+    accent:     'var(--coral)'
   };
 
   var LABELS = {
@@ -38,20 +39,23 @@
     if (stylesInjected) return;
     stylesInjected = true;
     var css = [
-      '.sensspec { max-width: 960px; margin: 0 auto; padding: 8px 0 24px; color: ' + COLORS.text + '; }',
-      '.sensspec .sensspec-intro { text-align: center; color: ' + COLORS.muted + '; font-size: 0.92rem; max-width: 520px; margin: 0 auto 22px; line-height: 1.5; }',
+      /* Widget root -- inherits font-text from the design language. */
+      '.sensspec { max-width: 960px; margin: 0 auto; padding: 8px 0 24px; color: var(--ink-primary); font-family: var(--font-text); }',
+      /* post.body baseline for the intro paragraph. */
+      '.sensspec .sensspec-intro { text-align: center; color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); max-width: 60ch; margin: 0 auto 22px; line-height: var(--lh-normal); }',
       '.sensspec .sensspec-legend { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }',
-      '.sensspec .sensspec-legend-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; color: ' + COLORS.muted + '; transition: opacity 0.25s ease; }',
+      '.sensspec .sensspec-legend-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); transition: opacity 0.25s ease; }',
       '.sensspec .sensspec-legend-swatch { width: 12px; height: 12px; }',
       '.sensspec .sensspec-legend-swatch.square { border-radius: 2px; }',
       '.sensspec .sensspec-legend-swatch.circle { border-radius: 50%; }',
-      '.sensspec .sensspec-legend-shapes { width: 100%; text-align: center; font-size: 0.75rem; color: ' + COLORS.muted + '; }',
+      '.sensspec .sensspec-legend-shapes { width: 100%; text-align: center; font-family: var(--font-text); font-size: var(--size-xs); color: var(--ink-faint); letter-spacing: var(--track-eyebrow); text-transform: uppercase; }',
       /* 2x2 layout. align-items: stretch lets each row pull both cells
-         to the taller side's height so the left-hand and right-hand cards
+         to the taller side\'s height so the left-hand and right-hand cards
          line up. */
       '.sensspec .sensspec-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(0, auto); gap: 18px 22px; align-items: stretch; }',
       '@media (max-width: 720px) { .sensspec .sensspec-grid { grid-template-columns: 1fr; } }',
-      '.sensspec .sensspec-card { background: ' + COLORS.card + '; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; flex-direction: column; }',
+      /* viz.frame: paper-raised, line border, radius 10. */
+      '.sensspec .sensspec-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; }',
       /* Sliders card: spread vertically so extra height stretches the
          gaps between sliders rather than leaving an empty block below. */
       '.sensspec .sensspec-card.sliders { justify-content: space-around; }',
@@ -61,38 +65,39 @@
       /* Confusion-matrix card: centre vertically too, same reason. */
       '.sensspec .sensspec-card.matrix { justify-content: center; }',
 
-      /* Slider */
+      /* Slider -- viz.row-title for the label, mono for the value. */
       '.sensspec-slider { margin-bottom: 18px; }',
       '.sensspec-slider:last-child { margin-bottom: 0; }',
       '.sensspec-slider-row { display: flex; justify-content: space-between; margin-bottom: 6px; }',
-      '.sensspec-slider-label { font-size: 0.82rem; font-weight: 600; color: ' + COLORS.text + '; }',
-      '.sensspec-slider-value { font-size: 0.9rem; font-weight: 700; font-variant-numeric: tabular-nums; }',
+      '.sensspec-slider-label { font-family: var(--font-display); font-size: var(--size-md); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
+      '.sensspec-slider-value { font-family: var(--font-mono); font-size: var(--size-md); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
       '.sensspec-slider input[type=range] { width: 100%; height: 5px; border-radius: 3px; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; }',
-      '.sensspec-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid ' + COLORS.accent + '; box-shadow: 0 1px 3px rgba(106,159,181,0.3); cursor: pointer; }',
-      '.sensspec-slider input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid ' + COLORS.accent + '; cursor: pointer; }',
+      /* Thumb border picks up the per-slider track colour via --thumb-color (set in setSliderFill). */
+      '.sensspec-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--paper-raised); border: 2px solid var(--thumb-color, var(--coral)); cursor: pointer; }',
+      '.sensspec-slider input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--paper-raised); border: 2px solid var(--thumb-color, var(--coral)); cursor: pointer; }',
 
-      /* Confusion matrix */
+      /* Confusion matrix -- viz.section-label for headers / row labels. */
       '.sensspec-matrix-header { display: grid; grid-template-columns: 100px 1fr 1fr; gap: 4px; margin-bottom: 4px; }',
-      '.sensspec-matrix-header > div { text-align: center; color: ' + COLORS.muted + '; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.09em; padding: 6px 0; }',
+      '.sensspec-matrix-header > div { text-align: center; color: var(--ink-faint); font-family: var(--font-mono); font-size: var(--size-xs); text-transform: uppercase; letter-spacing: var(--track-eyebrow); padding: 6px 0; }',
       '.sensspec-matrix-row { display: grid; grid-template-columns: 100px 1fr 1fr; gap: 4px; margin-bottom: 4px; }',
-      '.sensspec-matrix-rowlabel { display: flex; align-items: center; justify-content: center; color: ' + COLORS.muted + '; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.09em; text-align: center; }',
-      '.sensspec-matrix-cell { background: #fff; border: 2px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }',
-      '.sensspec-matrix-cell-count { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }',
-      '.sensspec-matrix-cell-label { color: ' + COLORS.muted + '; font-size: 0.72rem; margin-top: 2px; }',
+      '.sensspec-matrix-rowlabel { display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-family: var(--font-mono); font-size: var(--size-xs); text-transform: uppercase; letter-spacing: var(--track-eyebrow); text-align: center; }',
+      /* Higher-contrast border (--ink-faint) so the cells don\'t fade into the card on cooler graphite. */
+      '.sensspec-matrix-cell { background: var(--paper-raised); border: 2px solid var(--ink-faint); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }',
+      '.sensspec-matrix-cell-count { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
+      '.sensspec-matrix-cell-label { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-xs); margin-top: 2px; }',
 
-      /* Metrics — uniform heights within a row (and across rows) so the
-         four cards form a clean 2x2 regardless of label length. */
+      /* Metrics -- viz.row recipe per cell, code.text for formulas. */
       '.sensspec-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; grid-auto-rows: 1fr; align-items: stretch; }',
-      '.sensspec-metric { background: ' + COLORS.card + '; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 8px; padding: 12px 14px; transition: background 0.25s ease, border-color 0.25s ease; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }',
+      '.sensspec-metric { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; transition: background 0.25s ease, border-color 0.25s ease; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }',
       '.sensspec-metric-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }',
-      '.sensspec-metric-label { font-size: 0.82rem; font-weight: 600; color: ' + COLORS.text + '; }',
-      '.sensspec-metric-value { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }',
-      '.sensspec-metric-bar { height: 4px; border-radius: 2px; background: ' + COLORS.hairline + '; overflow: hidden; margin-bottom: 5px; }',
+      '.sensspec-metric-label { font-family: var(--font-display); font-size: var(--size-md); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
+      '.sensspec-metric-value { font-family: var(--font-mono); font-size: var(--size-lg); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
+      '.sensspec-metric-bar { height: 4px; border-radius: 2px; background: var(--paper-inset); overflow: hidden; margin-bottom: 5px; }',
       '.sensspec-metric-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }',
-      '.sensspec-metric-formula { color: ' + COLORS.muted + '; font-size: 0.72rem; font-family: ui-monospace, "SF Mono", Menlo, monospace; }',
+      '.sensspec-metric-formula { color: var(--sx-text); font-family: var(--font-mono); font-size: var(--size-xs); }',
 
-      /* Explanation — spans the full container width beneath the two-column grid */
-      '.sensspec-notes { margin-top: 18px; border: 1px solid ' + COLORS.cardBorder + '; border-radius: 10px; padding: 16px 20px; font-size: 0.88rem; line-height: 1.65; color: ' + COLORS.muted + '; background: ' + COLORS.card + '; }',
+      /* Explanation -- post.body inside a viz.frame. */
+      '.sensspec-notes { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); color: var(--ink-secondary); background: var(--paper-raised); }',
       '.sensspec-notes p { margin: 0 0 8px; }',
       '.sensspec-notes p:last-child { margin-bottom: 0; }',
 
@@ -155,12 +160,7 @@
       hovered: null
     };
 
-    // --------------------------- intro & legend ------------------------
-    root.appendChild(el('p', { class: 'sensspec-intro' },
-      'Drag the sliders to see how a diagnostic test performs on a population of ' + TOTAL +
-      ' people. Hover over the confusion matrix or the legend to highlight groups.'
-    ));
-
+    // --------------------------- legend --------------------------------
     var legend = el('div', { class: 'sensspec-legend' });
     ['tp', 'fn', 'fp', 'tn'].forEach(function(key) {
       var isPositive = key === 'tp' || key === 'fp';
@@ -181,7 +181,7 @@
     root.appendChild(legend);
 
     // ---------------------------- main grid ----------------------------
-    // Flat 2x2 CSS grid so each row can stretch independently — keeping
+    // Flat 2x2 CSS grid so each row can stretch independently - keeping
     // the sliders card and the matrix card at matching heights, and
     // likewise the population grid and the metrics cluster.
     var grid = el('div', { class: 'sensspec-grid' });
@@ -252,7 +252,7 @@
 
     // ------ metrics ------
     function buildMetric(label, formula, color) {
-      var valueEl = el('span', { class: 'sensspec-metric-value', style: 'color:' + color }, '—');
+      var valueEl = el('span', { class: 'sensspec-metric-value', style: 'color:' + color }, '-');
       var barFill = el('div', { class: 'sensspec-metric-bar-fill', style: 'background:' + color + '; width: 0%' });
       var metric = el('div', { class: 'sensspec-metric' }, [
         el('div', { class: 'sensspec-metric-row' }, [
@@ -285,13 +285,13 @@
     // ------ explanation (spans full width below the two-column grid) ------
     root.appendChild(el('div', { class: 'sensspec-notes' }, [
       buildNote(COLORS.tp, 'Sensitivity',
-        ' — Of all truly positive cases, what fraction does the classifier correctly flag?'),
+        ' - Of all truly positive cases, what fraction does the classifier correctly flag?'),
       buildNote(COLORS.tn, 'Specificity',
-        ' — Of all truly negative cases, what fraction does the classifier correctly leave alone?'),
+        ' - Of all truly negative cases, what fraction does the classifier correctly leave alone?'),
       buildNote('#d4a017', 'PPV (Positive Predictive Value)',
-        ' — When the classifier flags a case, what is the chance it is truly positive?'),
+        ' - When the classifier flags a case, what is the chance it is truly positive?'),
       buildNote('#0899a9', 'NPV (Negative Predictive Value)',
-        ' — When the classifier leaves a case alone, what is the chance it is truly negative?')
+        ' - When the classifier leaves a case alone, what is the chance it is truly negative?')
     ]));
 
     function buildNote(color, name, rest) {
@@ -306,6 +306,10 @@
       var pct = ((s.input.value - s.min) / (s.max - s.min)) * 100;
       s.input.style.background =
         'linear-gradient(to right, ' + s.color + ' ' + pct + '%, ' + COLORS.hairline + ' ' + pct + '%)';
+      // Hand the per-slider track colour to the ::thumb pseudo-element
+      // via a CSS custom property -- pseudo-elements can't be styled
+      // inline, but they can read variables from their host.
+      s.input.style.setProperty('--thumb-color', s.color);
       s.value.textContent = Math.round(parseFloat(s.input.value) * 100) + '%';
     }
 
@@ -355,8 +359,11 @@
         var isHovered = state.hovered === key;
         matrixCells[key].cell.style.background =
           isHovered ? COLORS[key] + '22' : COLORS.card;
+        // Default border is the higher-contrast --ink-faint so cells
+        // separate cleanly from the paper-raised card on dark mode;
+        // hover swap to the categorical hue keeps the highlight legible.
         matrixCells[key].cell.style.borderColor =
-          isHovered ? COLORS[key] : COLORS.cardBorder;
+          isHovered ? COLORS[key] : 'var(--ink-faint)';
       });
 
       var sens = pop.sick    > 0 ? pop.tp / pop.sick    : NaN;
@@ -380,7 +387,7 @@
     }
 
     function setMetric(m, v, highlight) {
-      m.value.textContent = isNaN(v) ? '—' : (v * 100).toFixed(1) + '%';
+      m.value.textContent = isNaN(v) ? '-' : (v * 100).toFixed(1) + '%';
       m.bar.style.width   = (isNaN(v) ? 0 : v * 100) + '%';
       m.el.style.background  = highlight ? m.color + '14' : COLORS.card;
       m.el.style.borderColor = highlight ? m.color + '66' : COLORS.cardBorder;

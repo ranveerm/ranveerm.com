@@ -411,19 +411,50 @@ a {
     background-color: var(--color-bg);
 }
 
+// footer.* -- footer chrome rendered using design tokens. Layout (the
+// existing single-line column structure) is preserved.
 .site-footer {
-    border-top-color: var(--color-hairline);
-    background-color: var(--color-bg);
-    color: var(--color-muted);
+    border-top-color: var(--line);
+    background-color: var(--paper);
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-md);
+    line-height: var(--lh-normal);
+
+    a, a:visited {
+        color: var(--ink-secondary);
+        font-family: var(--font-text);
+        font-size: var(--size-md);
+        font-weight: 400;
+        text-decoration: none;
+        border-bottom: 1px solid var(--line);
+    }
+    a:hover {
+        color: var(--coral-strong);
+        border-bottom-color: var(--coral);
+    }
+
+    // The footer-heading / footer-col-headers act as footer.label.
+    .footer-heading {
+        color: var(--ink-faint);
+        font-family: var(--font-text);
+        font-size: var(--size-xs);
+        font-weight: 500;
+        letter-spacing: var(--track-eyebrow);
+        text-transform: uppercase;
+    }
 }
 
-// Nav items should sit in ink, not the default blue link colour.
+// nav.link -- ink-coloured, sans, mid-weight.
 .site-nav .page-link,
 .site-nav .page-link:visited {
-    color: var(--color-ink);
+    color: var(--ink-primary);
+    font-family: var(--font-text);
+    font-size: var(--size-md);
+    font-weight: 400;
 }
 .site-nav .page-link:hover {
-    color: var(--color-accent-ink);
+    color: var(--coral-strong);
     text-decoration: none;
 }
 
@@ -453,16 +484,125 @@ a {
     color: var(--color-muted);
 }
 
-// --- Post-page meta row -------------------------------------------------
-// Individual post pages render the date, a literal `|` pipe, and the tag
-// pills inline inside .post-meta. Widen the whitespace around the pipe
-// but pack consecutive tag pills closer together so they read as a
-// cluster, not a comma-separated list.
+// =====================================================================
+// DESIGN ROLE BINDINGS -- post.* on post + page chrome.
+//
+// Each chrome selector below maps to one role from the role directory.
+// Layout-only properties (grids, margins, hover behaviour) stay; the
+// typographic and colour properties pull from the design tokens.
+// =====================================================================
+
+// post.title -- H1 of a post / page title.
+.post-title {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-h1l);
+    font-weight: 400;
+    line-height: var(--lh-tight);
+    letter-spacing: var(--track-tight);
+    margin-top: 8px;
+    margin-bottom: 12px;
+
+    @include media-query($on-laptop) {
+        font-size: var(--size-h1);
+    }
+}
+
+// post.date + post.read-time live inside .post-meta.
 .post-meta {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 400;
+    line-height: var(--lh-normal);
+
     time { margin-right: 8px; }
     .post-tag { margin-left: 0; margin-right: 0; }
     .post-tag:first-of-type { margin-left: 8px; }
     .post-tag + .post-tag { margin-left: 2px; }
+    .post-read-time {
+        color: var(--ink-muted);
+        font-family: var(--font-text);
+        font-size: var(--size-smd);
+        margin-left: 6px;
+        margin-right: 4px;
+    }
+}
+
+// post.deck -- italic standfirst directly under the H1. Optional via
+// `deck:` front-matter. Width tracks the surrounding wrapper.
+.post-deck {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: var(--lh-normal);
+    font-style: italic;
+    margin: 18px 0 0;
+}
+
+// post.lede -- italic first paragraph emphasis. Optional via `lede:`
+// front-matter.
+.post-lede {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: var(--lh-normal);
+    font-style: italic;
+    margin: 28px 0 24px;
+}
+
+// post.pullquote -- left-rule italic block. Authors opt-in by adding
+// `{:.pullquote}` after a markdown blockquote.
+.post-content blockquote.pullquote {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: var(--lh-normal);
+    font-style: italic;
+    border-left: 3px solid var(--coral);
+    padding-left: 18px;
+    margin: 28px 0;
+}
+
+// post.body -- baseline prose typography. Scoped to direct paragraph
+// children so widget bodies (which set their own type) are untouched.
+// Paragraph width tracks the surrounding wrapper rather than a fixed
+// 60ch ceiling -- this keeps body text aligned with the post-page hero
+// image and the .wrapper column.
+.post-content {
+    color: var(--ink-secondary);
+
+    > p,
+    > ul,
+    > ol {
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 400;
+        line-height: var(--lh-loose);
+    }
+}
+
+// page-heading / post-list-heading -- the home page hero ("Escape
+// Horizon") + any list heading. Treat as post.title-feed.
+.page-heading,
+.post-list-heading {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-h2b);
+    font-weight: 500;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--track-snug);
+    margin-bottom: 0;
+}
+
+// Hug the home tagline ("One more time with feeling") to the hero
+// title above. Beats the default 10px+10px h2->h5 stacking gap.
+.post-list-heading + .text-muted,
+.page-heading + .text-muted {
+    margin-top: 2px;
 }
 
 // Post-scroll divider -- inherit the hairline token.
@@ -566,34 +706,38 @@ blockquote {
         }
     }
 
+    // post.date in the feed.
     .post-stream-date {
-        font-size: 0.82rem;
-        color: var(--color-muted);
-        letter-spacing: 0.02em;
+        color: var(--ink-muted);
+        font-family: var(--font-text);
+        font-size: var(--size-smd);
+        font-weight: 400;
         align-self: start;
-        // Align the date's baseline with the title's first-line
-        // baseline. Title is 1.55rem at line-height 1.25 (~20px
-        // baseline from top); date is 0.82rem at default line-height
-        // (~10px baseline from top). Padding-top closes that gap.
+        // Align the date's baseline with the title's first-line.
+        // Title is var(--size-h2b)/var(--lh-snug); the padding closes
+        // the visual gap so the two columns share a baseline.
         padding-top: 10px;
     }
 
+    // post.title-feed.
     .post-stream-title {
-        margin: 0 0 10px;
-        font-size: 1.55rem;
-        line-height: 1.25;
-        letter-spacing: -0.01em;
+        color: var(--ink-primary);
+        font-family: var(--font-display);
+        font-size: var(--size-h2b);
         font-weight: 500;
+        line-height: var(--lh-snug);
+        letter-spacing: var(--track-snug);
+        margin: 0 0 10px;
 
         a,
         a:visited {
-            color: var(--color-ink);
+            color: var(--ink-primary);
             text-decoration: none;
         }
         a:hover {
-            color: var(--color-accent-ink);
+            color: var(--coral-strong);
             text-decoration: none;
-            border-bottom: 1px solid var(--color-accent);
+            border-bottom: 1px solid var(--coral);
         }
     }
 
@@ -601,38 +745,36 @@ blockquote {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        // Sits in the top row of the body so its baseline lines up with
-        // the date on the left. Tight bottom margin before the title.
         margin: 0 0 10px;
     }
 
+    // post.body (compact variant) -- width tracks the wrapper. Tight
+    // bottom margin so "Continue reading" sits close to the excerpt.
     .post-stream-excerpt {
-        color: var(--color-ink-2);
-        font-size: 0.98rem;
-        line-height: 1.6;
-        margin: 0 0 10px;
-        max-width: 640px;
+        color: var(--ink-secondary);
+        font-family: var(--font-display);
+        font-size: var(--size-lg);
+        font-weight: 400;
+        line-height: var(--lh-body);
+        margin: 0 0 4px;
 
-        // Jekyll wraps the excerpt text in a <p>, which minima gives a
-        // 15px bottom margin. On non-YIR posts this compounds with the
-        // excerpt block's own bottom margin and leaves a visible gap
-        // before "Continue reading". Zero it out so spacing is governed
-        // by .post-stream-excerpt's margin alone.
         > p:last-child { margin-bottom: 0; }
     }
 
+    // post.continue.
     .post-stream-more {
         display: inline-block;
-        color: var(--color-accent);
-        font-size: 0.82rem;
-        letter-spacing: 0.01em;
+        color: var(--coral);
+        font-family: var(--font-text);
+        font-size: var(--size-smd);
+        font-weight: 400;
         text-decoration: none;
-        border-bottom: 1px solid var(--color-accent);
+        border-bottom: 1px solid var(--coral);
         padding-bottom: 1px;
 
         &:hover {
-            color: var(--color-accent-ink);
-            border-bottom-color: var(--color-accent-ink);
+            color: var(--coral-strong);
+            border-bottom-color: var(--coral-strong);
         }
     }
 }
@@ -712,49 +854,10 @@ blockquote {
 // dark-mode is handled by the [data-theme="dark"] foundation override
 // at the top of this file. No widget-specific dark overrides required.
 
-// --- Sensitivity & Specificity widget: dark mode ------------------------
-// The widget's CSS is injected at runtime with hard-coded #fff /
-// rgba(106,159,181, ...) backgrounds. We re-tint each card surface,
-// border, and text colour to the dark palette. The four data colours
-// (tp/fn/fp/tn) already work against dark backgrounds.
-[data-theme="dark"] .sensspec {
-    color: var(--color-ink);
-
-    .sensspec-intro,
-    .sensspec-legend-item,
-    .sensspec-legend-shapes,
-    .sensspec-matrix-header > div,
-    .sensspec-matrix-rowlabel,
-    .sensspec-matrix-cell-label,
-    .sensspec-metric-formula,
-    .sensspec-notes { color: var(--color-muted); }
-
-    .sensspec-slider-label,
-    .sensspec-metric-label { color: var(--color-ink); }
-
-    .sensspec-card,
-    .sensspec-notes { background: var(--color-surface); border-color: var(--color-hairline); }
-
-    // The widget inlines `background` + `border-color` on matrix cells
-    // and metric cards per element (see sensitivity-specificity.js), so
-    // !important is required to beat the inline style. Keeping this
-    // localised -- most other rules win on specificity alone.
-    .sensspec-metric {
-        background: var(--color-surface) !important;
-        border-color: var(--color-hairline) !important;
-    }
-    .sensspec-matrix-cell {
-        background: var(--color-surface-2) !important;
-        border-color: var(--color-hairline) !important;
-    }
-    .sensspec-matrix-cell:hover { border-color: var(--color-accent) !important; }
-
-    .sensspec-metric-bar { background: var(--color-hairline); }
-
-    // Slider thumb: fill with the dark surface so the coloured ring stays
-    // legible on the light-ring-on-dark-surface pattern.
-    .sensspec-slider input[type=range]::-webkit-slider-thumb,
-    .sensspec-slider input[type=range]::-moz-range-thumb {
-        background: var(--color-surface);
-    }
-}
+// Sensitivity & Specificity widget: theme-aware via design-language tokens.
+// The widget's runtime CSS now consumes foundation tokens directly
+// (var(--paper-raised), var(--ink-muted), etc.); dark-mode flips happen
+// at the [data-theme="dark"] foundation override. The widget still
+// inlines per-element backgrounds on matrix cells / metric cards via
+// the categorical hue palette -- those remain hard-coded since they
+// carry information (TP/FN/FP/TN, PPV/NPV).

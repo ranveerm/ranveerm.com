@@ -28,7 +28,7 @@ layout: default
     flex: 0 0 18px;
     width: 18px;
     text-align: center;
-    color: var(--color-muted);
+    color: var(--ink-muted);
     font-size: 0.95rem;
   }
   .yir-overview-thumbs {
@@ -72,33 +72,25 @@ layout: default
     transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
   }
   .post-tag.selected {
-    background: var(--color-accent);
-    color: #fff;
-    border-color: var(--color-accent);
+    background: var(--coral);
+    color: var(--paper-raised);
+    border-color: var(--coral);
   }
   .post-tag.selected:before {
-    background: #fff;
+    background: var(--paper-raised);
     opacity: 1;
   }
-  /*
-   * Hovering a selected pill keeps the coral palette -- we just dim
-   * the whole pill slightly so the state change is legible without
-   * swapping to the base .post-tag:hover surface colour. The leading
-   * dot morphs into an "×" using a stacked linear-gradient so its
-   * bounding box stays identical to the dot's (6x6), preventing the
-   * pill from resizing and shifting layout on hover.
-   */
   .post-tag.selected:hover {
-    background: var(--color-accent);
-    color: #fff;
-    border-color: var(--color-accent);
+    background: var(--coral);
+    color: var(--paper-raised);
+    border-color: var(--coral);
     opacity: 0.82;
   }
   .post-tag.selected:hover:before {
     content: "";
     background:
-      linear-gradient(45deg,  transparent 42%, #fff 42%, #fff 58%, transparent 58%),
-      linear-gradient(-45deg, transparent 42%, #fff 42%, #fff 58%, transparent 58%);
+      linear-gradient(45deg,  transparent 42%, var(--paper-raised) 42%, var(--paper-raised) 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, var(--paper-raised) 42%, var(--paper-raised) 58%, transparent 58%);
     background-size: 100% 100%;
     background-color: transparent;
     width: 6px;
@@ -122,25 +114,27 @@ layout: default
   }
   .pagination button {
     padding: 0.25rem 0.75rem;
-    border: 1px solid var(--color-hairline);
+    border: 1px solid var(--line);
     background: transparent;
     border-radius: 999px;
-    color: var(--color-muted);
+    color: var(--ink-muted);
     cursor: pointer;
-    font-size: 0.85rem;
-    font-family: inherit;
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
   }
   .pagination button.active {
-    background: var(--color-accent);
-    color: #fff;
-    border-color: var(--color-accent);
+    background: var(--coral);
+    color: var(--paper-raised);
+    border-color: var(--coral);
   }
   .pagination button:hover:not(.active) {
-    color: var(--color-ink);
-    border-color: var(--color-ink);
+    color: var(--ink-primary);
+    border-color: var(--ink-primary);
   }
   .no-results {
-    color: var(--color-muted);
+    color: var(--ink-muted);
+    font-family: var(--font-display);
+    font-size: var(--size-md);
     font-style: italic;
     margin-top: 1rem;
   }
