@@ -406,7 +406,7 @@
          shadow on the left edge -- matches the design language\'s
          `viz.* + code.* in context` exemplar. */
       '.claudeenv .ce-band.active { background: var(--paper-inset); border-color: var(--ink-muted); box-shadow: inset 3px 0 0 var(--coral); }',
-      '.claudeenv .ce-band:hover:not(.dimmed) { background: var(--paper-inset); border-color: var(--ink-faint); }',
+      '.claudeenv .ce-band:hover:not(.dimmed), .claudeenv .ce-band.ce-band-soft-hover:not(.dimmed) { background: var(--paper-inset); border-color: var(--ink-faint); }',
       '.claudeenv .ce-band-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 3px; }',
       /* viz.row-title: ink-primary, display, lg, weight 500, snug. */
       '.claudeenv .ce-band-title { display: block; font-family: var(--font-display); font-size: var(--size-lg); font-weight: 500; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); }',
@@ -765,7 +765,7 @@
       entryWrap.innerHTML = '';
       var a = activeLayer();
       var layer = LAYERS.entry;
-      var band = el('button', { class: 'ce-band' + (a === 'entry' ? ' active' : a && a !== 'entry' ? ' dimmed' : ''), type: 'button' });
+      var band = el('button', { class: 'ce-band' + (a === 'entry' ? ' active' : a && a !== 'entry' ? ' dimmed' : ''), type: 'button', 'data-layer': 'entry' });
       hook(band, function() { selectLayer('entry'); });
       band.appendChild(el('span', { class: 'ce-band-title' }, layer.label));
       var cmd = el('div', { class: 'ce-entry-cmd' });
@@ -783,7 +783,7 @@
       var a = activeLayer();
       LAYER_ORDER.forEach(function(id) {
         var layer = LAYERS[id];
-        var band = el('button', { class: 'ce-band' + (a === id ? ' active' : a && a !== id ? ' dimmed' : ''), type: 'button' });
+        var band = el('button', { class: 'ce-band' + (a === id ? ' active' : a && a !== id ? ' dimmed' : ''), type: 'button', 'data-layer': id });
         hook(band, function() { selectLayer(id); });
         band.appendChild(el('span', { class: 'ce-band-title' }, layer.label));
         band.appendChild(el('span', { class: 'ce-band-sublabel' }, layer.sublabel));
@@ -1190,5 +1190,17 @@
     }
 
     rerender();
+
+    return {
+      selectLayer: selectLayer,
+      highlightBand: function(layerId) {
+        root.querySelectorAll('.ce-band').forEach(function(b) { b.classList.remove('ce-band-soft-hover'); });
+        var target = root.querySelector('.ce-band[data-layer="' + layerId + '"]');
+        if (target) target.classList.add('ce-band-soft-hover');
+      },
+      clearBandHighlight: function() {
+        root.querySelectorAll('.ce-band').forEach(function(b) { b.classList.remove('ce-band-soft-hover'); });
+      }
+    };
   };
 })();
