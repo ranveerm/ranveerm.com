@@ -10,3 +10,4 @@ vendor
 testing
 DayOne\ exports/
 _data/**/photos/
+.claude/settings.local.json

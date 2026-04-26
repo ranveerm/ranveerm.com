@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(curl -s:*)",
+      "Bash(grep:*)",
+      "Bash(diff:*)",
+      "Bash(find:*)",
+      "Bash(gunzip -t:*)",
+      "Bash(tar -tzf:*)",
+      "Bash(tar -xzf:*)"
+    ]
+  }
+}
