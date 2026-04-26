@@ -1,61 +1,388 @@
-// Design system -- light / dark tokens and site-wide overrides.
+// =====================================================================
+// DESIGN LANGUAGE -- Foundation tokens + semantic roles.
 //
-// Tokens derived from the `Escape Horizon.html` design bundle: warm paper
-// (Anthropic-leaning) light mode, warm graphite (Apple-leaning) dark mode,
-// coral accent reserved for inline links.
+// Two layers, per `update-website/project/Design Language.html`:
 //
-// All palette usage goes through CSS custom properties so the runtime
-// theme toggle is a single `data-theme` attribute swap on <html>.
+//   FOUNDATION  -- colour primitives, font stacks, type scale.
+//                  Two colour maps (light + dark), one type scale.
+//   SEMANTIC    -- addressable role classes (.role-system-primary,
+//                  .role-post-title, .role-viz-callout, etc.) that
+//                  resolve to foundation tokens.
+//
+// Tune the palette: edit the foundation map. Reassign a role: edit the
+// role rule. Markup names roles, not colours -- so a future palette
+// migration is a one-file change.
+//
+// User typeface decision: every role uses Gill Sans Nova as the
+// typeface. The design's serif/sans split survives only as separate
+// CSS vars (--font-display vs --font-text) so the family can be split
+// later without renaming roles.
+// =====================================================================
 
+// ---- Foundation: light palette + global type scale -------------------
 :root {
-    --color-bg:           #FAF9F7;   // page canvas, warm paper
-    --color-surface:      #FFFFFF;   // elevated blocks
-    --color-surface-2:    #F3F1EC;   // inset / tag fill
-    --color-ink:          #1D1D1F;   // primary text, titles
-    --color-ink-2:        #3A3A3D;   // body copy
-    --color-muted:        #6E6E73;   // dates, captions
-    --color-faint:        #9A9A9F;   // eyebrows, micro-labels
-    --color-hairline:     #E8E6E1;   // dividers, 1px borders
-    --color-accent:       #C96442;   // muted coral, inline links
-    --color-accent-ink:   #A54F32;   // hover state
+    // Surfaces
+    --paper:          #FAF9F7;   // page canvas, warm paper
+    --paper-raised:   #FFFFFF;   // cards, viz frames
+    --paper-inset:    #F3F1EC;   // tags, code chips, quiet fills
+
+    // Ink
+    --ink-primary:    #1D1D1F;   // titles, primary text
+    --ink-secondary:  #3A3A3D;   // body copy
+    --ink-muted:      #6E6E73;   // meta, dates, captions
+    --ink-faint:      #9A9A9F;   // eyebrows, micro-labels
+    --line:           #E8E6E1;   // hairlines, 1px borders
+
+    // Highlight
+    --coral:          #C96442;   // links, key marks
+    --coral-strong:   #A54F32;   // hover/active
+    --coral-wash:     #F6E9DF;   // viz.callout background
+
+    // Syntax (inside code blocks, mono visualisations)
+    --sx-text:        #3A3A3D;
+    --sx-keyword:     #9A4A28;
+    --sx-string:      #C96442;
+    --sx-comment:     #9A9A9F;
+    --sx-path:        #6E6E73;
+
+    // ---- Type stacks (theme-agnostic) --------------------------------
+    // Both display + text resolve to Gill Sans Nova per user direction.
+    // The variable split is preserved so a future palette migration can
+    // re-route either role without touching consumers.
+    --font-display: "gill-sans-nova", "Gill Sans Nova", "Gill Sans", "Gill Sans MT", "Segoe UI", system-ui, sans-serif;
+    --font-text:    "gill-sans-nova", "Gill Sans Nova", "Gill Sans", "Gill Sans MT", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    // ---- Type scale --------------------------------------------------
+    --size-xs:  11px;   // micro-labels, eyebrows
+    --size-sm:  12px;   // chip, footer label
+    --size-smd: 13px;   // post.date, system.muted
+    --size-md:  14px;   // nav.link, viz.callout
+    --size-lg:  16px;   // system.primary, viz.row-title
+    --size-xl:  19px;   // post.deck, nav.brand
+    --size-h2:  24px;
+    --size-h2b: 26px;   // post.title-feed
+    --size-h1:  48px;
+    --size-h1l: 54px;   // post.title
+
+    // ---- Tracking ----------------------------------------------------
+    --track-tight:   -0.022em;
+    --track-snug:    -0.015em;
+    --track-normal:  -0.005em;
+    --track-loose:    0.02em;
+    --track-eyebrow:  0.14em;
+
+    // ---- Line-height -------------------------------------------------
+    --lh-tight:  1.1;
+    --lh-snug:   1.2;
+    --lh-normal: 1.45;
+    --lh-body:   1.62;
+    --lh-loose:  1.7;
+
+    // ---- Backward-compat aliases -------------------------------------
+    // Site chrome and existing widgets reference these names directly.
+    // They delegate to canonical tokens so a single foundation update
+    // propagates everywhere.
+    --color-bg:           var(--paper);
+    --color-surface:      var(--paper-raised);
+    --color-surface-2:    var(--paper-inset);
+    --color-ink:          var(--ink-primary);
+    --color-ink-2:        var(--ink-secondary);
+    --color-muted:        var(--ink-muted);
+    --color-faint:        var(--ink-faint);
+    --color-hairline:     var(--line);
+    --color-accent:       var(--coral);
+    --color-accent-ink:   var(--coral-strong);
     --color-tag-bg:       #EFEDE7;
     --color-tag-ink:      #4A4744;
 }
 
-[data-theme="dark"] {
-    --color-bg:           #26262A;
-    --color-surface:      #2F2F33;
-    --color-surface-2:    #36363A;
-    --color-ink:          #F5F5F7;
-    --color-ink-2:        #D9D9DE;
-    --color-muted:        #9A9AA0;
-    --color-faint:        #6E6E74;
-    --color-hairline:     #3A3A3E;
-    --color-accent:       #E8957A;
-    --color-accent-ink:   #F0A285;
-    --color-tag-bg:       #35353A;
-    --color-tag-ink:      #D1D1D6;
+// ---- Foundation: dark palette ----------------------------------------
+// Cooler graphite per the design's dark map (revised). Code blocks
+// intentionally drop to the deepest paperInset for syntax contrast.
+@mixin _design-dark-palette {
+    --paper:          #26262A;
+    --paper-raised:   #34343A;
+    --paper-inset:    #1A1A1D;
+
+    --ink-primary:    #F5F2ED;
+    --ink-secondary:  #D9D5CE;
+    --ink-muted:      #9C968B;
+    --ink-faint:      #706B62;
+    --line:           #3A3A40;
+
+    --coral:          #E8957A;
+    --coral-strong:   #F0A285;
+    --coral-wash:     #3D2C24;
+
+    --sx-text:        #F0EDE7;
+    --sx-keyword:     #F2A88D;
+    --sx-string:      #F0C9A6;
+    --sx-comment:     #8A8278;
+    --sx-path:        #BDB6AB;
+
+    // Legacy tag pill chrome (kept until tag styling is fully migrated).
+    --color-tag-bg:   #35353A;
+    --color-tag-ink:  #D1D1D6;
 }
 
-// Respect OS preference only when the user hasn't explicitly chosen a theme.
-// The inline script in head.html always sets `data-theme` before first paint,
-// so in practice this media query is a safety net; the explicit attribute
-// wins either way.
+[data-theme="dark"] { @include _design-dark-palette; }
+
+// Respect OS preference only when the user hasn't explicitly chosen a
+// theme. The inline script in head.html sets data-theme before first
+// paint, so this is a safety net; explicit attribute always wins.
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --color-bg:         #26262A;
-        --color-surface:    #2F2F33;
-        --color-surface-2:  #36363A;
-        --color-ink:        #F5F5F7;
-        --color-ink-2:      #D9D9DE;
-        --color-muted:      #9A9AA0;
-        --color-faint:      #6E6E74;
-        --color-hairline:   #3A3A3E;
-        --color-accent:     #E8957A;
-        --color-accent-ink: #F0A285;
-        --color-tag-bg:     #35353A;
-        --color-tag-ink:    #D1D1D6;
+    :root:not([data-theme="light"]) { @include _design-dark-palette; }
+}
+
+// =====================================================================
+// SEMANTIC ROLES -- addressable utility classes.
+//
+// Apply by name in templates: <h1 class="role-post-title">..., or pull
+// the spec into a component via @include role-post-title; (see below).
+// Each role's recipe lives in exactly one place: edit here and every
+// consumer updates.
+// =====================================================================
+
+// system.* -------------------------------------------------------------
+.role-system-primary {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-lg);
+    font-weight: 400;
+    line-height: var(--lh-body);
+    letter-spacing: var(--track-normal);
+}
+.role-system-secondary {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: var(--size-lg);
+    font-weight: 400;
+    line-height: var(--lh-body);
+}
+.role-system-muted {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 400;
+}
+.role-system-faint {
+    color: var(--ink-faint);
+    font-family: var(--font-text);
+    font-size: var(--size-xs);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-system-highlight        { color: var(--coral); }
+.role-system-highlight-strong { color: var(--coral-strong); }
+
+// post.* ---------------------------------------------------------------
+.role-post-eyebrow {
+    color: var(--ink-faint);
+    font-family: var(--font-text);
+    font-size: var(--size-sm);
+    font-weight: 500;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-post-title {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-h1l);
+    font-weight: 400;
+    line-height: var(--lh-tight);
+    letter-spacing: var(--track-tight);
+}
+.role-post-title-feed {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-h2b);
+    font-weight: 500;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--track-snug);
+}
+.role-post-date {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 400;
+}
+.role-post-tag {
+    color: var(--ink-secondary);
+    background: var(--paper-inset);
+    border: 1px solid var(--line);
+    font-family: var(--font-text);
+    font-size: var(--size-xs);
+    font-weight: 400;
+}
+.role-post-deck {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: 20px;          // SIZE.xl + 1
+    font-weight: 400;
+    line-height: var(--lh-normal);
+    font-style: italic;
+}
+.role-post-body {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: var(--lh-loose);
+}
+.role-post-lede {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: var(--lh-normal);
+    font-style: italic;
+}
+.role-post-pullquote {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: var(--lh-normal);
+    font-style: italic;
+    border-left: 3px solid var(--coral);
+    padding-left: 16px;
+}
+.role-post-continue {
+    color: var(--coral);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 400;
+    border-bottom: 1px solid var(--coral);
+    padding-bottom: 1px;
+    text-decoration: none;
+
+    &:hover {
+        color: var(--coral-strong);
+        border-bottom-color: var(--coral-strong);
     }
+}
+
+// nav / footer ---------------------------------------------------------
+.role-nav-brand {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-xl);
+    font-weight: 500;
+    letter-spacing: var(--track-snug);
+}
+.role-nav-link {
+    color: var(--ink-primary);
+    font-family: var(--font-text);
+    font-size: var(--size-md);
+    font-weight: 400;
+}
+.role-nav-link-current {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-md);
+    font-weight: 400;
+}
+.role-footer-label {
+    color: var(--ink-faint);
+    font-family: var(--font-text);
+    font-size: var(--size-xs);
+    font-weight: 500;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-footer-link {
+    color: var(--ink-secondary);
+    font-family: var(--font-text);
+    font-size: var(--size-md);
+    font-weight: 400;
+}
+
+// viz.* -- technical visualisations -----------------------------------
+.role-viz-eyebrow {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-viz-frame {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+.role-viz-frame-active {
+    background: var(--paper-raised);
+    border: 1px solid var(--ink-muted);
+    border-radius: 10px;
+}
+.role-viz-row {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+.role-viz-row-selected {
+    background: var(--paper-inset);
+    border: 1px solid var(--ink-muted);
+    border-radius: 8px;
+    box-shadow: inset 3px 0 0 var(--coral);
+}
+.role-viz-row-title {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-lg);
+    font-weight: 500;
+    letter-spacing: var(--track-snug);
+}
+.role-viz-row-sub {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 400;
+}
+.role-viz-section-label {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-viz-callout {
+    background: var(--coral-wash);
+    color: var(--ink-secondary);
+    border-left: 3px solid var(--coral);
+    border-radius: 0 6px 6px 0;
+    font-family: var(--font-display);
+    font-size: var(--size-md);
+    line-height: var(--lh-normal);
+}
+
+// code.* -- mono surfaces + syntax marks ------------------------------
+.role-code-block {
+    background: var(--paper-inset);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--sx-text);
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+    line-height: 1.55;
+}
+.role-code-text    { color: var(--sx-text);    font-family: var(--font-mono); font-size: var(--size-smd); font-weight: 400; line-height: 1.55; }
+.role-code-keyword { color: var(--sx-keyword); font-family: var(--font-mono); font-size: var(--size-smd); font-weight: 500; }
+.role-code-string  { color: var(--sx-string);  font-family: var(--font-mono); font-size: var(--size-smd); }
+.role-code-comment { color: var(--sx-comment); font-family: var(--font-mono); font-size: var(--size-smd); font-style: italic; }
+.role-code-path    { color: var(--sx-path);    font-family: var(--font-mono); font-size: var(--size-smd); }
+.role-code-chip {
+    color: var(--sx-keyword);
+    background: var(--paper-inset);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    padding: 2px 9px;
 }
 
 // --- Site chrome --------------------------------------------------------
@@ -378,165 +705,12 @@ blockquote {
     }
 }
 
-// --- Claude Code Environment widget: dark mode --------------------------
-// The widget injects its own light-theme CSS at runtime. Rather than
-// touch the script, we lean on the fact that it exposes its palette
-// through local CSS variables on `.claudeenv` (--accent, --border,
-// --hairline, --muted, --card) and override them at the themed scope.
-// A handful of hard-coded colours (panel heads, band copy, code inline,
-// inspector bodies) need explicit re-tinting too.
-[data-theme="dark"] .claudeenv {
-    color: var(--color-ink);
-    --border:   var(--color-hairline);
-    --hairline: #2e2e32;
-    --muted:    var(--color-muted);
-    --card:     var(--color-surface);
-
-    .ce-intro,
-    .ce-band-sublabel,
-    .ce-band-desc,
-    .ce-entry-note,
-    .ce-pyramid-priority,
-    .ce-inspector-empty,
-    .ce-inspector-empty p,
-    .ce-panel-foot { color: var(--color-muted); }
-
-    .ce-section-label,
-    .ce-panel-head-label,
-    .ce-inspector-section-label,
-    .ce-band-count,
-    .ce-tree-root .ce-scope,
-    .ce-tree-static { color: var(--color-faint); }
-
-    .ce-bands-header h3,
-    .ce-inspector h3,
-    .ce-tree-root,
-    .ce-pyramid-label { color: var(--color-ink); }
-
-    .ce-entry-cmd { color: var(--color-ink); }
-    .ce-entry-cmd .dim { color: var(--color-faint); }
-
-    .ce-inspector-desc,
-    .ce-inspector-extended-item-text,
-    .ce-inspector-pill { color: var(--color-ink-2); }
-
-    .ce-panel-foot { background: rgba(255, 255, 255, 0.03); }
-    .ce-inspector-pill { background: rgba(106, 159, 181, 0.12); }
-    .ce-inspector-pill.flow { background: rgba(8, 145, 178, 0.14); }
-
-    .ce-tree-node { color: var(--color-muted); }
-    .ce-tree-node:hover { color: var(--color-ink); background: rgba(255, 255, 255, 0.04); }
-    .ce-tree-node.highlighted { background: rgba(106, 159, 181, 0.14); color: var(--color-ink); }
-    .ce-tree-node.selected { background: rgba(217, 119, 6, 0.22); color: #FBD38D; }
-    .ce-tree-root:hover { background: rgba(255, 255, 255, 0.03); }
-
-    .ce-inspector-example {
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--color-ink-2);
-        border-color: var(--border);
-    }
-
-    // Portability note: subdued slate, not blue.
-    .ce-mcp-callout {
-        background: rgba(148, 163, 184, 0.10);
-        border-color: rgba(148, 163, 184, 0.30);
-    }
-    .ce-mcp-callout p { color: var(--color-ink-2); }
-    .ce-mcp-callout-head .fa,
-    .ce-mcp-callout-head .ce-mcp-label,
-    .ce-mcp-callout .hl { color: #94A3B8; }
-
-    .ce-close-btn,
-    .ce-clear-btn { color: var(--color-muted); border-color: var(--border); }
-    .ce-close-btn:hover,
-    .ce-clear-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
-
-    // Tree controls (select all / select none, totals row, file rows)
-    .ce-mini-btn { color: var(--color-muted); border-color: var(--border); background: transparent; }
-    .ce-mini-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
-    .ce-tree-node.excluded { color: var(--color-faint); text-decoration-color: rgba(255,255,255,0.25); }
-    .ce-tree-node .ce-token-tag { color: var(--color-faint); }
-    .ce-tree-node.included-bold .ce-token-tag { color: var(--color-ink); }
-    // Custom checkbox: identical visual in both states (filled grey).
-    .ce-tree-check { background: var(--color-faint); border-color: var(--color-faint); }
-    .ce-tree-check:checked::after { border-color: var(--color-surface); }
-    // Directory rows: same colour as files, label bold.
-    .ce-tree-node .fa,
-    .ce-tree-node.dir .fa,
-    .ce-tree-root .ce-home,
-    .ce-tree-root .ce-folder { color: var(--color-faint); }
-    // Root rows hover identically to file rows: dim -> ink.
-    .ce-tree-root { color: var(--color-muted); }
-    .ce-tree-root:hover { color: var(--color-ink); background: rgba(255, 255, 255, 0.04); }
-    // Non-interactive folder row: same colour family, no hover lift.
-    .ce-tree-node.non-interactive:hover { background: transparent; color: var(--color-muted); }
-    // Layer-band hover/active visuals. Selection uses neutral grey, not orange.
-    .ce-band:hover:not(.dimmed) { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); }
-    .ce-band.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.20); }
-    // Inspector layer crumb: neutral, not per-layer accent.
-    .ce-inspector-layer-label { color: var(--color-muted); }
-    .ce-inspector-layer-label:hover { color: var(--color-ink); }
-    // Tree node selection -- also neutral grey, no orange tint.
-    .ce-tree-node.selected { background: rgba(255,255,255,0.08); color: var(--color-ink); }
-    // Precedence chain in the inspector
-    .ce-precedence-file { color: var(--color-ink); border-color: var(--border); background: transparent; }
-    .ce-precedence-file:hover { border-color: var(--color-ink); color: var(--color-ink); }
-    .ce-precedence-sep { color: var(--color-faint); }
-    // Section toggle "on" state -- also neutral grey.
-    .ce-section-toggle button.on,
-    .ce-section-toggle button.on.skill-mode { background: rgba(255,255,255,0.08); color: var(--color-ink); }
-    // Token-estimate caveat
-    .ce-impact-caveat { color: var(--color-faint); }
-
-    // Inspector pill variants (aggregation, token impact)
-    .ce-inspector-pill.aggregation { background: rgba(217, 119, 6, 0.14); border-left-color: #D97706; color: var(--color-ink-2); }
-    .ce-inspector-pill.token { background: rgba(180, 83, 9, 0.18); border-left-color: #F6AD7B; color: var(--color-ink-2); }
-
-    // Environment-impact summary
-    .ce-impact-stat { background: rgba(217, 119, 6, 0.08); border-color: var(--border); }
-    .ce-impact-stat.on-demand { background: rgba(8, 145, 178, 0.10); }
-    .ce-impact-stat-label { color: var(--color-faint); }
-    .ce-impact-stat-val { color: #F6AD7B; }
-    .ce-impact-stat.on-demand .ce-impact-stat-val { color: #5EEAD4; }
-    .ce-impact-stat-sub { color: var(--color-muted); }
-    .ce-impact-bar { background: rgba(255, 255, 255, 0.06); }
-    .ce-impact-legend { color: var(--color-ink-2); }
-    .ce-impact-list { color: var(--color-muted); }
-    .ce-impact-hint { background: rgba(217, 119, 6, 0.10); border-left-color: #D97706; color: var(--color-ink-2); }
-    .ce-impact-hint .ce-hint-link { color: #F6AD7B; }
-
-    // CLAUDE.md section editor
-    .ce-section-row { background: rgba(255, 255, 255, 0.03); border-color: var(--border); }
-    .ce-section-row.in-skill { background: rgba(8, 145, 178, 0.12); border-color: rgba(8, 145, 178, 0.40); }
-    .ce-section-label { color: var(--color-ink); }
-    .ce-section-label .ce-section-note { color: var(--color-muted); }
-    .ce-section-cost { color: #F6AD7B; }
-    .ce-section-row.in-skill .ce-section-cost { color: #5EEAD4; }
-    .ce-section-row.fixed .ce-section-cost { color: var(--color-faint); }
-    .ce-section-toggle { border-color: var(--border); }
-    .ce-section-toggle button { color: var(--color-muted); background: transparent; border-right-color: var(--border); }
-    .ce-section-toggle button.on { background: rgba(217, 119, 6, 0.22); color: #FBD38D; }
-    .ce-section-toggle button.on.skill-mode { background: rgba(8, 145, 178, 0.22); color: #5EEAD4; }
-    .ce-section-summary .label { color: var(--color-faint); }
-    .ce-section-summary .val { color: #F6AD7B; }
-    .ce-section-summary .val.on-demand { color: #5EEAD4; }
-
-    // Bold inline emphasis: weight only, inherit text colour.
-    .ce-bold { color: inherit; }
-    // Layer band titles + Layer 0 entry label/icon: same as body text.
-    .ce-band-title,
-    .ce-entry-head .fa,
-    .ce-entry-head .ce-layer-label,
-    .ce-entry-cmd { color: var(--color-ink); }
-    // Highlighted prompt text: website orange.
-    .ce-entry-cmd .mark { color: #F6AD7B; }
-    // Tree-root icons: neutral muted, not purple/orange.
-    .ce-tree-root .ce-home,
-    .ce-tree-root .ce-folder { color: var(--color-faint); }
-    .ce-code { background: rgba(8, 145, 178, 0.22); color: #5EEAD4; }
-
-    .ce-entry-band.active { background: rgba(217, 119, 6, 0.14); border-color: #D97706; }
-}
+// Claude Code Environment widget: theme-aware via design-language tokens.
+//
+// The widget's runtime CSS now consumes foundation tokens directly
+// (var(--paper-raised), var(--ink-muted), var(--coral-wash), etc.), so
+// dark-mode is handled by the [data-theme="dark"] foundation override
+// at the top of this file. No widget-specific dark overrides required.
 
 // --- Sensitivity & Specificity widget: dark mode ------------------------
 // The widget's CSS is injected at runtime with hard-coded #fff /
