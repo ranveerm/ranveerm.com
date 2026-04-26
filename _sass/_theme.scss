@@ -20,9 +20,12 @@
 // =====================================================================
 
 // ---- Foundation: light palette + global type scale -------------------
+// Light surface system has two tiers (revised): page + inset share the
+// same warm paper, with paperRaised as the only lifted surface. Cards
+// pop more distinctly against the slightly darker canvas.
 :root {
     // Surfaces
-    --paper:          #FAF9F7;   // page canvas, warm paper
+    --paper:          #F3F1EC;   // page canvas, warm paper (== inset)
     --paper-raised:   #FFFFFF;   // cards, viz frames
     --paper-inset:    #F3F1EC;   // tags, code chips, quiet fills
 
