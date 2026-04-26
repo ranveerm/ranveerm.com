@@ -428,8 +428,10 @@
       '.claudeenv .ce-panel-head-label { font-family: var(--font-mono); font-size: var(--size-sm); font-weight: 400; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
       '.claudeenv .ce-panel-head .fa { color: var(--ink-faint); font-size: 0.72rem; }',
       '.claudeenv .ce-tree-controls { display: flex; gap: 4px; }',
-      '.claudeenv .ce-mini-btn { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-muted); background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 3px 7px; cursor: pointer; }',
-      '.claudeenv .ce-mini-btn:hover { color: var(--ink-primary); border-color: var(--ink-muted); }',
+      /* Border at --ink-faint (not --line) so the 1px edge stays legible
+         in dark mode, where --line sits very close to --paper. */
+      '.claudeenv .ce-mini-btn { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-muted); background: transparent; border: 1px solid var(--ink-faint); border-radius: 4px; padding: 3px 7px; cursor: pointer; }',
+      '.claudeenv .ce-mini-btn:hover { color: var(--ink-primary); border-color: var(--ink-primary); }',
       '.claudeenv .ce-tree { padding: 8px 6px; }',
       /* code.path: file paths styled in muted mono. Directory labels  */
       /* (root + nested) are emphasised by weight only.                */
