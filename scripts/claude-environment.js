@@ -24,7 +24,7 @@
       label: 'Layer 1: Persistent Memory',
       sublabel: 'Instructions loaded into system prompt',
       color: '#0891b2',
-      description: 'Markdown files merged into the system prompt. Claude sees these as **instructions**, persistent, session-wide guidance for how to behave, what conventions to follow, and what commands exist.',
+      description: 'Markdown files concatenated into the system prompt at session start and carried through every turn that follows, without being re-injected per prompt. Claude reads them as **instructions** whose intent is to steer behaviour, codify conventions, and document the commands available in the project.',
       aggregation: 'All present `CLAUDE.md` files are **concatenated** into the system prompt at session start. Content accumulates rather than overrides, but where guidance directly conflicts the deeper file wins.',
       precedenceFiles: ['claude-local', 'claude-md-project', 'claude-md-global'],
       interactionExample:
