@@ -5,85 +5,103 @@ permalink: /journal-mapper/
 ---
 
 <style>
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-auto-rows: 600px;
-        /* grid-auto-rows: minmax(100px, 600px); */
-        align-items: center;
-        grid-gap: 20px;
-    }
-    .centered-image {
-        max-width:100%; 
-        max-height:100%; 
-        margin: auto;
-        display: block;
-    }
+  /* Page-scoped layout. Typography pulls from the design language
+     role classes (.post-title, .post-deck, .role-post-body, etc.). */
+  .jm-hero { text-align: center; padding: 24px 0 12px; }
+  .jm-hero .post-title { text-align: center; }
 
-    .centered-text {
-        text-align: justify;
-        text-justify: inter-word; 
-    }
+  .jm-icon {
+    width: min(45%, 220px);
+    border-radius: 22%;
+    margin: 8px auto 24px;
+    display: block;
+  }
+
+  .jm-rule {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 32px 0;
+  }
+
+  .jm-lede {
+    text-align: center;
+    max-width: 56ch;
+    margin: 0 auto 40px;
+  }
+
+  .jm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 40px;
+    align-items: center;
+    margin: 32px 0;
+  }
+  .jm-grid img {
+    max-width: 100%;
+    max-height: 480px;
+    margin: 0 auto;
+    display: block;
+  }
+  .jm-grid p { margin: 0; }
+
+  @media (max-width: 600px) {
+    .jm-grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  .jm-section { text-align: center; margin: 48px 0; }
+  .jm-section .page-heading { margin: 0 auto 12px; }
+  .jm-section-body { max-width: 56ch; margin: 0 auto 24px; }
+  .jm-section img { max-width: 100%; display: block; margin: 24px auto 0; }
+
+  .jm-cta {
+    display: block;
+    max-width: 220px;
+    margin: 16px auto 8px;
+  }
+  .jm-cta img { width: 100%; display: block; }
+
+  .jm-privacy { display: block; text-align: center; margin: 32px 0 16px; }
 </style>
 
-<div class="center-justify"><img src="/assets/images/journal-mapper/app-icon.jpg" style="height: 50%; width: 50%; border-radius: 100px; margin: 10px 0px 30px 0px" ></div>
+<header class="jm-hero">
+  <img src="/assets/images/journal-mapper/app-icon.jpg" alt="Journal Mapper app icon" class="jm-icon">
+  <h1 class="post-title">Journal Mapper</h1>
+  <p class="post-deck">Diary on a map</p>
+</header>
 
-<h1 style="text-align:center;">Journal Mapper</h1>
-<h3 style="text-align:center;" class="text-muted">Diary on a map</h3>
+<hr class="jm-rule">
 
-<br/>
-<hr class="post-divider"/> 
-<br/>
+<p class="role-post-body jm-lede">Your spatial journal to store 💾, organise 🗂 and review 📖 information related to points of interest 📍 in the real world 🌏.</p>
 
-<p style="text-align:center;">Your spatial journal to store 💾, organise 🗂 and review 📖 information related to points of interest 📍 in the real world 🌏.</p>
+<div class="jm-grid">
+  <img src="/assets/images/journal-mapper/overview.png" alt="Map overview">
+  <p class="role-post-body">Journal Mapper offers a fresh perspective on a personal journal, with a focus on locations as opposed to dates. Use the map as your canvas to create delightful annotations to store memories, future plans, reference material and everything in between.</p>
 
-<br/>
+  <p class="role-post-body">Create categories to organise locations and selectively display them on the map.</p>
+  <img src="/assets/images/journal-mapper/categories.png" alt="Categories">
 
-<div class="grid">
-    <div><img src="/assets/images/journal-mapper/overview.png" class="centered-image"></div>
-    <div> 
-        <p class="centered-text">Journal Mapper offers a fresh perspective on a personal journal, with a  focus on locations as opposed to dates. Use the map as your canvas to create delightful annotations to store memories, future plans, reference material and everything in between.</p>
-    </div>
-    
-    <div> 
-        <p class="centered-text">Create categories to organise locations and selectively display them on the map.</p>
-    </div>
-    <div><img src="/assets/images/journal-mapper/categories.png" class="centered-image"></div>
+  <img src="/assets/images/journal-mapper/icon.png" alt="Annotation customisation">
+  <p class="role-post-body">Modify the appearance of any annotation and category to create a visual description that matches their identity.</p>
 
-    <div><img src="/assets/images/journal-mapper/icon.png" class="centered-image"></div>
-    <div>
-        <p class="centered-text">Modify the appearance of any annotation and category to create a visual description that matches their identity.</p>
-    </div>
-
-    <div>
-        <p class="centered-text">Add notes and images to each annotation to associate them with a traditional journal.</p>
-    </div>
-    <div><img src="/assets/images/journal-mapper/location.png" class="centered-image"></div>
-
+  <p class="role-post-body">Add notes and images to each annotation to associate them with a traditional journal.</p>
+  <img src="/assets/images/journal-mapper/location.png" alt="Annotation detail">
 </div>
 
-<br/>
+<hr class="jm-rule">
 
-<h1 style="text-align:center;">☁️</h1>
-<p style="text-align:center;">Experience a consistent interface across all your devices, with iCloud sync ensuring up to date on all devices signed in with your Apple ID.</p>
-<img src="/assets/images/journal-mapper/multiple-devices.png" class="centered-image">
+<section class="jm-section">
+  <h2 class="page-heading">iCloud Sync ☁️</h2>
+  <p class="role-post-body jm-section-body">Experience a consistent interface across all your devices, with iCloud sync ensuring you stay up to date on every device signed in with your Apple ID.</p>
+  <img src="/assets/images/journal-mapper/multiple-devices.png" alt="Multiple devices showing the app">
+</section>
 
-<br/>
-<hr class="post-divider"/> 
-<br/>
+<hr class="jm-rule">
 
-<h3 style="text-align:center;">Download now on the App Store</h3>
-<br/>
-<a href="https://apps.apple.com/us/app/journal-mapper/id1533073089">
-    <img src="/assets/images/journal-mapper/app-store-badge.png" style="display: block; margin-left: auto; margin-right: auto; width: 40%;">
-</a>
+<section class="jm-section">
+  <h3 class="page-heading">Available on the App Store</h3>
+  <a href="https://apps.apple.com/us/app/journal-mapper/id1533073089" class="jm-cta" aria-label="Download Journal Mapper on the App Store">
+    <img src="/assets/images/journal-mapper/app-store-badge.png" alt="Download on the App Store">
+  </a>
+</section>
 
-<br/>
-
-<h3 style="text-align:center;">
-    <a href="/journal-mapper/privacy-policy">
-        🖐🏽 Privacy Policy
-    </a>
-</h3>
-
-<br/>
+<p class="role-post-body jm-privacy"><a href="/journal-mapper/privacy-policy">🖐🏽 Privacy Policy</a></p>
