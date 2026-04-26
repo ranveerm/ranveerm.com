@@ -20,12 +20,12 @@
 // =====================================================================
 
 // ---- Foundation: light palette + global type scale -------------------
-// Light surface system has two tiers (revised): page + inset share the
-// same warm paper, with paperRaised as the only lifted surface. Cards
-// pop more distinctly against the slightly darker canvas.
+// Light surface system has three tiers: page (lightest warm cream),
+// paperRaised (white, lifted cards), and paperInset (slightly darker
+// warm paper, for tags, code chips, and quiet fills).
 :root {
     // Surfaces
-    --paper:          #F3F1EC;   // page canvas, warm paper (== inset)
+    --paper:          #FAF9F7;   // page canvas, warm cream
     --paper-raised:   #FFFFFF;   // cards, viz frames
     --paper-inset:    #F3F1EC;   // tags, code chips, quiet fills
 
@@ -101,28 +101,29 @@
 }
 
 // ---- Foundation: dark palette ----------------------------------------
-// Cooler graphite per the design's dark map (revised). Code blocks
-// intentionally drop to the deepest paperInset for syntax contrast.
+// Cooler graphite per the design's dark map (revised). Surface tiers
+// now step UP through the stack: paper, then paperRaised, then
+// paperInset (the brightest, for tags, code chips, and quiet fills).
 @mixin _design-dark-palette {
     --paper:          #26262A;
-    --paper-raised:   #34343A;
-    --paper-inset:    #1A1A1D;
+    --paper-raised:   #2F2F33;
+    --paper-inset:    #36363A;
 
-    --ink-primary:    #F5F2ED;
-    --ink-secondary:  #D9D5CE;
-    --ink-muted:      #9C968B;
-    --ink-faint:      #706B62;
-    --line:           #3A3A40;
+    --ink-primary:    #F5F5F7;
+    --ink-secondary:  #D9D9DE;
+    --ink-muted:      #9A9AA0;
+    --ink-faint:      #6E6E74;
+    --line:           #3A3A3E;
 
     --coral:          #E8957A;
     --coral-strong:   #F0A285;
     --coral-wash:     #3D2C24;
 
-    --sx-text:        #F0EDE7;
-    --sx-keyword:     #F2A88D;
-    --sx-string:      #F0C9A6;
-    --sx-comment:     #8A8278;
-    --sx-path:        #BDB6AB;
+    --sx-text:        #D9D9DE;
+    --sx-keyword:     #E8957A;
+    --sx-string:      #E8B895;
+    --sx-comment:     #6E6E74;
+    --sx-path:        #9A9AA0;
 
     // Legacy tag pill chrome (kept until tag styling is fully migrated).
     --color-tag-bg:   #35353A;
