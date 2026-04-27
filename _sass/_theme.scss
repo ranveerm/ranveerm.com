@@ -447,6 +447,27 @@ a {
         letter-spacing: var(--track-eyebrow);
         text-transform: uppercase;
     }
+
+    // Centre the middle column ("Explore Website") within its track so
+    // the three-column row reads as left / centre / right.
+    .footer-col-3 { text-align: center; }
+
+    // Right-align the social column and put each icon on the trailing
+    // edge (text leads, icon trails). Flex row-reverse handles the
+    // visual flip while leaving the source order untouched.
+    .footer-col-2 {
+        text-align: right;
+
+        .social-media-list li a {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            align-items: center;
+        }
+        .social-media-list .svg-icon {
+            padding-right: 0;
+            padding-left: 5px;
+        }
+    }
 }
 
 // nav.link -- ink-coloured, sans, mid-weight.
