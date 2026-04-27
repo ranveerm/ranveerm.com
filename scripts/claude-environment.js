@@ -761,6 +761,9 @@
 
     // ─────────────────────────── render funcs ──────────────────────────
 
+    var ENTRY_PROMPT = 'convert the image to grayscale';
+    var entryTypewriterDone = false;
+
     function renderEntryBand() {
       entryWrap.innerHTML = '';
       var a = activeLayer();
@@ -769,13 +772,25 @@
       hook(band, function() { selectLayer('entry'); });
       band.appendChild(el('span', { class: 'ce-band-title' }, layer.label));
       var cmd = el('div', { class: 'ce-entry-cmd' });
-      cmd.appendChild(el('span', { class: 'dim' }, '$ '));
-      cmd.appendChild(el('span', { class: 'dim' }, 'claude '));
-      cmd.appendChild(el('span', { class: 'dim' }, '"'));
-      cmd.appendChild(el('span', { class: 'mark' }, 'convert the image to grayscale'));
-      cmd.appendChild(el('span', { class: 'dim' }, '"'));
+      cmd.appendChild(el('span', { class: 'mark' }, 'claude> '));
+      var typed = el('span', { class: 'ce-entry-typed' });
+      cmd.appendChild(typed);
       band.appendChild(cmd);
       entryWrap.appendChild(band);
+
+      if (entryTypewriterDone) {
+        typed.textContent = ENTRY_PROMPT;
+      } else {
+        entryTypewriterDone = true;
+        var i = 0;
+        var t = setInterval(function() {
+          if (i <= ENTRY_PROMPT.length) {
+            typed.textContent = ENTRY_PROMPT.slice(0, i++);
+          } else {
+            clearInterval(t);
+          }
+        }, 35);
+      }
     }
 
     function renderBands() {
