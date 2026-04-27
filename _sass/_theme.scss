@@ -388,6 +388,89 @@
     font-size: var(--size-sm);
     padding: 2px 9px;
 }
+.role-code-prompt {
+    background: var(--paper-inset);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--sx-text);
+    font-family: var(--font-mono);
+    font-size: var(--size-md);
+    line-height: 1.6;
+}
+.role-code-prompt-glyph {
+    color: var(--coral);
+    font-family: var(--font-mono);
+    font-size: var(--size-md);
+    font-weight: 600;
+}
+
+// post.section-* -- horizontal section delineator (rule + index + name)
+.role-post-section-rule  { background: var(--line); height: 1px; }
+.role-post-section-index {
+    color: var(--coral);
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}
+.role-post-section-name {
+    color: var(--ink-faint);
+    font-family: var(--font-text);
+    font-size: var(--size-xs);
+    font-weight: 500;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+
+// toc.* -- table of contents (index + title + dot leader + page) --------
+.role-toc-frame {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+.role-toc-label {
+    color: var(--ink-faint);
+    font-family: var(--font-text);
+    font-size: var(--size-xs);
+    font-weight: 500;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-toc-row {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: var(--size-lg);
+    line-height: 1.4;
+}
+.role-toc-row-flash {
+    color: var(--ink-primary);
+    background: var(--paper-inset);
+    font-family: var(--font-display);
+    font-size: var(--size-lg);
+    line-height: 1.4;
+    border-radius: 6px;
+}
+.role-toc-index {
+    color: var(--coral);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}
+.role-toc-title {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-lg);
+}
+.role-toc-leader { color: var(--line); }
+.role-toc-page {
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-variant-numeric: tabular-nums;
+}
 
 // --- Site chrome --------------------------------------------------------
 
