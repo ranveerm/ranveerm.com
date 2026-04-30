@@ -379,14 +379,31 @@
 .role-code-string  { color: var(--sx-string);  font-family: var(--font-mono); font-size: var(--size-smd); }
 .role-code-comment { color: var(--sx-comment); font-family: var(--font-mono); font-size: var(--size-smd); font-style: italic; }
 .role-code-path    { color: var(--sx-path);    font-family: var(--font-mono); font-size: var(--size-smd); }
-.role-code-chip {
+// code.inline -- inline code inside running prose. Sized in em so it
+// matches whatever prose it's embedded in (0.92em compensates for
+// mono's smaller x-height). No border, ink-primary, gentle wash.
+.role-code-inline,
+code.inline {
+    color: var(--ink-primary);
+    background: var(--paper-inset);
+    border: none;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    padding: 1px 5px;
+}
+
+// code.chip -- standalone labelled token in a diagram or inspector
+// (precedence chains, layer labels, badge-style identifiers).
+.role-code-chip,
+code.chip {
     color: var(--sx-keyword);
     background: var(--paper-inset);
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 5px;
     font-family: var(--font-mono);
     font-size: var(--size-sm);
-    padding: 2px 9px;
+    padding: 4px 10px;
 }
 .role-code-prompt {
     background: var(--paper-inset);
@@ -690,6 +707,10 @@ a {
         font-size: 18px;
         font-weight: 400;
         line-height: var(--lh-loose);
+    }
+
+    a, a:visited {
+        text-decoration: underline;
     }
 }
 
