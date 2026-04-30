@@ -418,7 +418,7 @@
     sec.appendChild(sectionHeader(2, 'The architecture', 'Host, Client and Server'));
 
     var body = div('mcp-body');
-    body.innerHTML = 'MCP defines 3 components: host, client and server. Unlike the client-server model, the <code class="inline">client</code> isn’t the user-facing application. Each client is, more or less, a single open phone line to one server: an in-process object inside the host that holds the JSON-RPC session for that one connection. A host with three servers configured ends up with three of these lines open simultaneously.';
+    body.innerHTML = 'MCP defines 3 components: host, client and server. Unlike the client-server model, the <code class="inline">client</code> isn’t the user-facing application. Each client is, more or less, a single open phone line to one server- an in-process object inside the host that holds the JSON-RPC session for that one connection. A host with three servers configured ends up with three of these lines open simultaneously.';
     sec.appendChild(body);
 
     var panel = div('mcp-panel');
@@ -688,7 +688,7 @@
         controlledByTarget: null,
         example: '/review-pr',
         rpcMethod: 'prompts/list',
-        summary: 'Server-defined templates that the user explicitly invokes (most commonly surfacing as slash commands within the host). The mapping is straightforward: each entry returned by <code class="inline">prompts/list</code> carries a <code class="inline">name</code>, and the host turns that into a slash command. Hosts that already have native slash commands (Claude Code is a good example) typically namespace MCP prompts behind the server name to avoid collisions, e.g. <code class="inline">/mcp__filesystem__find</code> rather than just <code class="inline">/find</code>. Prompts can take arguments, which means a server can offer fairly rich workflows whilst keeping them under the user’s direct control.',
+        summary: 'Server-defined templates that the user explicitly invokes (most commonly surfacing as slash commands within the host). The mapping is straightforward- each entry returned by <code class="inline">prompts/list</code> carries a <code class="inline">name</code>, and the host turns that into a slash command. Hosts that already have native slash commands (Claude Code is a good example) typically namespace MCP prompts behind the server name to avoid collisions, e.g. <code class="inline">/mcp__filesystem__find</code> rather than just <code class="inline">/find</code>. Prompts can take arguments, which means a server can offer fairly rich workflows whilst keeping them under the user’s direct control.',
         codeTitle: 'Server reply',
         code: '{\n  "prompts": [\n    {\n      "name": "review-pr",\n      "description": "Review a pull request for security issues",\n      "arguments": [\n        { "name": "pr_url", "required": true }\n      ]\n    }\n  ]\n}' },
       { id: 'sampling',  name: 'Sampling',  color: 'var(--coral)', colorLit: '#C96442',
@@ -705,7 +705,7 @@
     sec.appendChild(sectionHeader(3, 'The components', 'MCP Primitives'));
 
     var body = div('mcp-body');
-    body.innerHTML = 'The protocol is intentionally small. The host learns which servers exist from a configuration file (<a href="#sec-06">covered below</a>). Connections are eager rather than lazy: when the host starts, it spawns or opens a connection to every server in the config and runs the handshake with each. The handshake involves the host sending an <code class="inline">initialize</code> request that names the protocol version it speaks and the capabilities it can act as a client for. The server replies with the protocol version it has settled on along with the primitives it supports, and the host closes the loop with an <code class="inline">initialized</code> notification. Only then does it begin enumerating and using whatever the server has on offer. Different primitives are controlled by different entities.';
+    body.innerHTML = 'The protocol is intentionally small. The host learns which servers exist from a configuration file (<a href="#sec-06">covered below</a>). How and when those connections are formed is left to the host. Some hosts spawn or open every configured server at startup and keep it alive for the session, which sidesteps the per-invocation startup cost. Others take an ephemeral approach, spawning the server only when one of its tools is required and tearing it down afterwards, which keeps the resource footprint minimal. Either way, every fresh connection is preceded by the same brief <strong>handshake</strong>- the host sends an <code class="inline">initialize</code> request that names the protocol version it speaks and the capabilities it can act as a client for. The server replies with the protocol version it has settled on along with the primitives it supports, and the host closes the loop with an <code class="inline">initialized</code> notification. Only then does it begin enumerating and using whatever the server has on offer. Different primitives are controlled by different entities.';
     sec.appendChild(body);
 
     var panel = div('mcp-panel');
@@ -794,7 +794,7 @@
     sec.appendChild(body1);
 
     var body2 = div('mcp-body');
-    body2.innerHTML = 'Native tool use is, in essence, <code class="inline">application-defined</code>: a function is described in the prompt, the model selects one, and the application’s code executes it. MCP, by contrast, is <code class="inline">environment-defined</code>: tools arrive from external servers configured at the host level, and the host quietly translates them into the tool-call format the model already understands. Whilst the two arrive at the same destination, the path is rather different.';
+    body2.innerHTML = 'Native tool use is, in essence, <strong>application-defined</strong>- a function is described in the prompt, the model selects one, and the application’s code executes it. MCP, by contrast, is <strong>environment-defined</strong>- tools arrive from external servers configured at the host level, and the host quietly translates them into the tool-call format the model already understands. Whilst the two arrive at the same destination, the path is rather different.';
     sec.appendChild(body2);
 
     root.appendChild(sec);
@@ -820,7 +820,7 @@
     sec.appendChild(sectionHeader(5, 'A worked example', '“Convert the typeface on my landing page”'));
 
     var body = div('mcp-body');
-    body.textContent = 'A worked example, perhaps, is the most useful way to internalise how MCP actually behaves at runtime. The walkthrough below traces a single prompt from the user, through the host and down to the MCP servers it ends up exercising, and then back again. The swimlane indicates which actor is responsible for what at each tick (the reader is welcome to step through manually or simply hit play).';
+    body.textContent = 'The walkthrough below traces a single prompt from the user, through the host and down to the MCP servers it ends up exercising, and then back again.';
     sec.appendChild(body);
 
     var panel = div('mcp-panel');
