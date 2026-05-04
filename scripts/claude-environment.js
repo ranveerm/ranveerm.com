@@ -14,37 +14,41 @@
 
   var LAYERS = {
     entry: {
-      label: 'Layer 0: User Input',
+      label: '0. User Input',
       sublabel: "The user's request",
       color: '#d97706',
       description: 'Everything else exists to shape how this is interpreted before reaching the model.',
       nodes: ['prompt']
     },
     memory: {
-      label: 'Layer 1: Persistent Memory',
-      sublabel: 'Instructions loaded into system prompt',
+      label: '1. Instructions',
+      badge: '🧬 🧠',
+      sublabel: 'Loaded at the start of every session',
       color: '#0891b2',
       description: 'Markdown files concatenated into the system prompt at session start and carried through every turn that follows, without being re-injected per prompt. Claude reads them as **instructions** whose intent is to steer behaviour, codify conventions, and document the commands available in the project.',
-      aggregation: 'All present `CLAUDE.md` files are **concatenated** into the system prompt at session start. Content accumulates rather than overrides, but where guidance directly conflicts the deeper file wins.',
+      aggregation: 'All present `CLAUDE.md` files are **concatenated** into context at session start. Files are read from the filesystem root down to your working directory, with `CLAUDE.local.md` appended after `CLAUDE.md` at each level. There is no key-by-key override, when two files give conflicting guidance the docs note Claude may resolve it arbitrarily. Read order tends to nudge the model toward instructions seen last, but it is not enforced.',
       precedenceFiles: ['claude-local', 'claude-md-project', 'claude-md-global'],
       interactionExample:
-        '# How three CLAUDE.md files merge\n' +
+        '# How three CLAUDE.md files load\n' +
         '\n' +
-        '~/.claude/CLAUDE.md   "Use TypeScript strict mode"   ← kept (no conflict)\n' +
-        'CLAUDE.md (project)   "Use npm for installs"          ← overridden by .local\n' +
-        'CLAUDE.local.md       "Use pnpm instead of npm"       ← wins\n' +
+        'Read order (filesystem root → working dir, .local appended):\n' +
         '\n' +
-        '→ What Claude follows after merge:\n' +
-        '   • Use TypeScript strict mode   (aggregated from global)\n' +
-        '   • Use pnpm                     (override resolved to .local)',
+        '1. ~/.claude/CLAUDE.md   "Use TypeScript strict mode"\n' +
+        '2. ./CLAUDE.md           "Use npm for installs"\n' +
+        '3. ./CLAUDE.local.md     "Use pnpm instead of npm"\n' +
+        '\n' +
+        '→ All three sit in context. Where (2) and (3) conflict the\n' +
+        '  docs note Claude "may pick one arbitrarily". Putting personal\n' +
+        '  overrides in CLAUDE.local.md gets them read last, which tends\n' +
+        '  to nudge the model, but is not guaranteed.',
       nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'rules']
     },
     config: {
-      label: 'Layer 2: Permissions',
+      label: '2. Permissions',
       sublabel: 'Behavioural controls',
       color: '#7c3aed',
       description: 'Permissions, model selection, and feature toggles. Defines what Claude can do without asking.',
-      aggregation: 'Permission `allow` and `deny` arrays **union** across all three files. Other keys deep-merge, with deeper files overriding shallower ones. None of this enters the model context - it only governs runtime behaviour.',
+      aggregation: 'Full precedence chain (highest first): managed policy → CLI flags → `settings.local.json` → `settings.json` → `~/.claude/settings.json`. Array values like `permissions.allow` and `deny` are concatenated and deduplicated across all scopes. Scalar values like `model` are taken from the highest-precedence scope that sets them. None of this enters the model context, it only governs runtime behaviour.',
       precedenceFiles: ['settings-local', 'settings-project', 'settings-global'],
       interactionExample:
         '# How three settings.json files merge\n' +
@@ -62,7 +66,7 @@
       nodes: ['settings-local', 'settings-project', 'settings-global']
     },
     tools: {
-      label: 'Layer 3: Tools',
+      label: '3. Tools',
       sublabel: 'Primitive actions',
       color: '#db2777',
       description: 'The fundamental actions Claude can take. Built-ins like Read, Write, Bash, Grep are always available. Everything else in the environment either restricts these, orchestrates them, or extends them.',
@@ -70,7 +74,7 @@
       nodes: ['builtin-tools']
     },
     invocable: {
-      label: 'Layer 4: Invocable Knowledge',
+      label: '4. Invocable Knowledge',
       sublabel: 'Workflows and commands',
       color: '#d97706',
       description: 'Reusable patterns. Skills auto-load based on natural language; commands are invoked explicitly with a slash.',
@@ -78,7 +82,7 @@
       nodes: ['skills', 'commands']
     },
     delegation: {
-      label: 'Layer 5: Delegation',
+      label: '5. Delegation',
       sublabel: 'Specialised agents',
       color: '#e11d48',
       description: 'Spawn focused subagents that run in their own fresh context windows. Only a summary returns to the main conversation.',
@@ -86,7 +90,7 @@
       nodes: ['agents']
     },
     automation: {
-      label: 'Layer 6: Automation',
+      label: '6. Automation',
       sublabel: 'Event-driven scripts',
       color: '#059669',
       description: 'Shell scripts triggered by tool events. Enforce standards without model involvement, formatters, linters, validators.',
@@ -94,7 +98,7 @@
       nodes: ['hooks']
     },
     external: {
-      label: 'Layer 7: External Tools',
+      label: '7. External Tools',
       sublabel: 'Protocol-based integrations',
       color: '#2563eb',
       description: 'MCP is the odd one out: an OPEN PROTOCOL, not a Claude Code convention. Portable across Cursor, VS Code, and other clients.',
@@ -102,12 +106,12 @@
       nodes: ['mcp']
     },
     state: {
-      label: 'Layer 8: State and Isolation',
+      label: '8. State and Isolation',
       sublabel: 'Session management',
       color: '#64748b',
       description: 'How Claude remembers across sessions and isolates parallel work.',
       aggregation: 'On-disk only. Nothing here enters context until you `--resume` a session - and even then, only the prior turn transcript is replayed.',
-      nodes: ['sessions', 'worktrees']
+      nodes: ['sessions', 'worktreeinclude']
     }
   };
 
@@ -126,9 +130,9 @@
     'claude-local': {
       layer: 'memory', label: 'CLAUDE.local.md', icon: 'file-text-o',
       title: 'CLAUDE.local.md',
-      description: 'Personal **instructions** for this project. Gitignored, only you see it. Personal inputs (`.local`) take precedence over the team-level CLAUDE.md.',
+      description: 'Personal **instructions** for this project. Lives at the **project root** (not inside `.claude/`) and is gitignored, so only you see it. Treated identically to `CLAUDE.md`, just appended after it at the project level so its content is the most recently seen at that scope.',
       example: '# My personal tweaks\nUse pnpm instead of npm locally\nMy debug port is 3001\nSkip the Docker setup, I run Postgres natively',
-      priority: 'Highest-priority instruction file',
+      priority: 'Loaded last at the project level (read order, not enforced override)',
       tokens: 250,
       tokenNote: 'Loaded in full at session start.'
     },
@@ -161,7 +165,7 @@
       title: '~/.claude/CLAUDE.md',
       description: 'Global **instructions** that apply to every project on your machine. Your personal preferences across all work.',
       example: '## Global preferences\n- Always use TypeScript strict mode\n- Prefer functional patterns\n- Explain reasoning before big changes',
-      priority: 'Lowest-priority instruction file (project-level takes precedence over these)',
+      priority: 'Loaded earliest in the read order (filesystem root first); project files come after',
       tokens: 600,
       tokenNote: 'Loaded for **every** session on this machine - every project pays this cost.'
     },
@@ -232,18 +236,18 @@
     skills: {
       layer: 'invocable', label: 'skills/', icon: 'file-code-o',
       title: 'skills/',
-      description: "Markdown workflows invoked via natural language. Claude auto-loads them when your phrasing matches the skill's description. Each skill lives in its own folder with a SKILL.md file and optional supporting files. **Not** part of MCP, Claude Code-specific convention.",
+      description: "Each skill is a folder containing a `SKILL.md` plus any supporting files it bundles (templates, scripts, reference docs). Both you and Claude can invoke them: typed explicitly as `/skill-name`, or auto-invoked by Claude when your prompt matches the skill's `description` frontmatter. Frontmatter flags (`disable-model-invocation`, `user-invocable`) can lock invocation to one direction. **Not** part of MCP, Claude Code-specific convention.",
       example: '# .claude/skills/deploy/SKILL.md\n---\nname: deploy\ndescription: Triggered when user says\n  "deploy", "ship it", "push to prod"\nallowed-tools: [Read, Bash]\n---\n1. Run full test suite\n2. Bump version in package.json\n3. Create git tag\n4. Push to main',
-      priority: 'Auto-invoked by natural-language match',
+      priority: 'User-invoked via /name, or auto-invoked when description matches',
       tokens: 0,
       tokenNote: 'Each skill\'s description (~30 tokens) is in context so Claude can match. Bodies load on demand only when triggered.'
     },
     commands: {
       layer: 'invocable', label: 'commands/', icon: 'bolt',
       title: 'commands/',
-      description: 'Custom slash commands. Every `.md` file becomes `/project:name`. Explicit invocation, you type the command.',
+      description: 'Single-file equivalents of skills. A file at `commands/deploy.md` creates `/deploy` the same way a skill at `skills/deploy/SKILL.md` does, and both can be auto-invoked by Claude. Skills are now the recommended form because they bundle supporting files alongside the prompt; commands remain supported. If a skill and a command share a name, the skill wins.',
       example: '# .claude/commands/review.md\n---\ndescription: Review current branch\n---\n## Diff\n!`git diff main...HEAD`\n\nReview for security issues and missing tests.',
-      priority: 'Manual invocation (/project:review)',
+      priority: 'User-invoked via /name, or auto-invoked when description matches',
       tokens: 0,
       tokenNote: 'Loaded into context only when invoked.'
     },
@@ -281,29 +285,29 @@
     mcp: {
       layer: 'external', label: '.mcp.json', icon: 'server',
       title: '.mcp.json',
-      description: 'MCP server configuration. Unlike everything else here, MCP is an OPEN PROTOCOL, portable across Cursor, VS Code, and other clients. Extends Claude with external tools (databases, GitHub, Jira).',
+      description: 'MCP server configuration. Lives at the **project root** (not inside `.claude/`), committed for the team to share. Personal/per-user servers go to `~/.claude.json` instead. Unlike everything else here, MCP is an OPEN PROTOCOL, portable across Cursor, VS Code, and other clients. Extends Claude with external tools (databases, GitHub, Jira).',
       example: '{\n  "mcpServers": {\n    "postgres": {\n      "command": "npx",\n      "args": ["@modelcontextprotocol/server-postgres"]\n    },\n    "github": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-github"]\n    }\n  }\n}',
       priority: 'Works with ANY MCP-compatible client',
       tokens: 500,
       tokenNote: 'Tool definitions from each connected server join the system prompt - same cost model as built-in tools.'
     },
-    worktrees: {
-      layer: 'state', label: 'worktrees/', icon: 'sitemap',
-      title: 'worktrees/',
-      description: 'Git worktree isolation for parallel Claude sessions. Each worktree has its own branch and working directory. Created via `claude --worktree <n>`.',
-      example: '.claude/worktrees/\n├── feature-auth/     (branch: worktree-feature-auth)\n├── bugfix-123/       (branch: worktree-bugfix-123)\n└── experiment-refactor/',
-      priority: 'Run multiple Claude sessions in parallel without collisions',
+    worktreeinclude: {
+      layer: 'state', label: '.worktreeinclude', icon: 'file-text-o',
+      title: '.worktreeinclude',
+      description: 'Project-root file (gitignore-style syntax) listing untracked files to copy into each new git worktree Claude creates. Worktrees are fresh checkouts, so anything gitignored, like `.env` or local secrets, is missing by default; this file declares which of those should follow you in. Only files that match a pattern **and** are gitignored get copied, so tracked files are never duplicated.',
+      example: '# Local environment\n.env\n.env.local\n\n# API credentials\nconfig/secrets.json',
+      priority: 'Read when Claude creates a worktree (--worktree, EnterWorktree, subagent isolation)',
       tokens: 0,
-      tokenNote: 'Filesystem isolation. No model context impact.'
+      tokenNote: 'Filesystem only. No model context impact.'
     },
     sessions: {
       layer: 'state', label: 'projects/', icon: 'sitemap',
       title: '~/.claude/projects/',
-      description: 'Session history stored per project directory. Each worktree gets its own session storage. Resumable via `claude --resume`.',
-      example: '~/.claude/projects/\n└── Users-you-projects-myapp/\n    ├── sessions/\n    │   └── session-abc123.json\n    └── memory/\n        └── MEMORY.md',
-      priority: 'Auto-memory: Claude saves observations across sessions',
-      tokens: 0,
-      tokenNote: 'On-disk only. Replayed transcripts only enter context on `--resume`.'
+      description: 'Auto-memory: Claude maintains its own notes per project at `~/.claude/projects/<project>/memory/MEMORY.md`. The `<project>` key is derived from the git repository, so all worktrees and subdirectories of the same repo share one memory directory. `MEMORY.md` acts as an index; topic files (e.g. `debugging.md`) get split out as content grows. Session transcripts also live here for `--resume`.',
+      example: '~/.claude/projects/<project>/\n├── memory/\n│   ├── MEMORY.md         (Claude writes this)\n│   ├── debugging.md      (topic file, on-demand)\n│   └── architecture.md\n└── sessions/\n    └── session-<id>.json',
+      priority: 'On by default; toggle with /memory or autoMemoryEnabled',
+      tokens: 800,
+      tokenNote: 'First 200 lines of MEMORY.md (capped at 25 KB) load every session; topic files load on demand. Sessions only enter context on --resume.'
     }
   };
 
@@ -367,36 +371,37 @@
       /* Design-language foundation. The widget's local vars alias the   */
       /* site-wide tokens (defined in _sass/_theme.scss) so palette       */
       /* migrations and dark-mode flips happen in one place.             */
-      '.claudeenv { max-width: 960px; margin: 0 auto; padding: 8px 0 24px; color: var(--ink-primary); font-family: var(--font-text); --accent: var(--coral); --border: var(--line); --hairline: var(--line); --muted: var(--ink-muted); --card: var(--paper-raised); --subdued: var(--line); --subdued-bg: var(--paper-inset); --subdued-fg: var(--ink-muted); }',
+      '.claudeenv { position: relative; max-width: 960px; margin: 0 auto; padding: 8px 0 24px; color: var(--ink-primary); font-family: var(--font-text); --accent: var(--coral); --border: var(--line); --hairline: var(--line); --muted: var(--ink-muted); --card: var(--paper-raised); --subdued: var(--line); --subdued-bg: var(--paper-inset); --subdued-fg: var(--ink-muted); }',
       '.claudeenv .ce-intro { color: #777; font-size: 0.92rem; max-width: 620px; margin: 0 auto 20px; line-height: 1.5; }',
 
       /* Two-column grid: left = layer bands, right = file tree.
          align-items: stretch lets the file-tree panel grow to match the
          layer-bands column height. minmax(0, 1fr) prevents long strings
          in either column from pushing the layout wider. */
-      '.claudeenv .ce-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: stretch; }',
-      '@media (max-width: 760px) { .claudeenv .ce-grid { grid-template-columns: 1fr; } }',
+      /* 2-col layout (default): prompt spans full width above bands+filesystem. */
+      /* Inspector and context stack as full-width rows below the main grid.    */
+      '.claudeenv .ce-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "prompt prompt" "bands fs" "inspector inspector" "context context"; gap: 22px; align-items: stretch; }',
+      '.claudeenv .ce-prompt-wrap { grid-area: prompt; }',
+      '.claudeenv .ce-bands-col { grid-area: bands; }',
+      '.claudeenv .ce-fs-col { grid-area: fs; }',
+      '.claudeenv .ce-inspector { grid-area: inspector; }',
+      '.claudeenv .ce-context { grid-area: context; }',
+      '@media (max-width: 760px) { .claudeenv .ce-grid { grid-template-columns: 1fr; grid-template-areas: "prompt" "bands" "fs" "inspector" "context"; } }',
+      /* 4-column wide layout: activates when the viewport accommodates all     */
+      /* four blocks at their original 2-col width (~360 px each).              */
+      /* Layout: inspector | bands | filesystem | context, with the prompt     */
+      /* spanning cols 2-3 only so it stays at the original 2-col width.        */
+      /* The widget breaks out of the 740 px post-content wrapper via           */
+      /* position:relative + left:50% + translateX(-50%) so it can expand to    */
+      /* 1520 px centred in the viewport.                                        */
+      '@media (min-width: 1600px) { .claudeenv { max-width: none; width: min(1520px, calc(100vw - 60px)); position: relative; left: 50%; transform: translateX(-50%); } }',
+      '@media (min-width: 1600px) { .claudeenv .ce-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: ".         prompt prompt .       " "inspector bands  fs     context"; } }',
+      '@media (min-width: 1600px) { .claudeenv .ce-inspector, .claudeenv .ce-context { display: flex; flex-direction: column; } .claudeenv .ce-inspector .ce-panel-body-scroll, .claudeenv .ce-context .ce-panel-body-scroll { flex: 1; overflow-y: auto; } }',
 
       /* Layer bands */
       '.claudeenv .ce-bands { display: flex; flex-direction: column; gap: 8px; height: 100%; }',
-      '.claudeenv .ce-bands-entry { height: auto; margin-bottom: 16px; }',
       '.claudeenv .ce-bands-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }',
       '.claudeenv .ce-bands-header h3 { margin: 4px 0 0; font-size: 1.15rem; font-weight: 500; color: #222; }',
-      /* Layer 0 entry band -- viz.frame recipe (kept for legacy markup). */
-      '.claudeenv .ce-entry-band { width: 100%; text-align: left; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; cursor: pointer; transition: border-color 0.2s, background 0.2s, opacity 0.2s; font: inherit; color: inherit; }',
-      '.claudeenv .ce-entry-band.active { border-color: var(--ink-muted); background: var(--paper-inset); }',
-      '.claudeenv .ce-entry-band.dimmed { opacity: 0.35; }',
-      '.claudeenv .ce-entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }',
-      '.claudeenv .ce-entry-head .fa { color: var(--ink-primary); font-size: 0.85rem; }',
-      '.claudeenv .ce-entry-head .ce-layer-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-primary); }',
-      /* code.text + code.string for the prompt example: $ + cmd dim,    */
-      /* highlighted argument coral.                                      */
-      '.claudeenv .ce-entry-cmd { font-family: var(--font-mono); font-size: var(--size-md); color: var(--ink-primary); margin-bottom: 4px; }',
-      '.claudeenv .ce-entry-cmd .dim { color: var(--ink-faint); }',
-      '.claudeenv .ce-entry-cmd .mark { color: var(--coral); }',
-      '.claudeenv .ce-entry-note { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); margin: 0; }',
-      '.claudeenv .ce-connector { display: flex; justify-content: center; margin: 2px 0; }',
-      '.claudeenv .ce-connector::before { content: ""; width: 1px; height: 8px; background: linear-gradient(to bottom, transparent, var(--border), transparent); }',
       /* Layer band -- viz.row recipe. Active state stays neutral grey  */
       /* per the user's selection-colour preference (overrides the     */
       /* design's coral inset shadow).                                  */
@@ -410,6 +415,7 @@
       '.claudeenv .ce-band-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 3px; }',
       /* viz.row-title: ink-primary, display, lg, weight 500, snug. */
       '.claudeenv .ce-band-title { display: block; font-family: var(--font-display); font-size: var(--size-lg); font-weight: 500; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); }',
+      '.claudeenv .ce-band-num { font-family: var(--font-mono); letter-spacing: 0; color: var(--ink-muted); }',
       /* viz.row-sub: ink-muted, text, smd, weight 400.            */
       '.claudeenv .ce-band-sublabel { display: block; font-family: var(--font-text); font-size: var(--size-smd); font-weight: 400; color: var(--ink-muted); margin-top: 3px; }',
       '.claudeenv .ce-band .ce-entry-cmd { margin-top: 8px; margin-bottom: 0; }',
@@ -422,7 +428,7 @@
       /* viz.frame: paper-raised, line border, radius 10. */
       '.claudeenv .ce-panel { border: 1px solid var(--line); border-radius: 10px; background: var(--paper-raised); margin-bottom: 16px; overflow: hidden; }',
       '.claudeenv .ce-tree-panel { display: flex; flex-direction: column; height: 100%; margin-bottom: 0; }',
-      '.claudeenv .ce-tree-panel .ce-tree { flex: 1; }',
+      '.claudeenv .ce-tree-panel .ce-tree { flex: 1; display: flex; flex-direction: column; }',
       '.claudeenv .ce-panel-head { border-bottom: 1px solid var(--line); padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }',
       /* viz.eyebrow: ink-faint, mono, sm, eyebrow tracking, upper. */
       '.claudeenv .ce-panel-head-label { font-family: var(--font-mono); font-size: var(--size-sm); font-weight: 400; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
@@ -481,7 +487,7 @@
       '.claudeenv .ce-tree-totals .ce-totals-caveat { grid-column: 1 / -1; font-style: italic; font-size: 0.62rem; color: #999; margin-top: 4px; font-family: inherit; line-height: 1.4; }',
 
       /* Inspector */
-      '.claudeenv .ce-inspector { margin-top: 16px; }',
+      '.claudeenv .ce-inspector { }',
       '.claudeenv .ce-inspector-body { padding: 8px 16px 16px; }',
       '.claudeenv .ce-inspector-layer-crumb { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }',
       '.claudeenv .ce-inspector-layer-dot { width: 8px; height: 8px; border-radius: 50%; }',
@@ -580,6 +586,31 @@
       '.claudeenv .ce-close-btn { color: var(--ink-faint); background: transparent; border: none; cursor: pointer; font-size: 0.85rem; padding: 2px 4px; }',
       '.claudeenv .ce-close-btn:hover { color: var(--ink-primary); }',
 
+      /* Disclosure pattern shared by Inspector + Context panels:        */
+      /*   - header doubles as a click target that toggles open/closed   */
+      /*   - body has a max-height with vertical scroll when content     */
+      /*     exceeds it, so neither panel can push the page layout       */
+      /*     around as the user clicks through nodes or toggles files    */
+      '.claudeenv .ce-panel-head-toggle { cursor: pointer; user-select: none; transition: background 0.15s; }',
+      '.claudeenv .ce-panel-head-toggle:hover { background: var(--paper-inset); }',
+      '.claudeenv .ce-panel-chevron { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }',
+      '.claudeenv .ce-panel-chevron.open { transform: rotate(90deg); }',
+      '.claudeenv .ce-panel-body-scroll { height: 440px; overflow-y: auto; }',
+      '.claudeenv .ce-panel.collapsed .ce-panel-head { border-bottom-color: transparent; }',
+
+      /* Context panel: visualises the impact of the file checkboxes by  */
+      /* showing what actually ends up in scope for the next turn.       */
+      '.claudeenv .ce-context { }',
+      '.claudeenv .ce-context-body { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 14px; }',
+      '.claudeenv .ce-context-section { display: flex; flex-direction: column; gap: 6px; }',
+      '.claudeenv .ce-context-section-head { display: flex; align-items: baseline; gap: 8px; }',
+      '.claudeenv .ce-context-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); line-height: var(--lh-normal); margin: 0 0 4px; }',
+      '.claudeenv .ce-context-file-label { font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); margin-top: 6px; }',
+      '.claudeenv .ce-context-file-label:first-child { margin-top: 0; }',
+      '.claudeenv .ce-context-snippet { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
+      '.claudeenv .ce-context-empty { font-family: var(--font-text); font-size: var(--size-smd); font-style: italic; color: var(--ink-faint); margin: 0; padding: 6px 0; }',
+      '.claudeenv .ce-context-tag { font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); }',
+
       /* Portability note -- viz.callout recipe (coral wash + rule). */
       '.claudeenv .ce-mcp-callout { border-left: 3px solid var(--coral); background: var(--coral-wash); border-radius: 0 6px 6px 0; padding: 12px 14px; margin-top: 16px; }',
       '.claudeenv .ce-mcp-callout-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }',
@@ -589,8 +620,33 @@
       '.claudeenv .ce-mcp-callout .hl { color: var(--ink-primary); font-weight: 600; }',
 
       /* Inline markdown -- bold inherits colour; inline code uses code.chip. */
+      /* Disco Easter egg */
+      '@keyframes ce-disco-pulse { 0% { opacity: 0; transform: scale(0.4); } 50% { opacity: 0.9; transform: scale(1.3); } 100% { opacity: 0.1; transform: scale(0.7); } }',
+      '.claudeenv .ce-disco-overlay { position: absolute; top: -150px; left: -80px; right: -80px; height: 560px; pointer-events: none; overflow: hidden; z-index: 50; }',
+      '.claudeenv .ce-disco-light { position: absolute; border-radius: 50%; animation: ce-disco-pulse infinite alternate; }',
+
+      /* Editable prompt input */
+      '.claudeenv .ce-prompt-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: inherit; font: inherit; padding: 0; caret-color: var(--coral); }',
+      '.claudeenv .ce-prompt-input::placeholder { color: var(--ink-faint); }',
+
       '.claudeenv .ce-bold { font-weight: 600; }',
-      '.claudeenv .ce-code { font-family: var(--font-mono); font-size: 0.82em; background: var(--paper-inset); color: var(--sx-keyword); border: 1px solid var(--line); padding: 1px 6px; border-radius: 999px; }'
+      '.claudeenv .ce-code { font-family: var(--font-mono); font-size: 0.82em; background: var(--paper-inset); color: var(--sx-keyword); border: 1px solid var(--line); padding: 1px 6px; border-radius: 999px; }',
+
+      /* Instruction-layer table (🧬 / 🧠 breakdown) */
+      '.claudeenv .ce-instr-table { width: 100%; border-collapse: collapse; font-family: var(--font-text); font-size: var(--size-smd); margin-bottom: 14px; background: var(--paper-raised); }',
+      '.claudeenv .ce-instr-table thead { background: var(--paper-inset); }',
+      '.claudeenv .ce-instr-table th { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--line); background: var(--paper-inset); }',
+      '.claudeenv .ce-instr-table td { padding: 6px 8px; color: var(--ink-secondary); border-bottom: 1px solid var(--line); vertical-align: middle; line-height: var(--lh-normal); background: var(--paper-raised); }',
+      '.claudeenv .ce-instr-table td:first-child { font-size: 1.05rem; width: 28px; }',
+      '.claudeenv .ce-instr-table td:nth-child(2) { font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-keyword); white-space: nowrap; }',
+
+      /* Tips list (memory layer) */
+      '.claudeenv .ce-instr-tips { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); padding-left: 18px; line-height: var(--lh-normal); margin: 0 0 14px; }',
+
+      /* 4-col wide layout: inspector + context height alignment.          */
+      /* Higher specificity (.ce-panel.ce-inspector vs .ce-panel) ensures  */
+      /* margin-bottom: 0 wins regardless of source order.                 */
+      '@media (min-width: 1600px) { .claudeenv .ce-panel.ce-inspector, .claudeenv .ce-panel.ce-context { margin-bottom: 0; box-sizing: border-box; } }'
     ].join('\n');
     var style = document.createElement('style');
     style.textContent = css;
@@ -617,7 +673,11 @@
       included: {},
       // sectionMode[sectionId] = 'skill' → section moved out of CLAUDE.md.
       // Default (undefined) is 'inline'.
-      sectionMode: {}
+      sectionMode: {},
+      // Disclosure state for the Inspector and Context panels. Both
+      // open by default; user can collapse either to a single-line cell.
+      inspectorOpen: true,
+      contextOpen: true
     };
 
     function isIncluded(id) { return state.included[id] !== false; }
@@ -696,15 +756,18 @@
       });
     }
 
-    // Layer 0: full-width band above the grid.
-    var entryWrap = el('div', { class: 'ce-bands ce-bands-entry' });
-    root.appendChild(entryWrap);
-
     var grid = el('div', { class: 'ce-grid' });
     root.appendChild(grid);
 
-    var leftCol  = el('div', null);
-    var rightCol = el('div', { style: 'display: flex; flex-direction: column;' });
+    // Prompt is now a grid item. The grid-template-areas controls its
+    // placement: spans full width in 2-col mode; spans the bands+filesystem
+    // columns in the 4-col wide mode while inspector/context flank the
+    // outside columns. This keeps the prompt at its original 2-col width.
+    var entryWrap = el('div', { class: 'ce-prompt-wrap' });
+    grid.appendChild(entryWrap);
+
+    var leftCol  = el('div', { class: 'ce-bands-col' });
+    var rightCol = el('div', { class: 'ce-fs-col', style: 'display: flex; flex-direction: column;' });
     grid.appendChild(leftCol);
     grid.appendChild(rightCol);
 
@@ -715,20 +778,6 @@
     var treePanel = el('div', { class: 'ce-panel ce-tree-panel' });
     var treeHead = el('div', { class: 'ce-panel-head' });
     treeHead.appendChild(el('span', { class: 'ce-panel-head-label' }, 'Filesystem'));
-    var treeControls = el('div', { class: 'ce-tree-controls' });
-    // Single toggle: label flips between "select all" and "select none"
-    // depending on whether everything toggleable is currently included.
-    var bulkBtn = el('button', { class: 'ce-mini-btn', type: 'button' }, 'select all');
-    function updateBulkBtnLabel() {
-      var allIncluded = TOGGLEABLE.every(isIncluded);
-      bulkBtn.innerText = allIncluded ? 'select none' : 'select all';
-    }
-    hook(bulkBtn, function() {
-      var allIncluded = TOGGLEABLE.every(isIncluded);
-      setAllIncluded(!allIncluded);
-    });
-    treeControls.appendChild(bulkBtn);
-    treeHead.appendChild(treeControls);
     treePanel.appendChild(treeHead);
 
     var treeBody = el('div', { class: 'ce-tree' });
@@ -736,9 +785,14 @@
 
     rightCol.appendChild(treePanel);
 
-    // Inspector (full width, sits directly below the grid)
+    // Inspector and context are direct grid children.
+    // In 2-col mode they span the full row (grid-column: 1/-1).
+    // In the 4-col wide layout each becomes its own column.
     var inspectorPanel = el('div', { class: 'ce-panel ce-inspector' });
-    root.appendChild(inspectorPanel);
+    grid.appendChild(inspectorPanel);
+
+    var contextPanel = el('div', { class: 'ce-panel ce-context' });
+    grid.appendChild(contextPanel);
 
     // Portability note (full width, subdued slate, anchors the bottom)
     var mcpCallout = el('div', { class: 'ce-mcp-callout' }, [
@@ -761,31 +815,154 @@
 
     // ─────────────────────────── render funcs ──────────────────────────
 
+    function layerLabelNodes(label) {
+      var m = label.match(/^(\d+\.) (.+)/);
+      if (!m) return [document.createTextNode(label)];
+      return [el('span', { class: 'ce-band-num' }, m[1]), document.createTextNode(' ' + m[2])];
+    }
+
     var ENTRY_PROMPT = 'convert the image to grayscale';
     var entryTypewriterDone = false;
+    var promptText = '';
+    var discoActive = false;
+
+    function triggerDisco() {
+      if (discoActive) return;
+      discoActive = true;
+      var overlay = el('div', { class: 'ce-disco-overlay' });
+      root.appendChild(overlay);
+
+      var W = overlay.offsetWidth;
+      var H = overlay.offsetHeight;
+      var canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      canvas.style.cssText = 'position:absolute;top:0;left:0;display:block;';
+      overlay.appendChild(canvas);
+      var ctx = canvas.getContext('2d');
+
+      // Grid of small tiles, each with a fixed vivid colour
+      var TILE = 16, GAP = 3, STEP = TILE + GAP;
+      var cols = Math.ceil(W / STEP) + 1;
+      var rows = Math.ceil(H / STEP) + 1;
+      var PALETTE = [
+        [255, 30, 100], [255, 110, 0], [230, 210, 0],
+        [0, 210, 80],   [0, 185, 255], [60, 80, 255],
+        [180, 0, 255],  [255, 0, 195],
+      ];
+      var tileCol = [];
+      // Per-tile vignette radius multiplier: wide range so the falloff edge is ragged.
+      var tileRadMult = [];
+      // Per-tile brightness cap: limits how bright each tile can get even when fully
+      // in a beam, so illuminated areas stay varied rather than uniformly saturated.
+      var tileBrightCap = [];
+      for (var ti = 0; ti < rows * cols; ti++) {
+        tileCol.push(PALETTE[Math.floor(Math.random() * PALETTE.length)]);
+        tileRadMult.push(0.45 + Math.random() * 0.9);
+        tileBrightCap.push(0.25 + Math.random() * 0.75);
+      }
+
+      // Angles offset 45° from cardinal axes so no horizontal/vertical bands dominate.
+      // Alternating speed signs mean bands travel in opposing directions.
+      var beams = [
+        { angle: 0.25 * Math.PI + (Math.random() - 0.5) * 0.5, phase: Math.random() * Math.PI * 2, speed:  0.55, rotSpeed:  0.11 },
+        { angle: 0.75 * Math.PI + (Math.random() - 0.5) * 0.5, phase: Math.random() * Math.PI * 2, speed: -0.40, rotSpeed: -0.09 },
+        { angle: 1.25 * Math.PI + (Math.random() - 0.5) * 0.5, phase: Math.random() * Math.PI * 2, speed:  0.60, rotSpeed:  0.07 },
+        { angle: 1.75 * Math.PI + (Math.random() - 0.5) * 0.5, phase: Math.random() * Math.PI * 2, speed: -0.48, rotSpeed: -0.13 },
+      ];
+
+      var DURATION = 5.0, FADE_START = 4.2;
+      var startTime = performance.now();
+      var raf;
+
+      function frame(now) {
+        var elapsed = (now - startTime) / 1000;
+        var globalAlpha = elapsed > FADE_START ? Math.max(0, 1 - (elapsed - FADE_START) / (DURATION - FADE_START)) : 1;
+
+        var dt = 1 / 60;
+        for (var bi = 0; bi < beams.length; bi++) {
+          beams[bi].phase += beams[bi].speed * dt;
+          beams[bi].angle += beams[bi].rotSpeed * dt;
+        }
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Radial centre: horizontally centred, 35% down the overlay
+        // (which sits 150px above the widget, so this lands on the intro paragraph)
+        var centerX = W / 2, centerY = H * 0.35;
+        var maxDist = Math.sqrt(centerX * centerX + H * H); // diagonal to corner
+
+        for (var r = 0; r < rows; r++) {
+          for (var c = 0; c < cols; c++) {
+            var tx = c * STEP, ty = r * STEP;
+            var cx = tx + TILE / 2, cy = ty + TILE / 2;
+
+            // Radial falloff with per-tile radius jitter — breaks the hard edge.
+            // Higher power (3.5) makes edges fall off more steeply.
+            var dx = cx - centerX, dy = cy - centerY;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var effectiveMax = maxDist * tileRadMult[r * cols + c];
+            var radial = Math.pow(Math.max(0, 1 - dist / effectiveMax), 3.5);
+
+            var idx = r * cols + c;
+            var cap = tileBrightCap[idx];
+            var bright = 0.06 * cap;
+            for (var bi = 0; bi < beams.length; bi++) {
+              var b = beams[bi];
+              var proj = cx * Math.cos(b.angle) + cy * Math.sin(b.angle);
+              var w = Math.pow(Math.max(0, Math.sin(proj * 0.11 + b.phase)), 4);
+              bright = Math.max(bright, (0.06 + w * 0.5) * cap);
+            }
+
+            var col = tileCol[idx];
+            var alpha = bright * radial * globalAlpha;
+            if (alpha > 0.005) {
+              ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + alpha + ')';
+              ctx.fillRect(tx, ty, TILE, TILE);
+            }
+          }
+        }
+
+        if (elapsed < DURATION) {
+          raf = requestAnimationFrame(frame);
+        }
+      }
+
+      raf = requestAnimationFrame(frame);
+      setTimeout(function() {
+        cancelAnimationFrame(raf);
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        discoActive = false;
+      }, (DURATION + 0.2) * 1000);
+    }
 
     function renderEntryBand() {
       entryWrap.innerHTML = '';
-      var a = activeLayer();
-      var layer = LAYERS.entry;
-      var band = el('button', { class: 'ce-band' + (a === 'entry' ? ' active' : a && a !== 'entry' ? ' dimmed' : ''), type: 'button', 'data-layer': 'entry' });
-      hook(band, function() { selectLayer('entry'); });
-      band.appendChild(el('span', { class: 'ce-band-title' }, layer.label));
-      var cmd = el('div', { class: 'ce-entry-cmd' });
-      cmd.appendChild(el('span', { class: 'mark' }, 'claude> '));
-      var typed = el('span', { class: 'ce-entry-typed' });
-      cmd.appendChild(typed);
-      band.appendChild(cmd);
-      entryWrap.appendChild(band);
+      var prompt = el('div', { class: 'role-code-prompt', style: 'display:flex;gap:8px;padding:16px 18px;align-items:center;' });
+      prompt.appendChild(el('span', { class: 'role-code-prompt-glyph', style: 'user-select:none;flex-shrink:0' }, 'claude>'));
+      var input = el('input', {
+        type: 'text',
+        class: 'ce-prompt-input',
+        maxlength: '250',
+        placeholder: 'In search of...',
+        'aria-label': 'Prompt'
+      });
+      input.value = promptText;
+      input.addEventListener('input', function(e) {
+        promptText = e.target.value;
+        if (promptText.toLowerCase().includes('disco')) triggerDisco();
+      });
+      input.addEventListener('click', function(e) { e.stopPropagation(); });
+      prompt.appendChild(input);
+      entryWrap.appendChild(prompt);
 
-      if (entryTypewriterDone) {
-        typed.textContent = ENTRY_PROMPT;
-      } else {
+      if (!entryTypewriterDone) {
         entryTypewriterDone = true;
         var i = 0;
         var t = setInterval(function() {
           if (i <= ENTRY_PROMPT.length) {
-            typed.textContent = ENTRY_PROMPT.slice(0, i++);
+            promptText = ENTRY_PROMPT.slice(0, i++);
+            input.value = promptText;
           } else {
             clearInterval(t);
           }
@@ -800,7 +977,15 @@
         var layer = LAYERS[id];
         var band = el('button', { class: 'ce-band' + (a === id ? ' active' : a && a !== id ? ' dimmed' : ''), type: 'button', 'data-layer': id });
         hook(band, function() { selectLayer(id); });
-        band.appendChild(el('span', { class: 'ce-band-title' }, layer.label));
+        if (layer.badge) {
+          var titleRow = el('span', { class: 'ce-band-title', style: 'display:flex;justify-content:space-between;align-items:baseline;' });
+          var labelWrap = el('span', null, layerLabelNodes(layer.label));
+          titleRow.appendChild(labelWrap);
+          titleRow.appendChild(el('span', { style: 'font-family:var(--font-text);letter-spacing:0;font-size:var(--size-md);' }, layer.badge));
+          band.appendChild(titleRow);
+        } else {
+          band.appendChild(el('span', { class: 'ce-band-title' }, layerLabelNodes(layer.label)));
+        }
         band.appendChild(el('span', { class: 'ce-band-sublabel' }, layer.sublabel));
         bandsWrap.appendChild(band);
       });
@@ -880,6 +1065,10 @@
         var projectChildren = el('div', { class: 'ce-tree-children' });
         projectChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 1));
         projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 1));
+        // `.mcp.json` and `.worktreeinclude` live at the project root,
+        // not inside `.claude/`. Indent 1 keeps that hierarchy honest.
+        projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'server', 1));
+        projectChildren.appendChild(fileRow('worktreeinclude', '.worktreeinclude', 'file-text-o', 1));
         // `.claude/` is non-selectable but should mirror other folder rows.
         // Use the same `.ce-tree-row` + `.ce-tree-node.dir` structure with a
         // checkbox spacer so the icon aligns with peer files at indent 1.
@@ -892,15 +1081,37 @@
         projectChildren.appendChild(claudeRow);
         projectChildren.appendChild(fileRow('settings-project', 'settings.json', 'cog', 2));
         projectChildren.appendChild(fileRow('settings-local', 'settings.local.json', 'cog', 2));
-        projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'server', 2));
         projectChildren.appendChild(fileRow('rules', 'rules/', 'folder-o', 2, true));
         projectChildren.appendChild(fileRow('commands', 'commands/', 'folder-o', 2, true));
         projectChildren.appendChild(fileRow('skills', 'skills/', 'folder-o', 2, true));
         projectChildren.appendChild(fileRow('agents', 'agents/', 'folder-o', 2, true));
         projectChildren.appendChild(fileRow('hooks', 'hooks/', 'folder-o', 2, true));
-        projectChildren.appendChild(fileRow('worktrees', 'worktrees/', 'folder-o', 2, true));
         treeBody.appendChild(projectChildren);
       }
+
+      // Bulk-select footer: sits below all rows.
+      // checked = all included, unchecked = none, indeterminate = mixed.
+      var allIncluded = TOGGLEABLE.every(isIncluded);
+      var someIncluded = TOGGLEABLE.some(isIncluded);
+      var bulkRow = el('div', { class: 'ce-tree-row', style: 'padding: 8px 14px 6px; border-top: 1px solid var(--line); margin-top: auto; gap: 8px;' });
+      var bulkCheck = el('input', { type: 'checkbox', class: 'ce-tree-check', style: 'margin-left: 0;' });
+      bulkCheck.checked = allIncluded;
+      bulkCheck.indeterminate = someIncluded && !allIncluded;
+      bulkCheck.addEventListener('click', function(e) { e.stopPropagation(); });
+      bulkCheck.addEventListener('change', function(e) {
+        e.stopPropagation();
+        setAllIncluded(e.target.checked);
+      });
+      var bulkLabel = el('span', {
+        style: 'font-family:var(--font-mono);font-size:var(--size-xs);letter-spacing:var(--track-eyebrow);text-transform:uppercase;color:var(--ink-faint);cursor:pointer;user-select:none;'
+      }, allIncluded ? 'Select None' : 'Select All');
+      bulkLabel.addEventListener('click', function(e) {
+        e.stopPropagation();
+        setAllIncluded(!TOGGLEABLE.every(isIncluded));
+      });
+      bulkRow.appendChild(bulkCheck);
+      bulkRow.appendChild(bulkLabel);
+      treeBody.appendChild(bulkRow);
     }
 
 
@@ -934,11 +1145,11 @@
           bar.appendChild(el('div', {
             class: 'ce-impact-bar-seg',
             style: 'width: ' + pct.toFixed(2) + '%; background: ' + layer.color + ';',
-            title: layer.label + ': ' + fmtTokens(t) + ' tokens'
+            title: layer.label.replace(/^\d+\. /, '') + ': ' + fmtTokens(t) + ' tokens'
           }));
           legend.appendChild(el('span', { class: 'ce-impact-legend-item' }, [
             el('span', { class: 'ce-impact-legend-swatch', style: 'background: ' + layer.color }),
-            el('span', null, layer.label.replace(/^Layer \d+: /, '') + ' · ' + fmtTokens(t) + 't')
+            el('span', null, layer.label.replace(/^\d+\. /, '') + ' · ' + fmtTokens(t) + 't')
           ]));
         });
         parent.appendChild(bar);
@@ -1082,15 +1293,209 @@
         'Token estimates are for illustrative purposes only.'));
     }
 
+    // ────────────────────────── context panel ───────────────────────────
+    //
+    // Visualises the impact of the file-tree checkboxes. Four buckets,
+    // each tied to a directive in the official docs:
+    //
+    //  1. Aggregated text  - CLAUDE.md files concatenated in read order
+    //                        (filesystem root → working dir, .local
+    //                        appended after .md), plus auto-memory
+    //                        MEMORY.md when included.
+    //  2. Settings         - permissions/model/etc. merged across the
+    //                        included scopes. Arrays union; scalars
+    //                        override (highest scope wins).
+    //  3. Subagents        - the descriptions Claude can dispatch on,
+    //                        loaded with the agents/ folder.
+    //  4. Hooks            - tool-lifecycle scripts that fire when
+    //                        their matchers hit.
+    //
+    // Order mirrors the precedence in the docs. Excluded items render
+    // an empty-state line so the user can see the consequence of a
+    // checkbox flip without scrolling back up.
+
+    // Files contributing to the merged instruction stream, in read order.
+    var INSTRUCTION_REFS = [
+      { id: 'claude-md-global',  label: '~/.claude/CLAUDE.md' },
+      { id: 'claude-md-project', label: './CLAUDE.md' },
+      { id: 'claude-local',      label: './CLAUDE.local.md' },
+      { id: 'rules',             label: '.claude/rules/' },
+      { id: 'sessions',          label: '~/.claude/projects/<project>/memory/MEMORY.md' }
+    ];
+
+    var SETTINGS_REFS = [
+      { id: 'settings-global',  label: '~/.claude/settings.json' },
+      { id: 'settings-project', label: '.claude/settings.json' },
+      { id: 'settings-local',   label: '.claude/settings.local.json' }
+    ];
+
+    // Best-effort JSON parse of a node's example. Examples are hand-
+    // written illustrative snippets, so the parse may fail; treat that
+    // as "nothing to merge" rather than throwing.
+    function parseSettingsExample(id) {
+      var n = NODES[id];
+      if (!n || !n.example) return null;
+      try { return JSON.parse(n.example); } catch (e) { return null; }
+    }
+
+    // Merge per the settings doc:
+    //  - arrays concatenated and deduplicated across scopes
+    //  - scalars and nested objects: higher-precedence scope wins
+    // Iterate from lowest to highest precedence so later writes overwrite.
+    function mergeSettings(includedRefs) {
+      var out = {};
+      includedRefs.forEach(function(ref) {
+        var obj = parseSettingsExample(ref.id);
+        if (!obj) return;
+        deepMergeInto(out, obj);
+      });
+      return out;
+    }
+
+    function deepMergeInto(target, source) {
+      for (var k in source) {
+        if (!Object.prototype.hasOwnProperty.call(source, k)) continue;
+        var v = source[k];
+        if (Array.isArray(v)) {
+          var existing = Array.isArray(target[k]) ? target[k] : [];
+          var merged = existing.concat(v);
+          // Dedupe primitives; objects pass through unchanged.
+          var seen = {};
+          target[k] = merged.filter(function(item) {
+            if (typeof item !== 'string' && typeof item !== 'number') return true;
+            var key = typeof item + ':' + item;
+            if (seen[key]) return false;
+            seen[key] = true;
+            return true;
+          });
+        } else if (v && typeof v === 'object') {
+          target[k] = deepMergeInto(
+            (target[k] && typeof target[k] === 'object' && !Array.isArray(target[k])) ? target[k] : {},
+            v
+          );
+        } else {
+          target[k] = v;
+        }
+      }
+      return target;
+    }
+
+    function makeSection(label, hint) {
+      var s = el('div', { class: 'ce-context-section' });
+      s.appendChild(el('div', { class: 'ce-inspector-section-label' }, label));
+      if (hint) {
+        var p = el('p', { class: 'ce-context-hint' });
+        p.appendChild(renderDescription(hint));
+        s.appendChild(p);
+      }
+      return s;
+    }
+
+    function emptyLine(text) {
+      return el('p', { class: 'ce-context-empty' }, text);
+    }
+
+    function renderContext() {
+      contextPanel.innerHTML = '';
+      contextPanel.classList.toggle('collapsed', !state.contextOpen);
+
+      var head = el('div', { class: 'ce-panel-head ce-panel-head-toggle' }, [
+        el('span', { class: 'ce-panel-head-label' }, 'Context'),
+        el('span', { class: 'fa fa-chevron-right ce-panel-chevron' + (state.contextOpen ? ' open' : '') })
+      ]);
+      hook(head, function() {
+        state.contextOpen = !state.contextOpen;
+        rerender();
+      });
+      contextPanel.appendChild(head);
+
+      if (!state.contextOpen) return;
+
+      var body = el('div', { class: 'ce-context-body ce-panel-body-scroll' });
+      contextPanel.appendChild(body);
+
+      // 1. Aggregated text -- what enters the system prompt as instructions.
+      var instr = makeSection(
+        'Instructions in context',
+        'Concatenated in this read order. Loaded into the system prompt at session start; the docs note Claude `may pick one arbitrarily` when files conflict.'
+      );
+      var anyInstr = false;
+      INSTRUCTION_REFS.forEach(function(ref) {
+        if (!isIncluded(ref.id)) return;
+        var n = NODES[ref.id];
+        if (!n || !n.example) return;
+        anyInstr = true;
+        instr.appendChild(el('div', { class: 'ce-context-file-label' }, ref.label));
+        instr.appendChild(el('pre', { class: 'ce-context-snippet' }, n.example));
+      });
+      if (!anyInstr) instr.appendChild(emptyLine('No instruction files included. Claude starts with the built-in system prompt only.'));
+      body.appendChild(instr);
+
+      // 2. Settings -- merged config across included scopes.
+      var settings = makeSection(
+        'Settings (runtime, not in context)',
+        'Arrays like `permissions.allow`/`deny` concatenate and dedupe across scopes; scalars take the highest-precedence value. Governs what Claude can do; never enters the system prompt.'
+      );
+      var includedSettings = SETTINGS_REFS.filter(function(r) { return isIncluded(r.id); });
+      if (includedSettings.length === 0) {
+        settings.appendChild(emptyLine('No settings files included. Claude Code falls back to its built-in defaults.'));
+      } else {
+        var merged = mergeSettings(includedSettings);
+        if (Object.keys(merged).length === 0) {
+          settings.appendChild(emptyLine('Included settings files contain no overrides.'));
+        } else {
+          settings.appendChild(el('div', { class: 'ce-context-file-label' },
+            'merged from ' + includedSettings.map(function(r) { return r.label; }).join(' + ')));
+          settings.appendChild(el('pre', { class: 'ce-context-snippet' },
+            JSON.stringify(merged, null, 2)));
+        }
+      }
+      body.appendChild(settings);
+
+      // 3. Subagents -- triggerable via @-mention or description match.
+      var agents = makeSection(
+        'Triggerable subagents',
+        'Each agent\'s frontmatter `description` sits in the parent system prompt so Claude can dispatch. The body becomes the subagent\'s own system prompt and runs in a fresh context window.'
+      );
+      if (isIncluded('agents') && NODES.agents && NODES.agents.example) {
+        agents.appendChild(el('div', { class: 'ce-context-file-label' }, '.claude/agents/'));
+        agents.appendChild(el('pre', { class: 'ce-context-snippet' }, NODES.agents.example));
+      } else {
+        agents.appendChild(emptyLine('.claude/agents/ excluded. No subagents available; everything runs in the main context window.'));
+      }
+      body.appendChild(agents);
+
+      // 4. Hooks -- shell-side triggers on tool lifecycle events.
+      var hooks = makeSection(
+        'Active hooks',
+        'Configured in `settings.json` (or `hooks/`); fire deterministically on tool lifecycle events (`PreToolUse`, `PostToolUse`, `SubagentStop`, etc.). Run shell-side, never enter the system prompt.'
+      );
+      if (isIncluded('hooks') && NODES.hooks && NODES.hooks.example) {
+        hooks.appendChild(el('div', { class: 'ce-context-file-label' }, '.claude/hooks/ (or settings.json `hooks` key)'));
+        hooks.appendChild(el('pre', { class: 'ce-context-snippet' }, NODES.hooks.example));
+      } else {
+        hooks.appendChild(emptyLine('hooks/ excluded. Tool calls run without any pre/post automation.'));
+      }
+      body.appendChild(hooks);
+    }
+
     function renderInspector() {
       inspectorPanel.innerHTML = '';
+      inspectorPanel.classList.toggle('collapsed', !state.inspectorOpen);
 
-      var head = el('div', { class: 'ce-panel-head' }, [
-        el('span', { class: 'ce-panel-head-label' }, 'Inspector')
+      var head = el('div', { class: 'ce-panel-head ce-panel-head-toggle' }, [
+        el('span', { class: 'ce-panel-head-label' }, 'Inspector'),
+        el('span', { class: 'fa fa-chevron-right ce-panel-chevron' + (state.inspectorOpen ? ' open' : '') })
       ]);
+      hook(head, function() {
+        state.inspectorOpen = !state.inspectorOpen;
+        rerender();
+      });
       inspectorPanel.appendChild(head);
 
-      var body = el('div', { class: 'ce-inspector-body' });
+      if (!state.inspectorOpen) return;
+
+      var body = el('div', { class: 'ce-inspector-body ce-panel-body-scroll' });
       inspectorPanel.appendChild(body);
 
       // Empty state → simple help message.
@@ -1104,13 +1509,52 @@
       // Layer view
       if (state.selectedLayer) {
         var layer = LAYERS[state.selectedLayer];
-        body.appendChild(el('h3', null, layer.sublabel));
-        var desc = el('p', { class: 'ce-inspector-desc' });
-        desc.appendChild(renderDescription(layer.description));
-        body.appendChild(desc);
 
-        // Precedence chain (only for layers with multiple ordered files)
-        if (layer.precedenceFiles && layer.precedenceFiles.length > 1) {
+        if (state.selectedLayer === 'memory') {
+          // Tips first (no heading)
+          var tips = el('ul', { class: 'ce-instr-tips' });
+          ['<200 lines',
+           'Conventions, common commands, architecture',
+           'Adherence to instruction ∝ specific/concise nature of instruction'
+          ].forEach(function(tip) { tips.appendChild(el('li', null, tip)); });
+          body.appendChild(tips);
+
+          // "Instructions can be viewed as" styled like a description paragraph
+          var intro = el('p', { class: 'ce-inspector-desc' }, 'Instructions can be viewed as');
+          body.appendChild(intro);
+
+          var tbl = el('table', { class: 'ce-instr-table' });
+          var thead = el('thead');
+          thead.appendChild(el('tr', null, [
+            el('th', null, ''),
+            el('th', null, 'File'),
+            el('th', null, 'Conceptual'),
+            el('th', null, 'Controlled By')
+          ]));
+          tbl.appendChild(thead);
+          var tbody = el('tbody');
+          [
+            { icon: '🧬', file: 'CLAUDE.md', concept: 'Mechanism to guide behaviour', by: 'User 👨🏾‍💻' },
+            { icon: '🧠', file: 'MEMORY.md', concept: 'Accumulated knowledge through experience', by: '🤖' }
+          ].forEach(function(row) {
+            tbody.appendChild(el('tr', null, [
+              el('td', null, row.icon),
+              el('td', null, row.file),
+              el('td', null, row.concept),
+              el('td', null, row.by)
+            ]));
+          });
+          tbl.appendChild(tbody);
+          body.appendChild(tbl);
+        } else {
+          body.appendChild(el('h3', null, layer.sublabel));
+          var desc = el('p', { class: 'ce-inspector-desc' });
+          desc.appendChild(renderDescription(layer.description));
+          body.appendChild(desc);
+        }
+
+        // Precedence chain (only for layers with multiple ordered files, not memory)
+        if (state.selectedLayer !== 'memory' && layer.precedenceFiles && layer.precedenceFiles.length > 1) {
           body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Precedence (highest → lowest)'));
           var chain = el('div', { class: 'ce-precedence-chain' });
           layer.precedenceFiles.forEach(function(fid, idx) {
@@ -1135,6 +1579,7 @@
           body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Worked example'));
           body.appendChild(el('pre', { class: 'ce-inspector-example' }, layer.interactionExample));
         }
+
 
         return;
       }
@@ -1195,16 +1640,42 @@
       mcpCallout.style.display = visible ? '' : 'none';
     }
 
+    // In the 4-col wide layout, synchronise inspector + context heights to
+    // match the taller of the bands/filesystem columns. Temporarily zeroes
+    // their heights so they don't inflate the grid row measurement.
+    function syncWideHeights() {
+      if (window.innerWidth < 1600) {
+        inspectorPanel.style.height = '';
+        contextPanel.style.height = '';
+        return;
+      }
+      inspectorPanel.style.height = '0';
+      contextPanel.style.height = '0';
+      // The bands/filesystem cells share grid row 2 with inspector/context.
+      // With inspector/context zeroed (and box-sizing: border-box), row 2's
+      // height is determined by the bands and filesystem natural heights.
+      var h = Math.max(leftCol.offsetHeight, rightCol.offsetHeight);
+      inspectorPanel.style.height = h + 'px';
+      contextPanel.style.height = h + 'px';
+    }
+
     function rerender() {
       renderEntryBand();
       renderBands();
       renderTree();
       renderInspector();
+      renderContext();
       renderPortabilityNote();
-      updateBulkBtnLabel();
+      syncWideHeights();
     }
 
     rerender();
+
+    var _resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(syncWideHeights, 50);
+    });
 
     return {
       selectLayer: selectLayer,

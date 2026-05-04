@@ -41,6 +41,14 @@
     --coral-strong:   #A54F32;   // hover/active
     --coral-wash:     #F6E9DF;   // viz.callout background
 
+    // Scrollbars (per design language v3). Track stays transparent;
+    // the thumb pulls from the line/inkFaint range so it reads as
+    // "ink on paper" rather than chrome, and shifts to coral on hover.
+    --sb-track:        #F3F1EC;   // paperInset
+    --sb-thumb:        #C9C5BC;   // between line and inkFaint
+    --sb-thumb-hover:  #C96442;   // coral
+    --sb-thumb-active: #A54F32;   // coral-strong
+
     // Syntax (inside code blocks, mono visualisations)
     --sx-text:        #3A3A3D;
     --sx-keyword:     #9A4A28;
@@ -119,6 +127,11 @@
     --coral-strong:   #F0A285;
     --coral-wash:     #3D2C24;
 
+    --sb-track:        #2A2A2E;   // slightly inset from paper
+    --sb-thumb:        #4A4A4F;   // between line and inkFaint
+    --sb-thumb-hover:  #E8957A;   // coral
+    --sb-thumb-active: #F0A285;   // coral-strong
+
     --sx-text:        #D9D9DE;
     --sx-keyword:     #E8957A;
     --sx-string:      #E8B895;
@@ -138,6 +151,52 @@
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) { @include _design-dark-palette; }
 }
+
+// =====================================================================
+// SCROLLBARS -- design language v3.
+//
+// Thin, no buttons, transparent track. Thumb pulls from the
+// line/inkFaint range so it reads as "ink on paper" rather than
+// browser chrome. Coral on hover for affordance. The 3px transparent
+// border + background-clip:padding-box trick keeps the visible thumb
+// stripe at ~4px while the actual scrollbar gutter stays 10px wide,
+// so the hit target is comfortable but the visual weight is light.
+// =====================================================================
+
+// Firefox
+html, * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) transparent;
+}
+
+// WebKit / Blink
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background: transparent;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+    border: none;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--sb-thumb);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.15s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--sb-thumb-hover);
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:active {
+    background-color: var(--sb-thumb-active);
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-corner { background: transparent; }
+// Hide the up/down arrow buttons WebKit puts on some platforms.
+::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
 
 // =====================================================================
 // SEMANTIC ROLES -- addressable utility classes.

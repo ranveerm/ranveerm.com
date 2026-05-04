@@ -8,7 +8,7 @@ tags: [LLM]
 
 <!-- excerpt-start -->
 
-Each component in the Claude Code environment, including <span class="ce-term-link" data-layer="memory">instructions files</span>, <span class="ce-term-link" data-layer="config">settings</span>, <span class="ce-term-link" data-layer="invocable">skills</span>, <span class="ce-term-link" data-layer="delegation">agents</span>, <span class="ce-term-link" data-layer="automation">hooks</span> and <span class="ce-term-link" data-layer="external">MCP servers</span>, shapes how the model interprets intent, chooses tools, and produces output.
+Each component in the Claude Code environment, including <span class="ce-term-link" data-layer="memory">instructions files</span>, <span class="ce-term-link" data-layer="config">settings</span>, <span class="ce-term-link" data-layer="invocable">skills</span>, <span class="ce-term-link" data-layer="delegation">agents</span>, <span class="ce-term-link" data-layer="automation">hooks</span> and <span class="ce-term-link" data-layer="external">MCP servers</span>, shapes how the model interprets intent, chooses tools, and produces output. This visualisation **distills content/tips/suggestions** from [Claude Code Docs](https://code.claude.com/docs/en/claude-directory#ce-skill-review-md), which serves as the more comprehensive reference on this subject.
 
 <!--end-excerpt-->
 
