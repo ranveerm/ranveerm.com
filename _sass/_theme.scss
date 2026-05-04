@@ -41,6 +41,11 @@
     --coral-strong:   #A54F32;   // hover/active
     --coral-wash:     #F6E9DF;   // viz.callout background
 
+    // Table surfaces (header is a sunk shelf; body is the raised sheet)
+    --table-head:     #F3F1EC;   // paperInset, sunk shelf
+    --table-body:     #FFFFFF;   // raised sheet (paper-raised equivalent)
+    --table-line:     #E8E6E1;   // same warm hairline as --line
+
     // Scrollbars (per design language v3). Track stays transparent;
     // the thumb pulls from the line/inkFaint range so it reads as
     // "ink on paper" rather than chrome, and shifts to coral on hover.
@@ -126,6 +131,12 @@
     --coral:          #E8957A;
     --coral-strong:   #F0A285;
     --coral-wash:     #3D2C24;
+
+    // Table surfaces: header sunk deeper than paper; body clearly lifted;
+    // dividers slightly warmer than --line so rows read at low contrast.
+    --table-head:      #1F1F23;
+    --table-body:      #2F2F33;
+    --table-line:      #3F3F44;
 
     --sb-track:        #2A2A2E;   // slightly inset from paper
     --sb-thumb:        #4A4A4F;   // between line and inkFaint
@@ -546,6 +557,52 @@ code.chip {
     font-family: var(--font-mono);
     font-size: var(--size-sm);
     font-variant-numeric: tabular-nums;
+}
+
+// --- Table ---------------------------------------------------------------
+// Outer frame clips a generously-rounded card. Header is a sunk shelf
+// (--table-head); body is a single continuous raised sheet (--table-body)
+// divided by hairlines. Never per-row pill backgrounds.
+
+.role-table-frame {
+    background: var(--table-body);
+    border: 1px solid var(--table-line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.role-table-head {
+    background: var(--table-head);
+    border-bottom: 1px solid var(--table-line);
+}
+.role-table-head-cell {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-table-divider {
+    border-top: 1px solid var(--table-line);
+}
+.role-table-cell {
+    color: var(--ink-secondary);
+    font-family: var(--font-text);
+    font-size: var(--size-md);
+    font-weight: 400;
+    line-height: var(--lh-normal);
+}
+.role-table-cell-mono {
+    color: var(--coral);
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+    font-weight: 500;
+}
+.role-table-cell-meta {
+    color: var(--ink-muted);
+    font-family: var(--font-display);
+    font-size: var(--size-smd);
+    font-weight: 400;
 }
 
 // --- Site chrome --------------------------------------------------------
