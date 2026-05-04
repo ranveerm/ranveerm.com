@@ -635,9 +635,9 @@
       /* Instruction-layer table (🧬 / 🧠 breakdown) */
       '.claudeenv .ce-instr-table { width: 100%; border-collapse: separate; border-spacing: 0; font-family: var(--font-text); font-size: var(--size-smd); margin-bottom: 14px; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; }',
       '.claudeenv .ce-instr-table thead { background: var(--table-head); }',
-      '.claudeenv .ce-instr-table th { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); padding: 6px 20px; text-align: left; border-bottom: 1px solid var(--table-line); background: transparent; }',
+      '.claudeenv .ce-instr-table th { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); padding: 14px 20px; text-align: left; border: none; border-bottom: 1px solid var(--table-line); background: transparent; }',
       '.claudeenv .ce-instr-table tbody tr { background: transparent; }',
-      '.claudeenv .ce-instr-table td { padding: 12px 20px; color: var(--ink-secondary); border-top: 1px solid var(--table-line); vertical-align: middle; line-height: var(--lh-normal); font-size: var(--size-md); background: transparent; }',
+      '.claudeenv .ce-instr-table td { padding: 16px 20px; color: var(--ink-secondary); border: none; border-top: 1px solid var(--table-line); vertical-align: middle; line-height: var(--lh-normal); font-size: var(--size-md); background: transparent; }',
       '.claudeenv .ce-instr-table tr:first-child td { border-top: none; }',
       '.claudeenv .ce-instr-table td:first-child { font-size: 1.05rem; width: 28px; text-align: center; padding-right: 8px; }',
       '.claudeenv .ce-instr-table td:nth-child(2) { font-family: var(--font-mono); font-size: var(--size-smd); color: var(--coral); font-weight: 500; white-space: nowrap; }',
