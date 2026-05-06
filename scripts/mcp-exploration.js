@@ -424,11 +424,10 @@
     var panel = div('mcp-panel');
     var active = 'host';
 
-    // Component selector pills, sit at the very top of the panel so the
+    // Component selector tabs, sit at the very top of the panel so the
     // user can pick host / client / server without scrolling past the
     // visualisation first.
-    var btnsBar = div('');
-    btnsBar.style.cssText = 'display:flex;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap';
+    var btnsBar = div('mcp-tabs');
     panel.appendChild(btnsBar);
 
     var svgBg = div('');
@@ -587,13 +586,8 @@
       btnsBar.innerHTML = '';
       NODES.forEach(function (n) {
         var btn = document.createElement('button');
-        btn.className = 'mcp-arch-btn' + (n.id === active ? ' active' : '');
+        btn.className = 'mcp-tab' + (n.id === active ? ' active' : '');
         btn.textContent = n.label;
-        if (n.id === active) {
-          btn.style.borderColor = n.colorLit;
-          btn.style.color = n.colorLit;
-          btn.style.background = n.colorLit + '22';
-        }
         btn.onclick = function () { setActive(n.id); };
         btnsBar.appendChild(btn);
       });

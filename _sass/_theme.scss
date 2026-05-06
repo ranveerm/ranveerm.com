@@ -574,13 +574,15 @@ code.chip {
     background: var(--table-head);
     border-bottom: 1px solid var(--table-line);
 }
+// Per design language v3: header cells switched from mono caps to
+// sans-serif 13/600 inkPrimary so the title bar reads as emphasised
+// hierarchy against the body, instead of as a quiet eyebrow.
 .role-table-head-cell {
-    color: var(--ink-faint);
-    font-family: var(--font-mono);
-    font-size: var(--size-xs);
-    font-weight: 400;
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
+    color: var(--ink-primary);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 600;
+    letter-spacing: var(--track-snug);
 }
 .role-table-divider {
     border-top: 1px solid var(--table-line);
@@ -601,6 +603,137 @@ code.chip {
 .role-table-cell-meta {
     color: var(--ink-muted);
     font-family: var(--font-display);
+    font-size: var(--size-smd);
+    font-weight: 400;
+}
+
+// --- Viz callout rule ----------------------------------------------------
+// The 1px coral leading rule on the left of viz.callout. Use as a left
+// border on a wrapper or as background on a 1px sliver child.
+.role-viz-callout-rule { color: var(--coral); }
+
+// --- Panel ---------------------------------------------------------------
+// Interactive widget container. Frame is a raised rounded card; bar is
+// the eyebrow strip on top; body is the live area below; divider is the
+// hairline between bar and body.
+.role-panel-frame {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+.role-panel-bar {
+    background: var(--paper-inset);
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-panel-body { background: var(--paper-raised); }
+.role-panel-divider { border-top: 1px solid var(--line); }
+
+// --- Tabs ---------------------------------------------------------------
+// Horizontal tab bar with a hairline under the row; active tab gets a
+// 2px coral underline. On mobile, prefer a vertical segmented list:
+// full-width rows with a 3px coral leading bar on the active row.
+.role-tab-bar { border-bottom: 1px solid var(--line); }
+.role-tab {
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-tab-active {
+    color: var(--ink-primary);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-weight: 500;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--coral);
+}
+
+// --- Pill ---------------------------------------------------------------
+// Outline chip in mono micro caps. Default uses inkMuted; accent uses
+// coral for emphasis. Radius 999px for full pill.
+.role-pill {
+    color: var(--ink-muted);
+    border: 1px solid var(--ink-muted);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    font-weight: 500;
+    letter-spacing: var(--track-loose);
+    text-transform: uppercase;
+}
+.role-pill-accent {
+    color: var(--coral);
+    border: 1px solid var(--coral);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    font-weight: 500;
+    letter-spacing: var(--track-loose);
+    text-transform: uppercase;
+}
+
+// --- Meta ---------------------------------------------------------------
+// Mono key/value rows. Label is an eyebrow-tracked micro caps; value is
+// regular mono at sm.
+.role-meta-label {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-meta-value {
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    font-weight: 400;
+}
+
+// --- Timeline -----------------------------------------------------------
+// About-page entries: alternating cards on a centre rule. Entry is the
+// raised card; heading is the role title; range is the date interval
+// rendered as eyebrow-tracked sans micro caps.
+.role-timeline-entry {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+.role-timeline-heading {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-xl);
+    font-weight: 500;
+    letter-spacing: var(--track-snug);
+}
+.role-timeline-range {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
+    font-size: var(--size-smd);
+    font-weight: 400;
+    letter-spacing: var(--track-loose);
+    text-transform: uppercase;
+}
+
+// --- Gallery ------------------------------------------------------------
+// Photo thumbnails: framed raised tile with hairline + soft radius;
+// caption sits beneath in muted sans.
+.role-gallery-thumb {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+.role-gallery-caption {
+    color: var(--ink-muted);
+    font-family: var(--font-text);
     font-size: var(--size-smd);
     font-weight: 400;
 }
