@@ -43,11 +43,20 @@
       '.mcp-stat-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); color: var(--ink-faint); text-transform: uppercase; margin-bottom: 6px; }',
       '.mcp-stat-value { font-family: var(--font-display); font-size: 28px; font-weight: 400; }',
 
-      /* Tabs */
+      /* Tabs — desktop: horizontal bar with coral 2px bottom indicator.
+         Mobile (≤640px): vertical segmented list with 3px coral left bar
+         on the active row. !important is required on the mobile active rule
+         because §03/§08 apply borderBottomColor as an inline style. */
       '.mcp-tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }',
       '.mcp-tab { padding: 14px 18px; background: transparent; border: none; border-right: 1px solid var(--line); cursor: pointer; font-family: var(--font-display); font-size: var(--size-lg); color: var(--ink-muted); border-bottom: 2px solid transparent; transition: color .15s, background .15s; white-space: nowrap; flex: 1; min-width: 90px; letter-spacing: var(--track-snug); }',
       '.mcp-tab:last-child { border-right: none; }',
       '.mcp-tab.active { color: var(--ink-primary); background: var(--paper-inset); border-bottom-color: var(--coral); }',
+      '@media (max-width: 640px) {' +
+        '.mcp-tabs { flex-direction: column; border-bottom: none; overflow-x: visible; }' +
+        '.mcp-tab { border-right: none; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; text-align: left; padding: 14px 18px 14px 17px; }' +
+        '.mcp-tab:last-child { border-bottom: none; }' +
+        '.mcp-tab.active { border-bottom-color: var(--line) !important; border-left-color: var(--coral) !important; }' +
+      '}',
 
       /* Code */
       '.mcp-code-header { padding: 8px 14px; background: var(--paper-inset); border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-muted); display: flex; align-items: center; gap: 8px; }',
