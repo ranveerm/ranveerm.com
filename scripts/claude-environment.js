@@ -41,7 +41,7 @@
         '  docs note Claude "may pick one arbitrarily". Putting personal\n' +
         '  overrides in CLAUDE.local.md gets them read last, which tends\n' +
         '  to nudge the model, but is not guaranteed.',
-      nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'rules']
+      nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'rules', 'auto-memory']
     },
     config: {
       label: '2. Permissions',
@@ -188,6 +188,24 @@
         ]
       }
     },
+    'auto-memory': {
+      layer: 'memory', label: 'MEMORY.md', icon: 'file-text-o',
+      title: 'Auto-memory (MEMORY.md)',
+      description: "Claude's own accumulating notes, written and updated automatically across sessions. Lives at `~/.claude/projects/<project>/memory/MEMORY.md`. Loaded every session alongside `CLAUDE.md`. As the index grows, topic files (e.g. `debugging.md`) are split out and loaded on demand.",
+      example: '# MEMORY.md\n\n## user\n- Senior engineer, TypeScript / Go background\n- Prefers terse responses, no trailing summaries\n\n## feedback\n- Don\'t mock the database in tests (prior incident)\n- Bundle related changes into one PR\n\n## project\n- Auth rewrite driven by compliance deadline\n- Merge freeze begins 2026-06-01\n\n## reference\n- Bugs tracked in Linear project "AUTH"',
+      priority: 'Loaded every session; toggle with /memory or disable via autoMemoryEnabled',
+      tokens: 800,
+      tokenNote: 'First 200 lines of MEMORY.md (capped at 25 KB) load every session alongside CLAUDE.md. Topic files load on demand.',
+      extended: {
+        heading: 'Memory categories',
+        body: [
+          { label: 'user', text: 'Role, preferences, and background. Helps Claude tailor explanations to how you work.' },
+          { label: 'project', text: 'Goals, decisions, and constraints for this project. The "why" behind ongoing work.' },
+          { label: 'feedback', text: 'Corrections and confirmed approaches from prior sessions. Prevents repeating past mistakes.' },
+          { label: 'reference', text: 'Pointers to external systems: Linear boards, dashboards, design docs.' }
+        ]
+      }
+    },
     'settings-local': {
       layer: 'config', label: 'settings.local.json', icon: 'cog',
       title: 'settings.local.json',
@@ -301,13 +319,14 @@
       tokenNote: 'Filesystem only. No model context impact.'
     },
     sessions: {
-      layer: 'state', label: 'projects/', icon: 'sitemap',
-      title: '~/.claude/projects/',
-      description: 'Auto-memory: Claude maintains its own notes per project at `~/.claude/projects/<project>/memory/MEMORY.md`. The `<project>` key is derived from the git repository, so all worktrees and subdirectories of the same repo share one memory directory. `MEMORY.md` acts as an index; topic files (e.g. `debugging.md`) get split out as content grows. Session transcripts also live here for `--resume`.',
-      example: '~/.claude/projects/<project>/\n├── memory/\n│   ├── MEMORY.md         (Claude writes this)\n│   ├── debugging.md      (topic file, on-demand)\n│   └── architecture.md\n└── sessions/\n    └── session-<id>.json',
-      priority: 'On by default; toggle with /memory or autoMemoryEnabled',
-      tokens: 800,
-      tokenNote: 'First 200 lines of MEMORY.md (capped at 25 KB) load every session; topic files load on demand. Sessions only enter context on --resume.'
+      layer: 'state', label: 'Projects', icon: 'sitemap',
+      title: 'Projects (~/.claude/projects/)',
+      description: 'Session transcripts stored on disk. Each conversation is saved here so you can `--resume` a prior session to replay its turn history into context. The `<project>` key is derived from the git repository, so all worktrees share one projects directory.',
+      example: '~/.claude/projects/<project>/\n└── sessions/\n    └── session-<id>.json',
+      priority: 'On-disk only; never enters context unless you --resume',
+      tokens: 0,
+      tokenNote: 'Filesystem only. Session transcripts enter context only on --resume.',
+      seeAlso: { nodeId: 'auto-memory', label: 'Auto-memory (MEMORY.md)' }
     }
   };
 
@@ -1048,8 +1067,9 @@
       if (state.expandedUser) {
         var userChildren = el('div', { class: 'ce-tree-children' });
         userChildren.appendChild(fileRow('claude-md-global', 'CLAUDE.md', 'file-text-o', 1));
+        userChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 1));
         userChildren.appendChild(fileRow('settings-global', 'settings.json', 'cog', 1));
-        userChildren.appendChild(fileRow('sessions', 'projects/', 'folder-o', 1, true));
+        userChildren.appendChild(fileRow('sessions', 'Projects', 'sitemap', 1, true));
         treeBody.appendChild(userChildren);
       }
 
@@ -1324,7 +1344,7 @@
       { id: 'claude-md-project', label: './CLAUDE.md' },
       { id: 'claude-local',      label: './CLAUDE.local.md' },
       { id: 'rules',             label: '.claude/rules/' },
-      { id: 'sessions',          label: '~/.claude/projects/<project>/memory/MEMORY.md' }
+      { id: 'auto-memory',       label: '~/.claude/projects/<project>/memory/MEMORY.md' }
     ];
 
     var SETTINGS_REFS = [
@@ -1635,6 +1655,12 @@
       if (node.example) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'Example'));
         body.appendChild(el('pre', { class: 'ce-inspector-example' }, node.example));
+      }
+      if (node.seeAlso) {
+        body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'See also'));
+        var seeAlsoBtn = el('button', { class: 'ce-precedence-file', type: 'button' }, node.seeAlso.label);
+        hook(seeAlsoBtn, function() { selectNode(node.seeAlso.nodeId); });
+        body.appendChild(seeAlsoBtn);
       }
     }
 

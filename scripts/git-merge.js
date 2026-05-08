@@ -209,37 +209,37 @@
     var sameRow = Math.abs(y1 - y2) < 2;
     var d;
     if (sameRow) {
-      d = 'M ' + (x1 + 11) + ' ' + y1 + ' L ' + (x2 - 11) + ' ' + y2;
+      d = 'M ' + (x1 + 16) + ' ' + y1 + ' L ' + (x2 - 16) + ' ' + y2;
     } else {
-      var startOffset = (y2 > y1 ? 6 : -6);
-      var endOffset   = (y2 > y1 ? -6 : 6);
-      d = 'M ' + (x1 + 8) + ' ' + (y1 + startOffset) +
+      var startOffset = (y2 > y1 ? 9 : -9);
+      var endOffset   = (y2 > y1 ? -9 : 9);
+      d = 'M ' + (x1 + 12) + ' ' + (y1 + startOffset) +
           ' C ' + (x1 + 30) + ' ' + y1 + ', ' + (x2 - 30) + ' ' + y2 +
-          ', ' + (x2 - 8) + ' ' + (y2 + endOffset);
+          ', ' + (x2 - 12) + ' ' + (y2 + endOffset);
     }
     var dash = opts.dashed ? ' stroke-dasharray="4 4"' : '';
     var op   = opts.opacity != null ? ' stroke-opacity="' + opts.opacity + '"' : '';
-    return '<path d="' + d + '" stroke="' + color + '" stroke-width="' + (opts.width || 2) + '" fill="none"' + dash + op + '/>';
+    return '<path d="' + d + '" stroke="' + color + '" stroke-width="' + (opts.width || 1.5) + '" fill="none"' + dash + op + '/>';
   }
 
   function svgCommit(x, y, color, label, opts) {
     opts = opts || {};
     var ring = '';
     if (opts.merge) {
-      ring = '<circle cx="' + x + '" cy="' + y + '" r="16" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-dasharray="2 3" stroke-opacity="0.7"/>';
+      ring = '<circle cx="' + x + '" cy="' + y + '" r="24" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-dasharray="2 3" stroke-opacity="0.7"/>';
     }
     var inner = opts.merge
-      ? '<circle cx="' + x + '" cy="' + y + '" r="11" fill="var(--paper-inset)" stroke="' + color + '" stroke-width="2.2"/>' +
-        '<circle cx="' + x + '" cy="' + y + '" r="4.5" fill="' + color + '"/>'
-      : '<circle cx="' + x + '" cy="' + y + '" r="11" fill="var(--paper-inset)" stroke="' + color + '" stroke-width="2.2"/>';
+      ? '<circle cx="' + x + '" cy="' + y + '" r="16" fill="var(--paper-inset)" stroke="' + color + '" stroke-width="1.5"/>' +
+        '<circle cx="' + x + '" cy="' + y + '" r="7" fill="' + color + '"/>'
+      : '<circle cx="' + x + '" cy="' + y + '" r="16" fill="var(--paper-inset)" stroke="' + color + '" stroke-width="1.5"/>';
     var labelEl = label
-      ? '<text x="' + x + '" y="' + (y + 3.5) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="9.5" font-weight="600" fill="' + color + '">' + label + '</text>'
+      ? '<text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="14" font-weight="600" fill="' + color + '">' + label + '</text>'
       : '';
     var head = '';
     if (opts.head) {
       head =
-        '<rect x="' + (x - 22) + '" y="' + (y - 38) + '" width="44" height="18" rx="3" fill="' + color + '"/>' +
-        '<text x="' + x + '" y="' + (y - 25) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="var(--paper-raised)" letter-spacing="0.5">HEAD</text>';
+        '<rect x="' + (x - 26) + '" y="' + (y - 50) + '" width="52" height="18" rx="3" fill="' + color + '"/>' +
+        '<text x="' + x + '" y="' + (y - 37) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="13" font-weight="700" fill="var(--paper-raised)" letter-spacing="0.5">HEAD</text>';
     }
     var op = opts.dim ? ' opacity="0.35"' : '';
     return '<g' + op + '>' + ring + inner + labelEl + head + '</g>';
@@ -247,7 +247,7 @@
 
   function svgBranchLabel(x, y, label, color) {
     return '<g>' +
-      '<rect x="' + x + '" y="' + (y - 10) + '" width="60" height="20" rx="3" fill="var(--paper-raised)" stroke="' + color + '"/>' +
+      '<rect x="' + x + '" y="' + (y - 10) + '" width="60" height="20" rx="3" fill="var(--paper-raised)" stroke="' + color + '" stroke-width="1.5"/>' +
       '<text x="' + (x + 30) + '" y="' + (y + 4) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="10" font-weight="600" fill="' + color + '">' + label + '</text>' +
       '</g>';
   }
@@ -347,7 +347,7 @@
         svgEdge(xs[3], mainY, xs[4], mainY, INK) +
         svgEdge(xs[2], mainY, xs[3], featY, ACC) +
         svgEdge(xs[3], featY, xs[4], featY, ACC) +
-        svgRing(xs[2], mainY, 22, ACC) +
+        svgRing(xs[2], mainY, 33, ACC) +
         svgCaption(xs[2], mainY + 50, ACC, '← merge base') +
         svgCommit(xs[0], mainY, INK, 'a1') +
         svgCommit(xs[1], mainY, INK, 'b2') +
@@ -356,8 +356,8 @@
         svgCommit(xs[4], mainY, INK, 'e5', { head: true }) +
         svgCommit(xs[3], featY, ACC, 'f6') +
         svgCommit(xs[4], featY, ACC, 'g7') +
-        svgBranchLabel(xs[4] + 20, mainY, 'main', INK) +
-        svgBranchLabel(xs[4] + 20, featY, 'feature', ACC) +
+        svgBranchLabel(xs[4] + 28, mainY, 'main', INK) +
+        svgBranchLabel(xs[4] + 28, featY, 'feature', ACC) +
       '</svg>';
     sec.appendChild(div('gm-frame', svg));
 
@@ -438,14 +438,14 @@
           svgEdge(xs[4], mainY, xs[5], mainY, ACC) +
           svgEdge(xs[4], featY, xs[5], mainY, ACC) +
           svgCommit(xs[5], mainY, ACC, 'M', { merge: true, head: true }) +
-          svgBranchLabel(xs[5] + 20, mainY, 'main', INK) +
-          svgBranchLabel(xs[4] + 25, featY, 'feature', ACC);
+          svgBranchLabel(xs[5] + 36, mainY, 'main', INK) +
+          svgBranchLabel(xs[4] + 28, featY, 'feature', ACC);
       } else {
         rest =
           svgEdge(xs[4], mainY, xs[5], mainY, ACC, { dashed: true }) +
           svgCommit(xs[5], mainY, ACC, "g7'", { head: true }) +
-          svgBranchLabel(xs[5] + 20, mainY, 'main', INK) +
-          svgBranchLabel(xs[4] + 25, featY, 'feature', ACC) +
+          svgBranchLabel(xs[5] + 28, mainY, 'main', INK) +
+          svgBranchLabel(xs[4] + 28, featY, 'feature', ACC) +
           svgCaption(xs[5], mainY - 50, ACC, 'new commit, same diff');
       }
       svgBg.innerHTML = '<svg viewBox="0 0 540 240">' + trunk + rest + '</svg>';
@@ -788,7 +788,7 @@
     var mainY = 75, featY = 165;
     var xs = [60, 140, 220, 300, 380];
     var svg =
-      '<svg viewBox="0 0 460 230">' +
+      '<svg viewBox="0 0 480 230">' +
         svgEdge(xs[0], mainY, xs[1], mainY, INK) +
         svgEdge(xs[1], mainY, xs[2], mainY, INK) +
         svgEdge(xs[2], mainY, xs[3], mainY, INK) +
@@ -803,8 +803,8 @@
         svgCommit(xs[2], featY, ACC, 'f6') +
         svgCommit(xs[3], featY, ACC, 'g7') +
         svgCommit(xs[4], mainY, ACC, 'M', { merge: true, head: true }) +
-        svgBranchLabel(xs[4] + 20, mainY, 'main', INK) +
-        svgBranchLabel(xs[3] + 25, featY, 'feature', ACC) +
+        svgBranchLabel(xs[4] + 36, mainY, 'main', INK) +
+        svgBranchLabel(xs[3] + 28, featY, 'feature', ACC) +
       '</svg>';
     sec.appendChild(div('gm-frame', svg));
 
@@ -879,16 +879,16 @@
           svgEdge(xs[3], featY, xs[4], featY, ACC) +
           svgCommit(xs[3], featY, ACC, 'f6') +
           svgCommit(xs[4], featY, ACC, 'g7', { head: true }) +
-          svgBranchLabel(xs[4] + 25, mainY, 'main', INK) +
-          svgBranchLabel(xs[4] + 25, featY, 'feature', ACC);
+          svgBranchLabel(xs[4] + 28, mainY, 'main', INK) +
+          svgBranchLabel(xs[4] + 28, featY, 'feature', ACC);
       } else {
         rest =
           svgEdge(xs[4], mainY, xs[5], mainY, ACC) +
           svgEdge(xs[5], mainY, xs[6], mainY, ACC) +
           svgCommit(xs[5], mainY, ACC, "f6'") +
           svgCommit(xs[6], mainY, ACC, "g7'", { head: true }) +
-          svgBranchLabel(xs[4] + 25, mainY + 35, 'main', INK) +
-          svgBranchLabel(xs[6] + 20, mainY, 'feature', ACC);
+          svgBranchLabel(xs[4] + 28, mainY + 35, 'main', INK) +
+          svgBranchLabel(xs[6] + 28, mainY, 'feature', ACC);
       }
       svgBg.innerHTML = '<svg viewBox="0 0 560 240">' + trunk + rest + '</svg>';
     }
@@ -1026,17 +1026,17 @@
         // g7 is paused mid-replay: drawn dashed and ringed in coral-strong.
         rest = mainLabel +
           svgEdge(rcXs[5], rcMainY, rcXs[6], rcMainY, ACC, { dashed: true, opacity: 0.6 }) +
-          '<circle cx="' + rcXs[6] + '" cy="' + rcMainY + '" r="22" fill="none" stroke="var(--coral-strong)" stroke-width="1.5" stroke-dasharray="3 3"/>' +
+          '<circle cx="' + rcXs[6] + '" cy="' + rcMainY + '" r="33" fill="none" stroke="var(--coral-strong)" stroke-width="1.5" stroke-dasharray="3 3"/>' +
           svgCommit(rcXs[6], rcMainY, ACC, 'g7', { dim: true }) +
           '<text x="' + rcXs[6] + '" y="' + (rcMainY + 50) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="10" fill="var(--coral-strong)">⚠ paused</text>' +
-          svgBranchLabel(rcXs[6] + 25, rcMainY, 'feature', ACC);
+          svgBranchLabel(rcXs[6] + 44, rcMainY, 'feature', ACC);
       } else {
         rest = mainLabel +
           svgEdge(rcXs[5], rcMainY, rcXs[6], rcMainY, ACC) +
           svgCommit(rcXs[6], rcMainY, ACC, "g7'", { head: true }) +
-          svgBranchLabel(rcXs[6] + 25, rcMainY, 'feature', ACC);
+          svgBranchLabel(rcXs[6] + 28, rcMainY, 'feature', ACC);
       }
-      rcSvgBg.innerHTML = '<svg viewBox="0 0 560 220">' + trunk + rest + '</svg>';
+      rcSvgBg.innerHTML = '<svg viewBox="0 0 580 220">' + trunk + rest + '</svg>';
     }
 
     function renderRc() {
