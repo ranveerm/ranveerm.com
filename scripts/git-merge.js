@@ -97,12 +97,12 @@
       '.gm-table td:last-child { border-right: none; }',
       '.gm-table tr:first-child td { border-top: none; }',
       /* Cells that house a <pre> code block (sec 3 file-version table)
-         drop their padding so the code block fills the cell flush. The
-         pre itself drops its own background/border/radius so the table
-         cell becomes the visible surface: this avoids two stacked code
-         surfaces and prevents the trailing gap below shorter columns
-         (e.g. the "Hi" greeting wrapping less than "Hello"). */
-      '.gm-table td.gm-cell-pre { padding: 0; background: var(--paper-inset); }',
+         drop their padding so the code block fills the cell flush.
+         Cell carries the paper code-surface (matching the MCP
+         Primitives recipe), and the pre is transparent + height 100%
+         so the cell\'s background fills the row uniformly even when a
+         column has fewer lines than the others. */
+      '.gm-table td.gm-cell-pre { padding: 0; background: var(--paper); }',
       '.gm-table td.gm-cell-pre pre.role-code-block { background: transparent; border: none; border-radius: 0; height: 100%; box-sizing: border-box; }',
       '.gm-table tr:nth-child(even) { background: transparent; }',
       '.gm-table code { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
@@ -130,12 +130,15 @@
       '.gm code, .gm-mono { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
 
       /* Block code listing. Uses .role-code-block from the design
-         language for the surface (paper-inset background, line border,
-         smd mono type), plus widget-local helpers for prompt-glyph /
-         command / comment styling. Colours match the design-language
-         siblings .role-code-prompt-glyph (coral) and .role-code-comment
+         language for type/colour, but overrides the surface to match
+         the MCP Primitives recipe (paper background, no border): the
+         code area reads as an "inset hole" in the surrounding panel,
+         which is darker on light pages and darker still in dark mode.
+         Widget-local helpers add prompt-glyph / command / comment
+         styling, mirroring the design-language siblings
+         .role-code-prompt-glyph (coral) and .role-code-comment
          (sx-comment). */
-      '.gm pre.role-code-block { margin: 0 0 16px; padding: 14px 16px; line-height: 1.7; overflow: auto; }',
+      '.gm pre.role-code-block { margin: 0 0 16px; padding: 14px 16px; line-height: 1.7; overflow: auto; background: var(--paper); border: none; border-radius: 6px; }',
       '.gm pre.role-code-block .prompt { color: var(--coral); user-select: none; font-weight: 600; }',
       '.gm pre.role-code-block .cmd { color: var(--ink-primary); }',
       '.gm pre.role-code-block .cmt { color: var(--sx-comment); font-style: italic; }',
@@ -151,7 +154,7 @@
       '.gm pre.role-code-block .line { display: block; }',
       '.gm pre.role-code-block .gm-cm { color: var(--coral); font-weight: 600; }',
       '.gm pre.role-code-block .gm-cmt { color: var(--sx-comment); font-style: italic; }',
-      '.gm pre.role-code-block .gm-ours { background: var(--paper); margin: 0 -16px; padding: 0 16px; }',
+      '.gm pre.role-code-block .gm-ours { background: var(--paper-inset); margin: 0 -16px; padding: 0 16px; }',
       '.gm pre.role-code-block .gm-theirs { background: var(--coral-wash); margin: 0 -16px; padding: 0 16px; color: var(--ink-primary); }',
       '.gm-conflict-foot { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-md); line-height: var(--lh-body); margin: 10px 0 0; }',
       /* Syntax helpers reusing the design language\'s sx-* tokens. */
@@ -159,14 +162,14 @@
       '.gm-str { color: var(--sx-string); }',
 
       /* Merge-commit variants (§04). Tabbed code block with a fixed
-         min-height so the panel doesn\'t jump as the user switches tabs.
-         The wrapper sits on the panel surface (paper-raised) and lets
-         the inner role-code-block use its design-language default
-         (paper-inset, hairline border, 6px radius), so the commit log
-         reads with the same recipe as every other code block on the
-         page. */
-      '.gm-commit-area { background: var(--paper-raised); padding: 14px 16px; min-height: 270px; box-sizing: border-box; }',
-      '.gm-commit-area pre { margin: 0; overflow-x: auto; }',
+         min-height so the panel doesn\'t jump as the user switches
+         tabs. The wrapper carries the paper code-surface itself
+         (matching .mcp-code from the MCP Primitives recipe), so the
+         tabs sit on the paper-raised panel above and the commit log
+         reads as a darker "inset" beneath. The inner pre is
+         transparent so the wrapper\'s background fills uniformly. */
+      '.gm-commit-area { background: var(--paper); padding: 14px 16px; min-height: 270px; box-sizing: border-box; }',
+      '.gm-commit-area pre { margin: 0; overflow-x: auto; background: transparent; border: none; border-radius: 0; padding: 0; }',
       '.gm-commit-area .line { display: block; }',
       '.gm-commit-area .gm-cmt { color: var(--sx-comment); font-style: italic; }',
       '.gm-commit-area .gm-key { color: var(--ink-faint); }',
