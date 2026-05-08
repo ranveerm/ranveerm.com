@@ -24,136 +24,142 @@
     theory:   { label: 'FOUNDATIONS' },
   };
 
+  // Node positions are given as percentages of the SVG viewBox (1000×760).
+  // Each circle has radius R=50px. Minimum centre-to-centre distance to avoid
+  // overlap is 110px (100px diameter + 10px gap). This translates to:
+  //   same-x columns: y difference > 14.5%
+  //   same-y rows:    x difference > 11%
+  // All pairs below satisfy these constraints.
   var NODES = [
-    { id: 'text',    cluster: 'input',  x: 8,  y: 20, label: 'Raw text',
+    { id: 'text',    cluster: 'input',    x: 8,  y: 18, label: 'Raw text',
       summary: 'Language in its native form: letters, words, whitespace, before any processing.',
       plain: 'Just text as a human wrote it. The model cannot work with characters directly; everything after this is about turning the text into something mathematical.',
       feel:  'Think of it as the unopened letter. Still sealed, still continuous, still in human form.',
       session: null },
 
-    { id: 'tok',     cluster: 'input',  x: 24, y: 12, label: 'Tokenisation',
+    { id: 'tok',     cluster: 'input',    x: 24, y: 10, label: 'Tokenisation',
       summary: 'Breaks text into a finite inventory of pieces, each with an integer ID.',
       plain: 'The text is chopped into pieces drawn from a fixed list, often around 50,000 to 200,000 of them. Common words become one token; rare words get split into smaller pieces. Each piece is replaced by its ID number.',
       feel:  'Like transcribing speech into a phonetic alphabet. You fix the set of symbols first; then everything you ever write has to be spelled using only those.',
       session: 'S8' },
 
-    { id: 'embed',   cluster: 'input',  x: 40, y: 22, label: 'Embedding',
+    { id: 'embed',   cluster: 'input',    x: 40, y: 22, label: 'Embedding',
       summary: 'Each token ID becomes a vector of numbers that captures its meaning.',
-      plain: 'The model has a giant lookup table: token ID in, a list of (typically) several hundred to several thousand numbers out. That list of numbers is the token’s location in a high-dimensional space where related words sit near each other.',
+      plain: 'The model has a giant lookup table: token ID in, a list of (typically) several hundred to several thousand numbers out. That list of numbers is the token\'s location in a high-dimensional space where related words sit near each other.',
       feel:  'Every word gets a pin stuck in a vast map. Words about food cluster in one region, words about weather in another. The map has far too many dimensions to picture, but the principle is the same as any map.',
       session: 'S1' },
 
-    { id: 'pos',     cluster: 'input',  x: 24, y: 30, label: 'Position info',
+    { id: 'pos',     cluster: 'input',    x: 24, y: 30, label: 'Position info',
       summary: 'Injects information about where each token sits in the sequence.',
-      plain: 'The core operation treats its inputs as an unordered bag. Without extra help, “dog bites man” and “man bites dog” would look identical. A position signal is mixed into each token’s vector (or applied when tokens interact) so order is preserved.',
+      plain: 'The core operation treats its inputs as an unordered bag. Without extra help, “dog bites man” and “man bites dog” would look identical. A position signal is mixed into each token\'s vector (or applied when tokens interact) so order is preserved.',
       feel:  'Like numbering the pages of a manuscript before shuffling them for editing. The content is the same; the numbering tells you how it should eventually line up.',
       session: 'S7' },
 
-    { id: 'resid',   cluster: 'core',   x: 56, y: 40, label: 'Residual stream',
+    { id: 'resid',   cluster: 'core',     x: 56, y: 40, label: 'Residual stream',
       summary: 'The main channel running through the whole model. Every layer reads from it and writes back.',
       plain: 'Every token carries a running vector that starts as its embedding and gets updated by each layer. Updates are added on top, not replaced. By the end, this vector has accumulated everything the model has learned to say about that token in this context.',
       feel:  'A painter working in translucent layers. Earlier brushwork shows through the glazes added on top. The final image is every pass combined, not the last pass alone.',
       session: 'S6' },
 
-    { id: 'attn',    cluster: 'core',   x: 42, y: 52, label: 'Attention',
+    { id: 'attn',    cluster: 'core',     x: 42, y: 52, label: 'Attention',
       summary: 'Each token pulls information from other tokens in the sequence.',
       plain: 'For every token, the model works out how much each other token is worth listening to right now, and builds a weighted average of their content. This is how context moves between positions: the only place in the whole architecture where tokens actually interact.',
       feel:  'Like reading a detective novel. When you hit the word “she”, you glance backward to figure out who “she” is. Attention is that glance, happening in parallel for every word, toward every other word.',
       session: 'S3' },
 
-    { id: 'mha',     cluster: 'core',   x: 42, y: 64, label: 'Multiple heads',
+    { id: 'mha',     cluster: 'core',     x: 42, y: 67, label: 'Multiple heads',
       summary: 'Attention is run several times in parallel, each looking for different patterns.',
       plain: 'Instead of one attention operation, the model runs many (often 8 to 96) in parallel on different slices of the vector. Each can specialise: one head might track subject–verb agreement, another might track what a pronoun refers to, another might copy recent text.',
       feel:  'Like a committee of readers, each listening for one thing (rhythm, plot, character voice, foreshadowing) then pooling their notes.',
       session: 'S4' },
 
-    { id: 'mlp',     cluster: 'core',   x: 70, y: 52, label: 'Processing layer',
+    { id: 'mlp',     cluster: 'core',     x: 70, y: 52, label: 'Processing layer',
       summary: 'Each token is transformed independently through a learned nonlinear function.',
-      plain: 'After attention mixes information between tokens, this stage processes each token on its own. It expands the vector to a much larger size, applies a nonlinearity, then projects back. A lot of the model’s factual knowledge appears to live here.',
+      plain: 'After attention mixes information between tokens, this stage processes each token on its own. It expands the vector to a much larger size, applies a nonlinearity, then projects back. A lot of the model\'s factual knowledge appears to live here.',
       feel:  'If attention is the conversation in the room, this is each person going home and thinking it over. No mixing here, just private processing of what was just heard.',
       session: 'S5' },
 
-    { id: 'norm',    cluster: 'core',   x: 70, y: 64, label: 'Normalisation',
+    { id: 'norm',    cluster: 'core',     x: 70, y: 67, label: 'Normalisation',
       summary: 'Keeps the size of numbers stable as signals travel through many layers.',
-      plain: 'Without this, values in the residual stream would drift to very large or very small magnitudes over dozens of layers and the model would fail to train. Normalisation re-centres and rescales each token’s vector so it stays in a healthy range.',
-      feel:  'Tuning the volume between tracks so nothing gets drowned out or clipped. Invisible when it works; a disaster when it doesn’t.',
+      plain: 'Without this, values in the residual stream would drift to very large or very small magnitudes over dozens of layers and the model would fail to train. Normalisation re-centres and rescales each token\'s vector so it stays in a healthy range.',
+      feel:  'Tuning the volume between tracks so nothing gets drowned out or clipped. Invisible when it works; a disaster when it doesn\'t.',
       session: 'S6' },
 
-    { id: 'stack',   cluster: 'core',   x: 56, y: 76, label: 'Repeat ×N',
+    { id: 'stack',   cluster: 'core',     x: 56, y: 76, label: 'Repeat ×N',
       summary: 'The whole attention-plus-processing block is stacked dozens of times.',
       plain: 'A single block only does so much. Stacking (12 layers in small models, 80+ in frontier ones) lets the model build increasingly abstract representations: early layers deal with surface patterns, deeper layers with meaning.',
       feel:  'Drafts. First draft gets the sentences down; second draft tightens them; tenth draft is about rhythm and implication. Each pass sees and refines what the last pass produced.',
       session: null },
 
-    { id: 'unembed', cluster: 'output', x: 74, y: 28, label: 'To vocabulary',
+    { id: 'unembed', cluster: 'output',   x: 74, y: 28, label: 'To vocabulary',
       summary: 'The final vector is turned into a score for every possible next token.',
       plain: 'Multiplying by a large matrix projects the hidden vector back onto the vocabulary. The result is a raw score for every token: how plausible each one is as the next token.',
       feel:  'The moment a writer has narrowed things down and is now weighing candidate words, giving each one a rough score before picking.',
       session: 'S2' },
 
-    { id: 'softmax', cluster: 'output', x: 88, y: 18, label: 'Softmax',
+    { id: 'softmax', cluster: 'output',   x: 88, y: 16, label: 'Softmax',
       summary: 'Converts raw scores into a proper probability distribution.',
-      plain: 'Raw scores can be any real numbers. Softmax exponentiates each one and divides by the total, producing a set of positive values that sum to one. Now they can be read as probabilities: the model’s belief about what comes next.',
+      plain: 'Raw scores can be any real numbers. Softmax exponentiates each one and divides by the total, producing a set of positive values that sum to one. Now they can be read as probabilities: the model\'s belief about what comes next.',
       feel:  'Like sorting candidates by enthusiasm, then expressing each as a share of total enthusiasm. The loudest voice wins the most weight, but the quieter ones still count.',
       session: 'S2' },
 
-    { id: 'sample',  cluster: 'output', x: 93, y: 34, label: 'Pick a token',
+    { id: 'sample',  cluster: 'output',   x: 93, y: 32, label: 'Pick a token',
       summary: 'One token is chosen from the distribution and emitted as output.',
       plain: 'Several strategies: always pick the highest-probability token (deterministic), sample proportionally (adds variation), scale probabilities by a temperature (controls boldness), or restrict to the top few candidates. This is the one irreversible step.',
       feel:  'The writer finally commits. All the deliberation collapses into a single word on the page, and the sentence moves forward.',
       session: 'S10' },
 
-    { id: 'loop',    cluster: 'output', x: 78, y: 46, label: 'Feedback loop',
+    { id: 'loop',    cluster: 'output',   x: 80, y: 46, label: 'Feedback loop',
       summary: 'The chosen token is appended to the input and the whole process restarts.',
       plain: 'Generation is not one forward pass but many. Each new token joins the input, the model runs again, and the next token is produced. What the model writes becomes what it reads.',
       feel:  'The novelist rereading the last sentence before writing the next. The story so far is the prompt for the story still to come.',
       session: null },
 
-    { id: 'loss',     cluster: 'training', x: 28, y: 88, label: 'Loss',
+    { id: 'loss',    cluster: 'training', x: 28, y: 88, label: 'Loss',
       summary: 'A number measuring how wrong the model was about the next token.',
-      plain: 'During training, the true next token is known. The loss compares the predicted distribution to that truth. It is large when the correct token had low predicted probability and small when it had high probability. The model’s only job is to make this number small on average.',
-      feel:  'The red pen. One number that summarises every complaint about the model’s guess, rolled up for every position and every example.',
+      plain: 'During training, the true next token is known. The loss compares the predicted distribution to that truth. It is large when the correct token had low predicted probability and small when it had high probability. The model\'s only job is to make this number small on average.',
+      feel:  'The red pen. One number that summarises every complaint about the model\'s guess, rolled up for every position and every example.',
       session: 'T1' },
 
-    { id: 'backprop', cluster: 'training', x: 46, y: 94, label: 'Backprop',
+    { id: 'backprop', cluster: 'training', x: 46, y: 92, label: 'Backprop',
       summary: 'Works out how much each parameter contributed to the error.',
       plain: 'Starting from the loss, the chain rule is applied backward through the network to compute, for each weight, how a small change would affect the loss. This is pure calculus on a very large graph: the same technique as manual gradient calculation, just automated and done for billions of parameters at once.',
       feel:  'Forensics. The output was wrong; now trace every stroke back through every layer and tag each one with its share of responsibility.',
       session: 'T2' },
 
-    { id: 'optim',    cluster: 'training', x: 64, y: 94, label: 'Optimiser',
+    { id: 'optim',   cluster: 'training', x: 64, y: 92, label: 'Optimiser',
       summary: 'Uses the gradients to nudge each weight in a direction that reduces the loss.',
       plain: 'The simplest rule: subtract a small multiple of the gradient from the weight. Modern optimisers (Adam, AdamW) add momentum and per-parameter scaling so weights that have been moving consistently keep moving, and weights with noisy gradients move cautiously.',
       feel:  'A sculptor tapping a chisel. Thousands of tiny corrective taps, each smaller than you would expect, gradually shaping the piece toward its target form.',
       session: 'T3' },
 
-    { id: 'scale',    cluster: 'training', x: 82, y: 88, label: 'Scale',
+    { id: 'scale',   cluster: 'training', x: 82, y: 88, label: 'Scale',
       summary: 'Loss falls predictably as you add more parameters, more data, and more compute.',
       plain: 'Empirically, bigger models trained on more data give lower loss, and the relationship follows a clean mathematical law. Some abilities appear abruptly at certain scales: the loss curve is smooth but the behaviours it produces are not.',
       feel:  'A skill curve. Hours of practice translate to smooth, predictable progress, until a threshold is crossed and suddenly something new is possible.',
       session: 'T4' },
 
-    { id: 'linalg',   cluster: 'theory', x: 8, y: 54, label: 'Linear algebra',
+    { id: 'linalg',  cluster: 'theory',   x: 8,  y: 56, label: 'Linear algebra',
       summary: 'The language of vectors and their transformations.',
-      plain: 'Almost every operation in the model is a matrix multiply, a projection, or a normalisation. If you can read what a matrix does to a vector, you can read what any layer does. Matrix multiplication is essentially the model’s one true verb.',
-      feel:  'The grammar underneath. Nothing is said in the model that isn’t a rotation, a stretch, or a projection of something that came before.',
+      plain: 'Almost every operation in the model is a matrix multiply, a projection, or a normalisation. If you can read what a matrix does to a vector, you can read what any layer does. Matrix multiplication is essentially the model\'s one true verb.',
+      feel:  'The grammar underneath. Nothing is said in the model that isn\'t a rotation, a stretch, or a projection of something that came before.',
       session: null },
 
-    { id: 'prob',     cluster: 'theory', x: 8, y: 66, label: 'Probability',
+    { id: 'prob',    cluster: 'theory',   x: 8,  y: 70, label: 'Probability',
       summary: 'How the model expresses uncertainty and how training measures mistakes.',
       plain: 'The output is a distribution. The loss is an expectation. The training process is essentially maximum-likelihood estimation: the model is being tuned to assign high probability to the text it was trained on.',
       feel:  'The model never says “this word”; it says “this word 40%, that word 15%, the next one 9%…”. Everything that follows respects that this is a guess.',
       session: null },
 
-    { id: 'calc',     cluster: 'theory', x: 8, y: 78, label: 'Calculus',
+    { id: 'calc',    cluster: 'theory',   x: 8,  y: 84, label: 'Calculus',
       summary: 'Gradients tell us which direction to nudge each weight.',
       plain: 'Training requires knowing how the loss responds to tiny changes in every weight. That is exactly what the derivative measures. The chain rule propagates this information backward through compositions of functions, which is all a neural network is.',
       feel:  'A compass, billions of them, one per weight. Each points toward less error; the optimiser decides how far to walk along each.',
       session: null },
 
-    { id: 'info',     cluster: 'theory', x: 8, y: 42, label: 'Information',
+    { id: 'info',    cluster: 'theory',   x: 8,  y: 42, label: 'Information',
       summary: 'Measures how surprised the model is, which is what training penalises.',
-      plain: 'Cross-entropy is the average number of bits you would waste encoding real text with the model’s predicted distribution. Minimising it is equivalent to compressing the training data as well as possible. A good language model is, in a precise sense, a good compressor of language.',
+      plain: 'Cross-entropy is the average number of bits you would waste encoding real text with the model\'s predicted distribution. Minimising it is equivalent to compressing the training data as well as possible. A good language model is, in a precise sense, a good compressor of language.',
       feel:  'Surprise has a price. The model learns not to be surprised by text that people actually write.',
       session: null },
   ];
@@ -199,65 +205,41 @@
         '.mcp-tab:last-child { border-bottom: none; }' +
         '.mcp-tab.active { border-bottom-color: var(--line) !important; border-left-color: var(--coral) !important; }' +
       '}',
-      '.llmmap .mcp-tabs { margin-bottom: 22px; }',
+      // Outer panel (mirrors .mcp-panel from §02 of the MCP exploration).
+      // Tabs sit at the top; the canvas section uses --paper-inset for visual
+      // separation; the detail section sits below on --paper-raised, divided
+      // by a hairline. The whole thing reads as a single rounded surface.
+      '.llmmap-panel { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }',
 
-      // Single-column stack: SVG canvas on top, detail / connected /
-      // session-index cards beneath. The post layout caps content at
-      // ~740px which is too narrow for a useful side-by-side split, so
-      // the widget always flows vertically (matching the MCP and
-      // sensitivity widgets in this codebase).
-      '.llmmap-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }',
-
-      // Canvas (panel.frame recipe)
-      '.llmmap-canvas { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 14px; padding: 14px; overflow: hidden; }',
+      // Canvas section (paper-inset, mirroring the SVG area in MCP §02)
+      '.llmmap-canvas { background: var(--paper-inset); padding: 20px 18px 12px; }',
       '.llmmap-canvas svg { width: 100%; height: auto; display: block; }',
 
       // SVG element transitions
       '.llmmap-edge { transition: stroke 200ms ease, stroke-width 200ms ease, opacity 200ms ease; }',
       '.llmmap-node-g { cursor: pointer; }',
-      '.llmmap-node-g circle { transition: fill 180ms ease, stroke 180ms ease, stroke-width 180ms ease, r 180ms ease; }',
+      '.llmmap-node-g rect { transition: fill 180ms ease, stroke 180ms ease, stroke-width 180ms ease; }',
 
-      // Side column
-      '.llmmap-side { display: flex; flex-direction: column; gap: 14px; }',
+      // Detail section (mirrors .mcp-arch-desc: top hairline, paper-raised bg)
+      '.llmmap-detail { border-top: 1px solid var(--line); background: var(--paper-raised); padding: 20px; }',
 
-      // Card recipe (panel.frame)
-      '.llmmap-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }',
+      // Detail header
+      '.llmmap-detail-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }',
+      '.llmmap-detail-cluster { font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 500; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--coral); }',
+      '.llmmap-detail-session { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
 
-      // Card header
-      '.llmmap-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }',
-      '.llmmap-card-cluster { font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 500; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--coral); }',
-      '.llmmap-card-session { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
+      // Detail title
+      '.llmmap-detail-title { font-family: var(--font-display); font-size: var(--size-h2); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); margin: 4px 0 12px; }',
 
-      // Card title (post.title-feed style sized down)
-      '.llmmap-card-title { font-family: var(--font-display); font-size: var(--size-h2); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); margin: 4px 0 12px; }',
+      // Detail summary
+      '.llmmap-detail-summary { color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); margin: 0 0 16px; }',
 
-      // Card summary (italic deck)
-      '.llmmap-card-summary { color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); font-style: italic; line-height: var(--lh-normal); margin: 0 0 16px; }',
-
-      // Lens block (label + body, separated by hairline)
+      // Lens blocks (label + body, separated by hairline)
       '.llmmap-lens { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--line); }',
       '.llmmap-lens:first-of-type { padding-top: 0; margin-top: 0; border-top: none; }',
       '.llmmap-lens-label { font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 400; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }',
       '.llmmap-lens-body { color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-body); margin: 0; }',
-      '.llmmap-lens-body.feel { color: var(--ink-muted); font-style: italic; }',
-
-      // Connected / index card label (eyebrow style)
-      '.llmmap-card-label { font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 500; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px; }',
-
-      // Connected pills row (interactive .role-pill behaviour)
-      '.llmmap-connected { display: flex; flex-wrap: wrap; gap: 6px; }',
-      '.llmmap-connected-btn { padding: 4px 10px; border: 1px solid var(--ink-muted); border-radius: 999px; background: transparent; color: var(--ink-muted); font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 500; letter-spacing: var(--track-loose); text-transform: uppercase; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease; }',
-      '.llmmap-connected-btn:hover { color: var(--coral); border-color: var(--coral); }',
-
-      // Session index (key/value rows with hairlines)
-      '.llmmap-session-list { display: flex; flex-direction: column; }',
-      '.llmmap-session-row { display: grid; grid-template-columns: 38px 1fr; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); background: transparent; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; transition: color 0.15s ease; }',
-      '.llmmap-session-row:last-child { border-bottom: none; }',
-      '.llmmap-session-key { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
-      '.llmmap-session-val { font-family: var(--font-display); font-size: var(--size-md); color: var(--ink-secondary); }',
-      '.llmmap-session-row:hover .llmmap-session-val { color: var(--coral); }',
-      '.llmmap-session-row.is-active .llmmap-session-key { color: var(--coral); }',
-      '.llmmap-session-row.is-active .llmmap-session-val { color: var(--ink-primary); font-weight: 500; }',
+      '.llmmap-lens-body.feel { color: var(--ink-muted); }',
 
       // Footer strip (post.section-rule + meta)
       '.llmmap-footer { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
@@ -311,7 +293,10 @@
     // CLUSTERS[k].label is kept for the SVG eyebrow text inside the canvas.
     var TAB_LABELS = { input: 'Input', core: 'Core', output: 'Output', training: 'Training', theory: 'Foundations' };
 
-    // ---------- Cluster filter tabs ----------
+    // ---------- Single panel: tabs + canvas + detail (mirrors .mcp-panel) ----------
+    var panel = el('div', 'llmmap-panel');
+
+    // Cluster filter tabs at the top of the panel
     var tabsBar = el('div', 'mcp-tabs');
     var clusterTabEls = {};
 
@@ -330,12 +315,9 @@
       tabsBar.appendChild(tab);
       clusterTabEls[k] = tab;
     });
-    root.appendChild(tabsBar);
+    panel.appendChild(tabsBar);
 
-    // ---------- Grid ----------
-    var grid = el('div', 'llmmap-grid');
-
-    // Canvas (left)
+    // Canvas (paper-inset background, sits below the tabs)
     var canvas = el('div', 'llmmap-canvas');
     var svg = svgEl('svg', {
       viewBox: '0 0 1000 760',
@@ -344,32 +326,56 @@
       'aria-label': 'Concept map of language-model components'
     });
     canvas.appendChild(svg);
-    grid.appendChild(canvas);
+    panel.appendChild(canvas);
 
-    // Side (right): detail card + connected card + session-index card
-    var side = el('div', 'llmmap-side');
-    var detailCard    = el('div', 'llmmap-card');
-    var connectedCard = el('div', 'llmmap-card');
-    var sessionCard   = el('div', 'llmmap-card');
-    side.appendChild(detailCard);
-    side.appendChild(connectedCard);
-    side.appendChild(sessionCard);
-    grid.appendChild(side);
+    // Detail section (paper-raised, top hairline)
+    var detailCard = el('div', 'llmmap-detail');
+    panel.appendChild(detailCard);
 
-    root.appendChild(grid);
-
-    // ---------- Footer ----------
-    var footer = el('div', 'llmmap-footer');
-    var fL = el('span'); fL.textContent = 'Map · v0.3';
-    var fR = el('span'); fR.textContent = NODES.length + ' concepts · ' + EDGES.length + ' dependencies';
-    footer.appendChild(fL); footer.appendChild(fR);
-    root.appendChild(footer);
+    root.appendChild(panel);
 
     // ---------- SVG layout helpers ----------
     var W = 1000, H = 760;
-    var R = 50, R_SEL = 56;
+    // Node box dimensions matching MCP §02 "Host, Client and Server" exactly:
+    // bw=100, bh=40, rx=3, font-size=11.
+    var CAP_W = 100;  // fixed width
+    var CAP_H = 40;   // fixed height
+    var CAP_R = 3;    // corner radius
+
     function toX(p) { return (p / 100) * W; }
     function toY(p) { return (p / 100) * H; }
+
+    // Distance from box centre to its edge in direction (ux, uy).
+    // Uses an ellipse approximation with semi-axes = half-width / half-height.
+    function capTrim(ux, uy) {
+      var hw = CAP_W / 2;
+      var hh = CAP_H / 2;
+      var d  = Math.sqrt((ux / hw) * (ux / hw) + (uy / hh) * (uy / hh));
+      return (d > 0 ? 1 / d : hw) + 6; // +6 for arrowhead clearance
+    }
+
+    // Returns true if line segment (ax,ay)-(bx,by) intersects segment (cx,cy)-(dx,dy).
+    function segmentsIntersect(ax, ay, bx, by, cx, cy, dx, dy) {
+      var d1x = bx - ax, d1y = by - ay;
+      var d2x = dx - cx, d2y = dy - cy;
+      var cross = d1x * d2y - d1y * d2x;
+      if (Math.abs(cross) < 1e-8) return false;
+      var tx = cx - ax, ty = cy - ay;
+      var t = (tx * d2y - ty * d2x) / cross;
+      var u = (tx * d1y - ty * d1x) / cross;
+      return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+    }
+
+    // Returns true if line segment (x1,y1)-(x2,y2) passes through rectangle
+    // defined by corners (rx1,ry1) top-left and (rx2,ry2) bottom-right.
+    function lineIntersectsRect(x1, y1, x2, y2, rx1, ry1, rx2, ry2) {
+      if (x1 >= rx1 && x1 <= rx2 && y1 >= ry1 && y1 <= ry2) return true;
+      if (x2 >= rx1 && x2 <= rx2 && y2 >= ry1 && y2 <= ry2) return true;
+      return segmentsIntersect(x1, y1, x2, y2, rx1, ry1, rx2, ry1) ||
+             segmentsIntersect(x1, y1, x2, y2, rx2, ry1, rx2, ry2) ||
+             segmentsIntersect(x1, y1, x2, y2, rx2, ry2, rx1, ry2) ||
+             segmentsIntersect(x1, y1, x2, y2, rx1, ry2, rx1, ry1);
+    }
 
     // Arrow markers. Two variants: hairline default, coral when an edge
     // is "hot" (connected to the selected node). Markers do not inherit
@@ -391,7 +397,7 @@
       { key: 'core',     x: 56, y: 32, anchor: 'middle' },
       { key: 'output',   x: 93, y: 8,  anchor: 'end'    },
       { key: 'training', y: 82, x: 28, anchor: 'start'  },
-      { key: 'theory',   x: 8,  y: 36, anchor: 'start'  },
+      { key: 'theory',   x: 8,  y: 32, anchor: 'start'  },
     ];
     clusterLabels.forEach(function (c) {
       var t = svgEl('text', {
@@ -433,67 +439,58 @@
 
     // Build a node group per concept
     var nodeEls = NODES.map(function (n) {
-      var g = svgEl('g', { class: 'llmmap-node-g' });
+      var g  = svgEl('g', { class: 'llmmap-node-g' });
+      var cx = toX(n.x), cy = toY(n.y);
+      var hw = CAP_W / 2;
 
-      // Outer ring shown when selected. Hidden by default via opacity 0.
-      var ring = svgEl('circle', {
-        cx: toX(n.x), cy: toY(n.y), r: R_SEL + 8,
+      // Outer ring (slightly larger box, shown only when selected).
+      var ring = svgEl('rect', {
+        x: cx - hw - 6, y: cy - CAP_H / 2 - 6,
+        width: (hw + 6) * 2, height: CAP_H + 12,
+        rx: CAP_R + 6, ry: CAP_R + 6,
         fill: 'none',
         stroke: 'var(--coral)',
         'stroke-width': '1',
         opacity: '0',
       });
 
-      var circle = svgEl('circle', {
-        cx: toX(n.x), cy: toY(n.y), r: R,
-        fill: 'var(--paper-inset)',
+      // Main box (matching MCP §02 bw=100, bh=40, rx=3).
+      var cap = svgEl('rect', {
+        x: cx - hw, y: cy - CAP_H / 2,
+        width: hw * 2, height: CAP_H,
+        rx: CAP_R, ry: CAP_R,
+        fill: 'var(--paper-raised)',
         stroke: 'var(--line)',
         'stroke-width': '1',
       });
 
-      // Word-wrap label if too long for one line
+      // Word-wrap: split if label is longer than 12 chars.
+      // dy centres the text block vertically, +4 baseline offset matches MCP §02.
       var words = n.label.length > 12 ? n.label.split(' ') : [n.label];
       var labels = words.map(function (w, i) {
-        var dy = (n.session ? -6 : 4) + (words.length === 1 ? 0 : (i - (words.length - 1) / 2) * 14);
+        var dy = 4 + (i - (words.length - 1) / 2) * 12;
         var t = svgEl('text', {
-          x: toX(n.x),
-          y: toY(n.y) + dy,
+          x: cx,
+          y: cy + dy,
           'text-anchor': 'middle',
           'font-family': 'var(--font-mono)',
-          'font-size': '13',
+          'font-size': '11',
           'font-weight': '500',
-          fill: 'var(--ink-primary)',
+          fill: 'var(--ink-secondary)',
         });
         t.textContent = w;
         t.style.pointerEvents = 'none';
         return t;
       });
 
-      var sessionT = null;
-      if (n.session) {
-        sessionT = svgEl('text', {
-          x: toX(n.x),
-          y: toY(n.y) + (words.length === 1 ? 16 : 22),
-          'text-anchor': 'middle',
-          'font-family': 'var(--font-mono)',
-          'font-size': '10',
-          'font-weight': '600',
-          'letter-spacing': '1.2',
-          fill: 'var(--ink-faint)',
-        });
-        sessionT.textContent = n.session;
-        sessionT.style.pointerEvents = 'none';
-      }
-
       g.appendChild(ring);
-      g.appendChild(circle);
+      g.appendChild(cap);
       labels.forEach(function (t) { g.appendChild(t); });
-      if (sessionT) g.appendChild(sessionT);
 
       g.addEventListener('click', function () { setSelected(n.id); });
 
       nodesLayer.appendChild(g);
-      return { node: n, g: g, ring: ring, circle: circle, labels: labels, sessionT: sessionT };
+      return { node: n, g: g, ring: ring, cap: cap, labels: labels };
     });
 
     // ---------- Render passes ----------
@@ -508,16 +505,15 @@
         var filteredOut = filter && (a.cluster !== filter || b.cluster !== filter);
         var dimmed = (sel && !hot) || (!sel && filteredOut);
 
-        // Trim line endpoints to circle perimeter so arrow tips meet edges.
+        // Trim line endpoints to capsule perimeter so arrow tips meet edges.
         var ax = toX(a.x), ay = toY(a.y), bx = toX(b.x), by = toY(b.y);
         var dx = bx - ax, dy = by - ay;
         var len = Math.sqrt(dx * dx + dy * dy) || 1;
         var ux = dx / len, uy = dy / len;
-        var trim = R + 4;
-        line.setAttribute('x1', ax + ux * trim);
-        line.setAttribute('y1', ay + uy * trim);
-        line.setAttribute('x2', bx - ux * trim);
-        line.setAttribute('y2', by - uy * trim);
+        line.setAttribute('x1', ax + ux * capTrim(ux, uy));
+        line.setAttribute('y1', ay + uy * capTrim(ux, uy));
+        line.setAttribute('x2', bx - ux * capTrim(ux, uy));
+        line.setAttribute('y2', by - uy * capTrim(ux, uy));
 
         line.setAttribute('stroke', hot ? 'var(--coral)' : 'var(--line)');
         line.setAttribute('stroke-width', hot ? '1.6' : '1');
@@ -531,12 +527,35 @@
       var filter = state.clusterFilter;
       var conn = sel ? connectedSet(sel) : {};
       nodeEls.forEach(function (ne) {
-        var isSel            = ne.node.id === sel;
-        var isConn           = !isSel && !!conn[ne.node.id];
-        var isDimByFilter    = filter && ne.node.cluster !== filter;
-        var isDimBySelection = sel && !isSel && !isConn;
-        var isDim            = isDimByFilter || isDimBySelection;
+        var isSel         = ne.node.id === sel;
+        var isConn        = !isSel && !!conn[ne.node.id];
+        var isDimByFilter = filter && ne.node.cluster !== filter;
 
+        // Dim an unrelated node only if a hot (selected-relationship) edge line
+        // visually passes through its bounding box, which could be mistaken for
+        // a connection. The coral border on selected/connected nodes is enough
+        // to signal the active relationship without dimming everything else.
+        var isDimByPassThrough = false;
+        if (!isSel && !isConn && sel) {
+          var cx  = toX(ne.node.x), cy = toY(ne.node.y);
+          var hw  = CAP_W / 2;
+          var pad = 4; // slight expansion so near-misses also trigger
+          var bx1 = cx - hw - pad, by1 = cy - CAP_H / 2 - pad;
+          var bx2 = cx + hw + pad, by2 = cy + CAP_H / 2 + pad;
+          edgeEls.forEach(function (line) {
+            if (isDimByPassThrough) return;
+            if (line.__from !== sel && line.__to !== sel) return; // not a hot edge
+            var ex1 = parseFloat(line.getAttribute('x1'));
+            var ey1 = parseFloat(line.getAttribute('y1'));
+            var ex2 = parseFloat(line.getAttribute('x2'));
+            var ey2 = parseFloat(line.getAttribute('y2'));
+            if (lineIntersectsRect(ex1, ey1, ex2, ey2, bx1, by1, bx2, by2)) {
+              isDimByPassThrough = true;
+            }
+          });
+        }
+
+        var isDim = isDimByFilter || isDimByPassThrough;
         ne.g.setAttribute('opacity', isDim ? '0.35' : '1');
 
         // Outer ring shows only on the selected node.
@@ -548,28 +567,22 @@
         // connected uses --coral border on --paper-inset. Both states keep
         // text in --ink-primary so legibility holds in both palettes.
         if (isSel) {
-          ne.circle.setAttribute('r', R_SEL);
-          ne.circle.setAttribute('fill', 'var(--coral-wash)');
-          ne.circle.setAttribute('stroke', 'var(--coral)');
-          ne.circle.setAttribute('stroke-width', '2.5');
+          ne.cap.setAttribute('fill', 'var(--coral-wash)');
+          ne.cap.setAttribute('stroke', 'var(--coral)');
+          ne.cap.setAttribute('stroke-width', '2');
         } else if (isConn) {
-          ne.circle.setAttribute('r', R);
-          ne.circle.setAttribute('fill', 'var(--paper-inset)');
-          ne.circle.setAttribute('stroke', 'var(--coral)');
-          ne.circle.setAttribute('stroke-width', '1.5');
+          ne.cap.setAttribute('fill', 'var(--paper-raised)');
+          ne.cap.setAttribute('stroke', 'var(--coral)');
+          ne.cap.setAttribute('stroke-width', '1.5');
         } else {
-          ne.circle.setAttribute('r', R);
-          ne.circle.setAttribute('fill', 'var(--paper-inset)');
-          ne.circle.setAttribute('stroke', 'var(--line)');
-          ne.circle.setAttribute('stroke-width', '1');
+          ne.cap.setAttribute('fill', 'var(--paper-raised)');
+          ne.cap.setAttribute('stroke', 'var(--line)');
+          ne.cap.setAttribute('stroke-width', '1');
         }
 
         ne.labels.forEach(function (t) {
-          t.setAttribute('fill', isSel || isConn ? 'var(--ink-primary)' : 'var(--ink-secondary)');
+          t.setAttribute('fill', isSel ? 'var(--ink-primary)' : 'var(--ink-secondary)');
         });
-        if (ne.sessionT) {
-          ne.sessionT.setAttribute('fill', isSel ? 'var(--coral)' : 'var(--ink-faint)');
-        }
       });
     }
 
@@ -578,22 +591,22 @@
       if (!n) return;
       detailCard.innerHTML = '';
 
-      var head = el('div', 'llmmap-card-head');
-      var clusterEl = el('span', 'llmmap-card-cluster');
+      var head = el('div', 'llmmap-detail-head');
+      var clusterEl = el('span', 'llmmap-detail-cluster');
       clusterEl.textContent = CLUSTERS[n.cluster].label;
       head.appendChild(clusterEl);
       if (n.session) {
-        var sessEl = el('span', 'llmmap-card-session');
+        var sessEl = el('span', 'llmmap-detail-session');
         sessEl.textContent = '→ Session ' + n.session;
         head.appendChild(sessEl);
       }
       detailCard.appendChild(head);
 
-      var title = el('h3', 'llmmap-card-title');
+      var title = el('h3', 'llmmap-detail-title');
       title.textContent = n.label;
       detailCard.appendChild(title);
 
-      var sum = el('p', 'llmmap-card-summary');
+      var sum = el('p', 'llmmap-detail-summary');
       sum.textContent = n.summary;
       detailCard.appendChild(sum);
 
@@ -608,51 +621,6 @@
       var bod2 = el('p', 'llmmap-lens-body feel'); bod2.textContent = n.feel;
       lens2.appendChild(lab2); lens2.appendChild(bod2);
       detailCard.appendChild(lens2);
-    }
-
-    function renderConnected() {
-      var conn = connectedSet(state.selectedId);
-      var ids = Object.keys(conn);
-      connectedCard.innerHTML = '';
-
-      var lab = el('div', 'llmmap-card-label');
-      lab.textContent = 'Connected · ' + ids.length;
-      connectedCard.appendChild(lab);
-
-      var row = el('div', 'llmmap-connected');
-      ids.forEach(function (id) {
-        var n = findNode(id);
-        var btn = el('button', 'llmmap-connected-btn');
-        btn.type = 'button';
-        btn.textContent = n.label;
-        btn.addEventListener('click', function () { setSelected(id); });
-        row.appendChild(btn);
-      });
-      connectedCard.appendChild(row);
-    }
-
-    function renderSessionIndex() {
-      sessionCard.innerHTML = '';
-
-      var lab = el('div', 'llmmap-card-label');
-      lab.textContent = 'Session index';
-      sessionCard.appendChild(lab);
-
-      var list = el('div', 'llmmap-session-list');
-      var sessioned = NODES
-        .filter(function (n) { return n.session; })
-        .slice()
-        .sort(function (a, b) { return a.session.localeCompare(b.session); });
-      sessioned.forEach(function (n) {
-        var row = el('button', 'llmmap-session-row' + (n.id === state.selectedId ? ' is-active' : ''));
-        row.type = 'button';
-        var k = el('span', 'llmmap-session-key'); k.textContent = n.session;
-        var v = el('span', 'llmmap-session-val'); v.textContent = n.label;
-        row.appendChild(k); row.appendChild(v);
-        row.addEventListener('click', function () { setSelected(n.id); });
-        list.appendChild(row);
-      });
-      sessionCard.appendChild(list);
     }
 
     function renderTabs() {
@@ -674,8 +642,6 @@
       renderEdges();
       renderNodes();
       renderDetail();
-      renderConnected();
-      renderSessionIndex();
     }
 
     // Initial render

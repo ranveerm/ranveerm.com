@@ -1,6 +1,6 @@
 ---
 layout: post
-title: The Shape of a Language Model
+title: Internals of a Large Language Model (LLM)
 date: 2026-05-06 00:00:00 +1000
 categories: jekyll update
 tags: [LLM]
@@ -8,7 +8,7 @@ tags: [LLM]
 
 <!-- excerpt-start -->
 
-A concept map of how a language model is wired together: twenty-two concepts grouped into five regions, connected by how each one depends on the others. Click any node and the rest fades, so the wiring is easier to follow. Every concept has a plain description and a non-technical analogy.
+An interactive concept map of how a large language model is wired together: twenty-two concepts grouped into five regions, connected by how each one depends on the others. Click any node and the rest fades, so the wiring is easier to follow. Every concept has a plain description and a non-technical analogy.
 
 <!--end-excerpt-->
 
