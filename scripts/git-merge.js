@@ -77,24 +77,36 @@
       '.gm-arch-desc em { color: var(--ink-primary); font-style: italic; }',
       '.gm-arch-desc pre.role-code-block { margin: 8px 0 12px; font-size: 12.5px; }',
 
-      /* Tables. The minima theme's _base.scss adds hardcoded light-mode
-         defaults (zebra striping, header backgrounds, cell borders) that
-         use SASS variables, not CSS custom properties, so they bleed
-         through in dark mode. The first block below neutralises those
-         element-level rules so the role-table-* tokens win. */
+      /* Tables. Recipe mirrors .ce-instr-table from claude-environment.js
+         so both posts read with the same surface: paper-table-body
+         background, paper-table-head thead, rounded outer frame, inner
+         hairline grid via per-cell top/right borders. The first block
+         below neutralises minima's element-level defaults (zebra
+         striping, header backgrounds) which bleed through in dark mode. */
       '.gm-table-wrap { margin: 16px 0; }',
-      '.gm-table-wrap .role-table-frame { width: 100%; }',
+      '.gm-table-wrap .role-table-frame { width: 100%; border: none; padding: 0; background: transparent; }',
       /* table-layout: fixed lets each <pre>\'s overflow-x: auto take effect
          per-cell instead of the longest line forcing the whole table to
          exceed the post width (which previously clipped "Theirs"). */
-      '.gm-table { width: 100%; border-collapse: collapse; margin: 0; border: none; color: inherit; table-layout: fixed; }',
-      '.gm-table th, .gm-table td { padding: 12px 14px; text-align: left; vertical-align: top; border: none; background: transparent; min-width: 0; }',
+      '.gm-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 0; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; color: inherit; table-layout: fixed; font-family: var(--font-text); font-size: var(--size-smd); }',
+      '.gm-table thead { background: var(--table-head); }',
+      '.gm-table th { font-family: var(--font-text); font-size: var(--size-smd); font-weight: 600; letter-spacing: var(--track-snug); color: var(--ink-primary); padding: 14px 20px; text-align: left; vertical-align: top; border: none; border-right: 1px solid var(--table-line); border-bottom: 1px solid var(--table-line); background: transparent; }',
+      '.gm-table th:last-child { border-right: none; }',
+      '.gm-table tbody tr { background: transparent; }',
+      '.gm-table td { padding: 16px 20px; color: var(--ink-secondary); border: none; border-top: 1px solid var(--table-line); border-right: 1px solid var(--table-line); vertical-align: top; line-height: var(--lh-normal); font-size: var(--size-md); background: transparent; min-width: 0; }',
+      '.gm-table td:last-child { border-right: none; }',
+      '.gm-table tr:first-child td { border-top: none; }',
+      /* Cells that house a <pre> code block (sec 3 file-version table)
+         drop their padding so the code block fills the cell flush. The
+         pre itself drops its own background/border/radius so the table
+         cell becomes the visible surface: this avoids two stacked code
+         surfaces and prevents the trailing gap below shorter columns
+         (e.g. the "Hi" greeting wrapping less than "Hello"). */
+      '.gm-table td.gm-cell-pre { padding: 0; background: var(--paper-inset); }',
+      '.gm-table td.gm-cell-pre pre.role-code-block { background: transparent; border: none; border-radius: 0; height: 100%; box-sizing: border-box; }',
       '.gm-table tr:nth-child(even) { background: transparent; }',
-      '.gm-table tbody tr { border-top: 1px solid var(--table-line); }',
-      '.gm-table tbody tr:first-child { border-top: none; }',
       '.gm-table code { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
       '.gm-table strong { color: var(--ink-primary); font-weight: 500; }',
-      '.gm-table em { color: var(--ink-primary); font-style: italic; }',
       /* Subtitle inside a header cell (e.g. "(c3)" beside "Merge Base"). */
       '.gm-table .gm-vershead-sub { color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; font-weight: 400; margin-left: 4px; }',
       /* Code block inside a cell. Uses .role-code-block from the design
@@ -148,9 +160,13 @@
 
       /* Merge-commit variants (§04). Tabbed code block with a fixed
          min-height so the panel doesn\'t jump as the user switches tabs.
-         The min-height is sized to the tallest variant\'s line count. */
-      '.gm-commit-area { background: var(--paper); padding: 14px 16px; min-height: 270px; box-sizing: border-box; }',
-      '.gm-commit-area pre { margin: 0; padding: 0; background: transparent; border: none; overflow-x: auto; }',
+         The wrapper sits on the panel surface (paper-raised) and lets
+         the inner role-code-block use its design-language default
+         (paper-inset, hairline border, 6px radius), so the commit log
+         reads with the same recipe as every other code block on the
+         page. */
+      '.gm-commit-area { background: var(--paper-raised); padding: 14px 16px; min-height: 270px; box-sizing: border-box; }',
+      '.gm-commit-area pre { margin: 0; overflow-x: auto; }',
       '.gm-commit-area .line { display: block; }',
       '.gm-commit-area .gm-cmt { color: var(--sx-comment); font-style: italic; }',
       '.gm-commit-area .gm-key { color: var(--ink-faint); }',
@@ -270,11 +286,11 @@
   // ------------------------------------------------------------------
   function buildTOC(root) {
     var ENTRIES = [
-      { num: 1, title: 'The Common Base' },
-      { num: 2, title: 'Merge vs. Cherry-Pick' },
-      { num: 3, title: 'How Conflicts Arise' },
+      { num: 1, title: 'Common Base' },
+      { num: 2, title: 'How Conflicts Arise' },
+      { num: 3, title: 'Merge Conventions' },
       { num: 4, title: 'Inside a Merge Commit' },
-      { num: 5, title: 'Merge Conventions' },
+      { num: 5, title: 'Cherry-Pick' },
       { num: 6, title: 'Rebase: Replaying Instead of Recording' }
     ];
 
@@ -329,18 +345,18 @@
   // ------------------------------------------------------------------
   function buildSection01(root) {
     var sec = el('section', 'gm-section');
-    sec.appendChild(sectionHeader(1, 'The Common Base'));
+    sec.appendChild(sectionHeader(1, 'Common Base'));
 
     sec.appendChild(el('p', 'gm-body',
-      'When you branch off, both branches share history up to one commit: ' +
-      'the <em>merge base</em>. Git uses this third point to perform a ' +
-      '<strong>three-way merge</strong>, comparing each branch tip against ' +
-      'the base to figure out what changed on each side.'));
+      'When a branch forks off, both lineages share history up to one ' +
+      'commit: the <strong>merge base</strong>. Git uses this third point to ' +
+      'perform a <strong>three-way merge</strong>, comparing each branch tip ' +
+      'against the base to determine what changed on both sides.'));
 
-    var mainY = 70, featY = 150;
+    var mainY = 90, featY = 170;
     var xs = [60, 130, 200, 270, 340, 410];
     var svg =
-      '<svg viewBox="0 0 480 220">' +
+      '<svg viewBox="0 0 480 240">' +
         svgEdge(xs[0], mainY, xs[1], mainY, INK) +
         svgEdge(xs[1], mainY, xs[2], mainY, INK) +
         svgEdge(xs[2], mainY, xs[3], mainY, INK) +
@@ -348,7 +364,7 @@
         svgEdge(xs[2], mainY, xs[3], featY, ACC) +
         svgEdge(xs[3], featY, xs[4], featY, ACC) +
         svgRing(xs[2], mainY, 33, ACC) +
-        svgCaption(xs[2], mainY + 50, ACC, '← merge base') +
+        svgCaption(xs[2], mainY - 42, ACC, 'merge base') +
         svgCommit(xs[0], mainY, INK, 'a1') +
         svgCommit(xs[1], mainY, INK, 'b2') +
         svgCommit(xs[2], mainY, INK, 'c3') +
@@ -359,13 +375,21 @@
         svgBranchLabel(xs[4] + 28, mainY, 'main', INK) +
         svgBranchLabel(xs[4] + 28, featY, 'feature', ACC) +
       '</svg>';
-    sec.appendChild(div('gm-frame', svg));
 
-    sec.appendChild(div('gm-note',
-      'Here, <code>c3</code> is the merge base of <code>main</code> ' +
+    // Panel mirrors the tabbed-view recipe (svg-bg + arch-desc), minus
+    // the tab bar, so the description sits flush with its visualisation.
+    var panel = div('gm-panel');
+    var svgBg = div('gm-svg-bg', svg);
+    panel.appendChild(svgBg);
+    var desc = div('gm-arch-desc');
+    desc.innerHTML =
+      '<h3>Three-way diff against the base</h3>' +
+      '<p>Here, <code>c3</code> is the merge base of <code>main</code> ' +
       '(tip <code>e5</code>) and <code>feature</code> (tip <code>g7</code>). ' +
-      'Git diffs <code>c3 → e5</code> and <code>c3 → g7</code> to determine ' +
-      'each side\'s contribution.'));
+      'Git computes <code>git diff c3..e5</code> and <code>git diff c3..g7</code> ' +
+      'to determine each side\'s contribution.</p>';
+    panel.appendChild(desc);
+    sec.appendChild(panel);
 
     root.appendChild(sec);
   }
@@ -375,12 +399,12 @@
   // ------------------------------------------------------------------
   function buildSection02(root) {
     var sec = el('section', 'gm-section');
-    sec.appendChild(sectionHeader(2, 'Merge vs. Cherry-Pick'));
+    sec.appendChild(sectionHeader(5, 'Cherry-Pick'));
 
     sec.appendChild(el('p', 'gm-body',
-      'Both operations bring work from one branch to another, but the ' +
-      '<em>shape of history</em> they leave behind is fundamentally different. ' +
-      'Switch tabs to compare what each one records.'));
+      'Both merge and cherry-pick bring data from one branch to another, but ' +
+      'the <strong>shape of history</strong> they leave behind is ' +
+      'fundamentally different.'));
 
     var OPTIONS = [
       { id: 'merge', label: 'git merge feature',
@@ -389,19 +413,16 @@
           '<p>A merge commit (<code>M</code>) is recorded with <strong>two parents</strong>: ' +
           'the previous tip of <code>main</code> and the tip of <code>feature</code>. ' +
           'Both branches\' commits stay in history exactly as they were, and the ' +
-          'relationship between the parallel streams is preserved.</p>' +
-          '<p>Use this when the parallelism itself is meaningful, e.g. when a ' +
-          'feature lands on a release branch and you want the merge to mark ' +
-          'where it joined.</p>' },
+          'relationship between the parallel streams is preserved.</p>' },
       { id: 'cherry', label: 'git cherry-pick g7',
         title: 'Cherry-pick: one commit, replayed',
         body:
-          '<p>The <em>diff</em> of <code>g7</code> is replayed on top of ' +
+          '<p>The <strong>diff</strong> of <code>g7</code> is replayed on top of ' +
           '<code>main</code> as a brand-new commit (<code>g7\'</code>) with a ' +
           '<strong>new hash</strong>. There is no tie back to <code>feature</code>.</p>' +
           '<p>Use this when only one commit\'s worth of change is wanted, e.g. ' +
-          'porting a fix to a maintenance branch. Be aware that if you later ' +
-          'merge <code>feature</code>, Git may see the change a second time.</p>' }
+          'porting a fix to a maintenance branch. Note that a subsequent merge ' +
+          'of <code>feature</code> may surface the change a second time.</p>' }
     ];
 
     var active = 'merge';
@@ -479,14 +500,15 @@
   // ------------------------------------------------------------------
   function buildSection03(root) {
     var sec = el('section', 'gm-section');
-    sec.appendChild(sectionHeader(3, 'How Conflicts Arise'));
+    sec.appendChild(sectionHeader(2, 'How Conflicts Arise'));
 
     sec.appendChild(el('p', 'gm-body',
-      'Git\'s three-way merge can auto-resolve <em>independent</em> changes: ' +
-      'if you edited line 5 and the other side edited line 50, no problem. A ' +
-      'conflict arises when both branches modify <strong>the same line</strong> ' +
-      'differently, or when one side edits while the other deletes. Git cannot ' +
-      'infer which intent to honour, so it stops and asks you.'));
+      'Git\'s three-way merge can auto-resolve <strong>independent</strong> ' +
+      'changes: if one side edited line 5 and the other side edited line 50, ' +
+      'then there are no issues. A conflict arises when both branches modify ' +
+      '<strong>the same line</strong> differently, or when one side edits while ' +
+      'the other deletes. Git cannot infer which intent to honour, so it stops ' +
+      'and requests user input.'));
 
     // Swift versions of greet, one cell per version. The conflicting
     // line (the one both sides modified differently) is wrapped in a
@@ -525,22 +547,23 @@
           '</thead>' +
           '<tbody>' +
             '<tr>' +
-              '<td><pre class="role-code-block">' + swiftBody('blue',  false) + '</pre></td>' +
-              '<td><pre class="role-code-block">' + swiftBody('red',   true)  + '</pre></td>' +
-              '<td><pre class="role-code-block">' + swiftBody('green', true)  + '</pre></td>' +
+              '<td class="gm-cell-pre"><pre class="role-code-block">' + swiftBody('blue',  false) + '</pre></td>' +
+              '<td class="gm-cell-pre"><pre class="role-code-block">' + swiftBody('red',   true)  + '</pre></td>' +
+              '<td class="gm-cell-pre"><pre class="role-code-block">' + swiftBody('green', true)  + '</pre></td>' +
             '</tr>' +
           '</tbody>' +
         '</table>' +
       '</div>';
     sec.appendChild(fileTable);
 
-    // The "CONFLICT (content): …" line is not part of the file, so it
-    // sits inside the code block as a Swift comment. Each line is a
-    // block-display .line span; no raw "\n" is used, so the highlighted
-    // ours/theirs lines do not introduce an extra blank line.
-    var conflict = div('gm-conflict-wrap');
-    conflict.innerHTML =
-      '<pre class="role-code-block gm-conflict-block">' +
+    // Conflict marker block sits inside a panel with the description
+    // immediately below, mirroring the tabbed-view recipe (svg-bg +
+    // arch-desc) minus the tab bar.
+    var conflictPanel = div('gm-panel');
+    var conflictArea = div('gm-svg-bg');
+    conflictArea.style.display = 'block';
+    conflictArea.innerHTML =
+      '<pre class="role-code-block gm-conflict-block" style="margin: 0;">' +
         '<span class="line gm-cmt">// CONFLICT (content): Merge conflict in greet.swift</span>' +
         '<span class="line"><span class="gm-kw">func</span> greet(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>' +
         '<span class="line gm-cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (main)</span>' +
@@ -550,19 +573,21 @@
         '<span class="line gm-cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature</span>' +
         '<span class="line">    <span class="gm-kw">return</span> <span class="gm-str">"Hi, \\(name)!"</span></span>' +
         '<span class="line">}</span>' +
-      '</pre>' +
-      '<p class="gm-conflict-foot">' +
-        'Note: line 3 is not conflicted. Only <code>main</code> is unchanged ' +
-        'from base, and only <code>feature</code> changed <code>"Hello"</code> ' +
-        '→ <code>"Hi"</code>, so Git takes <code>feature</code>\'s version ' +
-        'automatically. The conflict is purely on line 2.' +
-      '</p>';
-    sec.appendChild(conflict);
+      '</pre>';
+    conflictPanel.appendChild(conflictArea);
 
-    sec.appendChild(div('gm-note',
-      'You resolve the conflict by editing the file (picking, combining, or ' +
-      'rewriting), staging it with <code>git add</code>, and committing. ' +
-      '<em>That commit</em> is the merge commit.'));
+    var conflictDesc = div('gm-arch-desc');
+    conflictDesc.innerHTML =
+      '<h3>Resolving the conflict</h3>' +
+      '<p>Line 3 is not conflicted. Only <code>main</code> is unchanged ' +
+      'from base, and only <code>feature</code> changed <code>"Hello"</code> ' +
+      '→ <code>"Hi"</code>, so Git takes <code>feature</code>\'s version ' +
+      'automatically. The conflict is purely on line 2.</p>' +
+      '<p>The conflict is resolved by editing the file (picking, combining, ' +
+      'or rewriting), staging it with <code>git add</code>, and committing. ' +
+      '<strong>That commit</strong> is the merge commit.</p>';
+    conflictPanel.appendChild(conflictDesc);
+    sec.appendChild(conflictPanel);
 
     root.appendChild(sec);
   }
@@ -574,13 +599,14 @@
     var sec = el('section', 'gm-section');
     sec.appendChild(sectionHeader(4, 'Inside a Merge Commit'));
 
+
     sec.appendChild(el('p', 'gm-body',
       'A merge commit is a <strong>regular commit with two (or more) parent ' +
       'pointers</strong>. Its tree is whatever the working directory looked ' +
-      'like when you ran <code>git commit</code> after resolving, which means ' +
-      '<strong>the merge commit\'s contents include your conflict resolution</strong>. ' +
+      'like when <code>git commit</code> ran after resolution, which means ' +
+      '<strong>the merge commit\'s contents include the conflict resolution</strong>. ' +
       'If there were no conflicts, the merge commit is often empty in terms of ' +
-      '"new" content; it just records that two histories joined.'));
+      '"new" content and just records that two histories joined.'));
 
     // Three variants of a merge commit, shown as a tab group. The
     // viewing area uses a fixed min-height sized to the tallest variant,
@@ -656,47 +682,137 @@
       '<div class="role-table-frame">' +
         '<table class="gm-table">' +
           '<thead><tr class="role-table-head">' +
-            '<th class="role-table-head-cell" style="width:30%">Field</th>' +
+            '<th class="role-table-head-cell" style="width:18%; white-space: nowrap;">Field</th>' +
             '<th class="role-table-head-cell">What it holds</th>' +
           '</tr></thead>' +
           '<tbody>' +
             '<tr><td class="role-table-cell"><strong>Two parents</strong></td>' +
-            '<td class="role-table-cell">First parent is the branch you were on ' +
-              '(<code>main</code>); second is the branch you merged in ' +
-              '(<code>feature</code>). This ordering is why <code>HEAD^1</code> ' +
-              'and <code>HEAD^2</code> work the way they do.</td></tr>' +
+            '<td class="role-table-cell">First parent is the branch the merge ' +
+              'was performed on (<code>main</code>); second is the branch ' +
+              'merged in (<code>feature</code>). This ordering is what ' +
+              '<code>HEAD^N</code> walks: <code>HEAD^1</code> resolves to the ' +
+              'first parent (<code>main</code>\'s previous tip), ' +
+              '<code>HEAD^2</code> to the second parent (<code>feature</code>\'s ' +
+              'tip). <code>HEAD^3</code> only exists for an octopus merge ' +
+              '(three or more parents); on a regular two-parent merge it errors ' +
+              'out as "no such ref".</td></tr>' +
             '<tr><td class="role-table-cell"><strong>Tree (snapshot)</strong></td>' +
             '<td class="role-table-cell">The full state of all files post-resolution. ' +
-              'If conflicts existed, your hand-edited file is what is stored: ' +
-              '<em>not</em> a "diff of diffs", but a complete snapshot like any ' +
-              'other commit.</td></tr>' +
+              'If conflicts existed, the hand-edited file is what is stored: ' +
+              '<strong>not</strong> a "diff of diffs", but a complete snapshot ' +
+              'like any other commit.</td></tr>' +
           '</tbody>' +
         '</table>' +
       '</div>';
     sec.appendChild(anatomy);
 
     sec.appendChild(el('p', 'gm-body',
-      'Most of the time you can ignore a merge commit\'s special structure ' +
-      'and let it sit there. The shape only matters when an operation has to ' +
-      'choose <em>which</em> parent to follow, or has to decide what to do ' +
-      'when a merge appears inside a range. The four common scenarios:'));
+      'A merge commit\'s special structure can usually be ignored: it just ' +
+      'sits in history like any other commit. The shape only matters when an ' +
+      'operation has to choose <strong>which</strong> parent to follow, or ' +
+      'has to decide what to do when a merge appears inside a range. The four ' +
+      'common scenarios:'));
+
+    // Small SVGs accompany the first three scenarios. Each diagram shows
+    // a merge commit M with its two parents (e5 on main, g7 on feature),
+    // plus the operation's effect on history.
+    function svgRevert() {
+      var mY = 70, fY = 150;
+      // Chain shifted left so the trailing "main" branch label
+      // (offset +36 + width 60) clears the viewBox right edge.
+      var xs = [30, 110, 190, 270, 350];
+      return '<svg viewBox="0 0 460 200">' +
+        // main trunk c3 - d4 - e5 - M - R
+        svgEdge(xs[0], mY, xs[1], mY, INK) +
+        svgEdge(xs[1], mY, xs[2], mY, INK) +
+        svgEdge(xs[2], mY, xs[3], mY, ACC) +
+        svgEdge(xs[3], mY, xs[4], mY, ACC) +
+        // feature into M
+        svgEdge(xs[1], mY, xs[2], fY, ACC) +
+        svgEdge(xs[2], fY, xs[3], mY, ACC) +
+        svgCommit(xs[0], mY, INK, 'c3') +
+        svgCommit(xs[1], mY, INK, 'd4') +
+        svgCommit(xs[2], mY, INK, 'e5') +
+        svgCommit(xs[3], mY, ACC, 'M', { merge: true }) +
+        svgCommit(xs[4], mY, ACC, 'R', { head: true }) +
+        svgCommit(xs[2], fY, ACC, 'g7', { dim: true }) +
+        svgCaption(xs[4], mY + 50, 'var(--coral-strong)', 'undoes feature\'s diff') +
+        svgBranchLabel(xs[4] + 36, mY, 'main', INK) +
+        '</svg>';
+    }
+
+    function svgCherryMerge() {
+      var sY = 60, mY = 150;
+      var xs = [50, 130, 210, 290, 370, 450];
+      return '<svg viewBox="0 0 540 210">' +
+        // release branch (top): two existing commits then M' cherry-picked
+        svgEdge(xs[3], sY, xs[4], sY, INK) +
+        svgEdge(xs[4], sY, xs[5], sY, ACC, { dashed: true }) +
+        svgCommit(xs[3], sY, INK, 'r1') +
+        svgCommit(xs[4], sY, INK, 'r2') +
+        svgCommit(xs[5], sY, ACC, "M'", { head: true }) +
+        svgBranchLabel(xs[5] + 28, sY, 'release', INK) +
+        // main (bottom): regular merge with feature
+        svgEdge(xs[0], mY, xs[1], mY, INK) +
+        svgEdge(xs[1], mY, xs[2], mY, INK) +
+        svgEdge(xs[2], mY, xs[3], mY, ACC) +
+        svgEdge(xs[1], mY, xs[2], mY + 40, ACC) +
+        svgEdge(xs[2], mY + 40, xs[3], mY, ACC) +
+        svgCommit(xs[0], mY, INK, 'c3') +
+        svgCommit(xs[1], mY, INK, 'd4') +
+        svgCommit(xs[2], mY, INK, 'e5') +
+        svgCommit(xs[3], mY, ACC, 'M', { merge: true }) +
+        svgCommit(xs[2], mY + 40, ACC, 'g7', { dim: true }) +
+        svgBranchLabel(xs[3] + 36, mY, 'main', INK) +
+        '</svg>';
+    }
+
+    function svgSquash() {
+      var mY = 70, fY = 150;
+      var xs = [50, 130, 210, 290, 370];
+      return '<svg viewBox="0 0 460 200">' +
+        // main with a single squash commit S (no merge link)
+        svgEdge(xs[0], mY, xs[1], mY, INK) +
+        svgEdge(xs[1], mY, xs[2], mY, INK) +
+        svgEdge(xs[2], mY, xs[3], mY, INK) +
+        svgEdge(xs[3], mY, xs[4], mY, ACC) +
+        // feature, dimmed (its commits exist but are not linked into S)
+        svgEdge(xs[1], mY, xs[2], fY, ACC, { opacity: 0.4 }) +
+        svgEdge(xs[2], fY, xs[3], fY, ACC, { opacity: 0.4 }) +
+        svgCommit(xs[0], mY, INK, 'c3') +
+        svgCommit(xs[1], mY, INK, 'd4') +
+        svgCommit(xs[2], mY, INK, 'e5') +
+        svgCommit(xs[3], mY, INK, 'f0') +
+        svgCommit(xs[4], mY, ACC, 'S', { head: true }) +
+        svgCommit(xs[2], fY, ACC, 'f6', { dim: true }) +
+        svgCommit(xs[3], fY, ACC, 'g7', { dim: true }) +
+        svgCaption(xs[4], mY + 50, ACC, 'combined diff, no merge link') +
+        svgBranchLabel(xs[4] + 28, mY, 'main', INK) +
+        svgBranchLabel(xs[3] + 28, fY, 'feature', ACC) +
+        '</svg>';
+    }
 
     var SCENARIOS = [
       { id: 'revert',  label: 'Revert',      title: 'Reverting a merge',
+        svg: svgRevert,
         body:
           '<p>A plain <code>git revert &lt;merge-sha&gt;</code> fails, because ' +
-          'Git cannot tell which side of the merge to revert. Pass ' +
-          '<code>-m</code> to choose the parent that represents the line of ' +
-          'history you want to keep:</p>' +
+          'Git cannot tell which side of the merge to revert. <code>-m</code> ' +
+          'selects the parent that represents the line of history to keep:</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
           '<span class="cmd">git revert -m 1 9f2a8c1</span>\n' +
           '<span class="cmt"># -m 1: keep main (first parent); undo feature\'s changes</span></pre>' +
-          '<p>The new commit subtracts <code>feature</code>\'s contribution ' +
-          'while leaving the merge itself in history. Be careful: re-merging ' +
-          '<code>feature</code> later will not bring those changes back, ' +
-          'because Git still sees them as already merged. You typically have ' +
-          'to revert the revert.</p>' },
+          '<p>The reversal is the inverse of the diff from the chosen parent ' +
+          'to the merge commit (<code>git diff e5..M</code> with <code>-m 1</code>), ' +
+          'not the diff from the merge base. That diff captures everything the ' +
+          'merge brought in via the second parent, plus any conflict-resolution ' +
+          'edits, so the new commit <code>R</code> subtracts ' +
+          '<code>feature</code>\'s contribution while leaving the merge itself ' +
+          'in history. Caveat: re-merging <code>feature</code> later does not ' +
+          'bring those changes back, because Git still sees them as already ' +
+          'merged. The remedy is usually to revert the revert.</p>' },
       { id: 'cherry',  label: 'Cherry-pick', title: 'Cherry-picking a merge',
+        svg: svgCherryMerge,
         body:
           '<p>By default <code>git cherry-pick</code> refuses a merge commit ' +
           'for the same reason: which parent\'s diff should it replay? ' +
@@ -706,27 +822,29 @@
           '<span class="cmd">git cherry-pick -m 1 9f2a8c1</span></pre>' +
           '<p>This is occasionally useful for porting a feature-bundle to ' +
           'another long-lived branch, but the result is a single ' +
-          'squashed-feeling commit, not a faithful replay of the individual ' +
-          'feature work.</p>' },
+          'squashed-feeling commit (<code>M\'</code>), not a faithful replay ' +
+          'of the individual feature work.</p>' },
       { id: 'squash',  label: 'Squash',      title: 'Squashing across a merge commit',
+        svg: svgSquash,
         body:
           '<p>Interactive rebase (<code>git rebase -i</code>) flattens history ' +
           'by walking commits one parent at a time. By default, when it hits ' +
-          'a merge commit it <em>drops</em> the merge entirely and replays ' +
-          'only the first-parent line: any commits brought in by the merge\'s ' +
-          'second parent vanish. This bites the unwary when a quick squash on ' +
-          'top of a freshly-merged feature appears to lose work.</p>' +
-          '<p>If you genuinely need to preserve the merge structure while ' +
-          'rewriting, use <code>--rebase-merges</code>:</p>' +
+          'a merge commit it <strong>drops</strong> the merge entirely and ' +
+          'replays only the first-parent line: any commits brought in by the ' +
+          'merge\'s second parent vanish. This bites the unwary when a quick ' +
+          'squash on top of a freshly-merged feature appears to lose work.</p>' +
+          '<p>To preserve the merge structure while rewriting, use ' +
+          '<code>--rebase-merges</code>:</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
           '<span class="cmd">git rebase -i --rebase-merges main</span>\n' +
           '<span class="cmt"># merges become "label" / "merge" directives in the todo list</span></pre>' +
           '<p>If the goal is the opposite (collapse a feature plus its merge ' +
           'into a single tidy commit on top of <code>main</code>), it is ' +
-          'almost always cleaner to <em>not</em> have made the merge in the ' +
-          'first place: run <code>git merge --squash feature</code>, which ' +
-          'stages the feature\'s combined diff without recording a merge ' +
-          'commit, then commit normally.</p>' },
+          'almost always cleaner to <strong>not</strong> have made the merge ' +
+          'in the first place: <code>git merge --squash feature</code> stages ' +
+          'the feature\'s combined diff without recording a merge commit ' +
+          '(commit <code>S</code> in the diagram), then a normal commit lands ' +
+          'it on <code>main</code>.</p>' },
       { id: 'history', label: 'Read history', title: 'Reading history past a merge',
         body:
           '<p>Two flags make merges legible after the fact. ' +
@@ -745,8 +863,10 @@
     var sActive = 'revert';
     var sPanel = div('gm-panel');
     var sTabs = div('mcp-tabs');
+    var sSvgBg = div('gm-svg-bg');
     var sDesc = div('gm-arch-desc');
     sPanel.appendChild(sTabs);
+    sPanel.appendChild(sSvgBg);
     sPanel.appendChild(sDesc);
 
     function renderScenarios() {
@@ -760,7 +880,14 @@
         sTabs.appendChild(b);
       });
       var s = SCENARIOS.find(function (x) { return x.id === sActive; });
-      sDesc.innerHTML = '<h3>' + s.title + '</h3>' + s.body;
+      if (s.svg) {
+        sSvgBg.innerHTML = s.svg();
+        sSvgBg.style.display = '';
+      } else {
+        sSvgBg.innerHTML = '';
+        sSvgBg.style.display = 'none';
+      }
+      sDesc.innerHTML = s.body;
     }
     renderScenarios();
     sec.appendChild(sPanel);
@@ -773,12 +900,12 @@
   // ------------------------------------------------------------------
   function buildSection05(root) {
     var sec = el('section', 'gm-section');
-    sec.appendChild(sectionHeader(5, 'Merge Conventions'));
+    sec.appendChild(sectionHeader(3, 'Merge Conventions'));
 
     sec.appendChild(el('p', 'gm-body',
       'The convention is <strong>"merge X into Y"</strong>, where ' +
-      '<strong>Y is your current branch (HEAD)</strong> and X is the branch ' +
-      'named in the command. So if you run:'));
+      '<strong>Y is the current branch (HEAD)</strong> and X is the branch ' +
+      'named in the command. So running:'));
 
     sec.appendChild(el('pre', 'role-code-block',
       '<span class="prompt">$</span> <span class="cmd">git checkout main</span>\n' +
@@ -814,9 +941,9 @@
         'commit M.</li>' +
       '<li><code>feature</code> stays put: its tip is still <code>g7</code>. ' +
         'It has been "absorbed", but not consumed.</li>' +
-      '<li><code>HEAD</code> follows <code>main</code>: you were on ' +
-        '<code>main</code> when you merged, so <code>HEAD</code> moves to ' +
-        'M with <code>main</code>.</li>';
+      '<li><code>HEAD</code> follows <code>main</code>: <code>main</code> was ' +
+        'the current branch when the merge ran, so <code>HEAD</code> moves ' +
+        'to M with <code>main</code>.</li>';
     sec.appendChild(keys);
 
     root.appendChild(sec);
@@ -844,7 +971,7 @@
           'commits <code>f6\'</code>/<code>g7\'</code> are constructed by ' +
           'applying the same diffs on top of <code>e5</code>. The branch tip ' +
           'now points at <code>g7\'</code>, and the original commits are ' +
-          'unreachable (Git\'s reflog still has them for ~90 days).</p>' +
+          'unreachable (Git\'s reflog still retains them for ~90 days).</p>' +
           '<p>History is linear; the parallelism that did happen is erased.</p>' }
     ];
 
@@ -951,9 +1078,9 @@
     sec.appendChild(el('p', 'gm-body',
       '<strong>Rebase can still produce conflicts.</strong> When a replayed ' +
       'commit modifies a line that the new base also changed, Git pauses the ' +
-      'rebase mid-flight and asks you to resolve. The resolution is identical ' +
-      'to a merge conflict, but applied <em>one commit at a time</em> and ' +
-      'continued with <code>git rebase --continue</code>.'));
+      'rebase mid-flight and requests user input to resolve. The resolution ' +
+      'is identical to a merge conflict, but applied <strong>one commit at a ' +
+      'time</strong> and continued with <code>git rebase --continue</code>.'));
 
     // Tabbed panel: Conflict Arises / After Resolution
     var CONFLICT_STATES = [
@@ -1060,9 +1187,9 @@
       } else {
         rcDesc.innerHTML =
           '<h3>Resolved with <code>git rebase --continue</code></h3>' +
-          '<p>Edit the file to choose a single value, stage it, and continue. ' +
-          'Git records the resolved patch as <code>g7\'</code> and the ' +
-          'history is now linear.</p>' +
+          '<p>The file is edited to a single value, staged, and the rebase ' +
+          'is continued. Git records the resolved patch as <code>g7\'</code> ' +
+          'and the history is now linear.</p>' +
           resolvedFile;
       }
       renderRcSvg();
@@ -1073,10 +1200,11 @@
     sec.appendChild(el('p', 'gm-body',
       '<strong>Interactive rebase</strong> (<code>git rebase -i &lt;base&gt;</code>) ' +
       'turns the same machinery into an editing surface: each commit in the ' +
-      'replay window appears in a todo list, and you can <code>pick</code>, ' +
-      '<code>reword</code>, <code>squash</code>, <code>fixup</code>, ' +
-      '<code>edit</code>, <code>drop</code>, or reorder them. It is the usual ' +
-      'way to clean up a feature\'s history before sharing.'));
+      'replay window appears in a todo list, where it can be ' +
+      '<code>pick</code>ed, <code>reword</code>ed, <code>squash</code>ed, ' +
+      '<code>fixup</code>ed, <code>edit</code>ed, <code>drop</code>ped, or ' +
+      'reordered. It is the usual way to clean up a feature\'s history ' +
+      'before sharing.'));
 
     root.appendChild(sec);
   }
@@ -1091,12 +1219,12 @@
     root.className = 'gm';
 
     buildTOC(root);
-    buildSection01(root);
-    buildSection02(root);
-    buildSection03(root);
-    buildSection04(root);
-    buildSection05(root);
-    buildSection06(root);
+    buildSection01(root);  // 1: Common Base
+    buildSection03(root);  // 2: How Conflicts Arise
+    buildSection05(root);  // 3: Merge Conventions
+    buildSection04(root);  // 4: Inside a Merge Commit
+    buildSection02(root);  // 5: Cherry-Pick
+    buildSection06(root);  // 6: Rebase: Replaying Instead of Recording
   };
 
 })();
