@@ -120,7 +120,16 @@
          needed due to subpixel rounding). */
       '.gm .gm-table pre.role-code-block { margin: 0; padding: 12px 14px; white-space: pre-wrap; overflow-wrap: break-word; overflow: hidden; line-height: 1.55; }',
       '.gm .gm-table pre.role-code-block .line { display: block; }',
-      '.gm .gm-table pre.role-code-block .line.hl { background: var(--coral-wash); margin: 0 -14px; padding: 0 14px; color: var(--ink-primary); }',
+      /* Conflict-line highlights inside the file-version table follow
+         the same red/green semantic as the conflict block: the Ours
+         column gets the del wash + rule, the Theirs column gets the
+         add wash + rule. The padding compensates 14px to leave room
+         for the 3px stem (-14 + 3 = -11 visual padding-left). */
+      '.gm .gm-table td[data-gm-col="ours"]   pre.role-code-block .line.hl { background: var(--hl-del-bg); box-shadow: inset 3px 0 0 var(--hl-del-rule); margin: 0 -14px; padding: 0 14px 0 17px; color: var(--ink-primary); }',
+      '.gm .gm-table td[data-gm-col="theirs"] pre.role-code-block .line.hl { background: var(--hl-add-bg); box-shadow: inset 3px 0 0 var(--hl-add-rule); margin: 0 -14px; padding: 0 14px 0 17px; color: var(--ink-primary); }',
+      /* Fallback for any other .line.hl occurrence (e.g. base column
+         if a future change introduces one). */
+      '.gm .gm-table pre.role-code-block .line.hl { background: var(--hl-info-bg); box-shadow: inset 3px 0 0 var(--hl-info-rule); margin: 0 -14px; padding: 0 14px 0 17px; color: var(--ink-primary); }',
 
       /* Note callout */
       '.gm-note { background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--coral); border-radius: 4px; padding: 12px 16px; color: var(--ink-secondary); font-family: var(--font-text); font-size: var(--size-md); line-height: var(--lh-body); margin: 12px 0; }',
@@ -129,16 +138,19 @@
       /* Inline mono chip. */
       '.gm code, .gm-mono { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
 
-      /* Block code listing. Uses .role-code-block from the design
-         language for type/colour, but overrides the surface to match
-         the MCP Primitives recipe (paper background, no border): the
-         code area reads as an "inset hole" in the surrounding panel,
-         which is darker on light pages and darker still in dark mode.
-         Widget-local helpers add prompt-glyph / command / comment
-         styling, mirroring the design-language siblings
-         .role-code-prompt-glyph (coral) and .role-code-comment
-         (sx-comment). */
-      '.gm pre.role-code-block { margin: 0 0 16px; padding: 14px 16px; line-height: 1.7; overflow: auto; background: var(--paper); border: none; border-radius: 6px; }',
+      /* Block code listing. Type / colour come straight from the
+         design-language .role-code-block recipe; we only set the
+         margin / padding / line-height here. Per Design Language v3,
+         the surface treatment depends on context:
+
+           - Code that sits directly on the page background keeps the
+             default .role-code-block (paper-inset bg + hairline).
+           - Code that lives inside a panel (.gm-panel) gets the boxed
+             variant: paper bg + no border, reading as an "inset hole"
+             in the surrounding panel.body. This is implemented as a
+             contextual override matching .role-code-block-inset. */
+      '.gm pre.role-code-block { margin: 0 0 16px; padding: 14px 16px; line-height: 1.7; overflow: auto; }',
+      '.gm-panel pre.role-code-block, .gm-table pre.role-code-block { background: var(--paper); border: none; }',
       '.gm pre.role-code-block .prompt { color: var(--coral); user-select: none; font-weight: 600; }',
       '.gm pre.role-code-block .cmd { color: var(--ink-primary); }',
       '.gm pre.role-code-block .cmt { color: var(--sx-comment); font-style: italic; }',
@@ -154,8 +166,13 @@
       '.gm pre.role-code-block .line { display: block; }',
       '.gm pre.role-code-block .gm-cm { color: var(--coral); font-weight: 600; }',
       '.gm pre.role-code-block .gm-cmt { color: var(--sx-comment); font-style: italic; }',
-      '.gm pre.role-code-block .gm-ours { background: var(--paper-inset); margin: 0 -16px; padding: 0 16px; }',
-      '.gm pre.role-code-block .gm-theirs { background: var(--coral-wash); margin: 0 -16px; padding: 0 16px; color: var(--ink-primary); }',
+      /* Conflict halves use the v3 line-highlight roles: ours sits on
+         the del wash (red, the "kept-or-lost" side), theirs on the
+         add wash (green, the incoming change). Each carries the role\'s
+         3px leading rule via inset box-shadow. The negative horizontal
+         margin / padding lets the wash bleed to the block edges. */
+      '.gm pre.role-code-block .gm-ours { background: var(--hl-del-bg); box-shadow: inset 3px 0 0 var(--hl-del-rule); margin: 0 -16px; padding: 0 16px 0 19px; color: var(--ink-primary); }',
+      '.gm pre.role-code-block .gm-theirs { background: var(--hl-add-bg); box-shadow: inset 3px 0 0 var(--hl-add-rule); margin: 0 -16px; padding: 0 16px 0 19px; color: var(--ink-primary); }',
       '.gm-conflict-foot { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-md); line-height: var(--lh-body); margin: 10px 0 0; }',
       /* Syntax helpers reusing the design language\'s sx-* tokens. */
       '.gm-kw { color: var(--sx-keyword); font-weight: 500; }',
@@ -173,7 +190,7 @@
       '.gm-commit-area .line { display: block; }',
       '.gm-commit-area .gm-cmt { color: var(--sx-comment); font-style: italic; }',
       '.gm-commit-area .gm-key { color: var(--ink-faint); }',
-      '.gm-commit-area .gm-add { color: var(--coral-strong); }',
+      '.gm-commit-area .gm-add { color: var(--hl-add-rule); }',
       '.gm-commit-area .gm-msg { color: var(--ink-primary); }',
 
       /* Key points list (§05). Plain <ul> with default markers, sized
@@ -187,7 +204,39 @@
       '.gm-toc-row { transition: background 0.15s, color 0.15s; }',
       '.gm-toc-row:hover { background: var(--paper-inset); }',
       '.gm-toc-row:hover .role-toc-title,',
-      '.gm-toc-row:hover .role-toc-row { color: var(--ink-primary); }'
+      '.gm-toc-row:hover .role-toc-row { color: var(--ink-primary); }',
+
+      /* Internal link: prose anchor that triggers a widget-local effect
+         (highlight, pulse). Solid underline in the surrounding text
+         colour so it follows the site\'s link convention rather than
+         competing with it. */
+      '.gm-ilink { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; cursor: pointer; }',
+      '.gm-ilink:hover { color: var(--coral); }',
+
+      /* Radial pulse (§01 merge-base highlight). A circle anchored at
+         c3 grows outward and fades, repeated a couple of times so the
+         viewer sees a sonar-style ping originating from the commit
+         centre. Animating r/opacity keeps the geometric centre fixed. */
+      '@keyframes gm-radial-ping { 0% { r: 16; opacity: 0.85; stroke-width: 2.5; } 100% { r: 56; opacity: 0; stroke-width: 0.5; } }',
+      '.gm-radial-pulse { animation: gm-radial-ping 1.2s ease-out 2; opacity: 0; }',
+
+      /* Pulse animation (§04 parent-pointer highlight). */
+      '@keyframes gm-pulse { 0% { stroke-width: 1.5; } 25% { stroke: var(--coral-strong); stroke-width: 3.5; } 50% { stroke-width: 1.5; } 75% { stroke: var(--coral-strong); stroke-width: 3.5; } 100% { stroke-width: 1.5; } }',
+      '.gm-pulse { animation: gm-pulse 1.6s ease-in-out 2; }',
+
+      /* Parent-SHA inline highlight: a coral wash with a brief flash
+         used by the §04 "parent pointers" / "Parents" internal links. */
+      '.gm-parent-sha { color: var(--ink-faint); padding: 1px 3px; border-radius: 3px; transition: background 0.2s, color 0.2s; }',
+      '@keyframes gm-sha-pulse { 0% { background: transparent; color: var(--ink-faint); } 20% { background: var(--coral); color: var(--paper-raised); } 50% { background: transparent; color: var(--ink-faint); } 70% { background: var(--coral); color: var(--paper-raised); } 100% { background: transparent; color: var(--ink-faint); } }',
+      '.gm-parent-sha.gm-sha-pulse { animation: gm-sha-pulse 1.6s ease-in-out forwards; }',
+
+      /* Line highlight (§02 "line 1 vs line 3" reveal). Consumes the
+         v3 info wash + rule (the same colours used wherever blue is
+         needed across the design language) and pulses on once via the
+         hold-step in the keyframes. The 17px left padding clears the
+         3px stem applied through box-shadow during the lit phases. */
+      '@keyframes gm-line-flash { 0% { background: transparent; box-shadow: none; } 15%, 70% { background: var(--hl-info-bg); box-shadow: inset 3px 0 0 var(--hl-info-rule); } 100% { background: transparent; box-shadow: none; } }',
+      '.gm pre.role-code-block .line.gm-line-flash { animation: gm-line-flash 1.8s ease-in-out forwards; margin: 0 -14px; padding: 0 14px 0 17px; }'
     ].join('\n');
     var s = document.createElement('style');
     s.textContent = css;
@@ -225,16 +274,25 @@
   // ------------------------------------------------------------------
   function svgEdge(x1, y1, x2, y2, color, opts) {
     opts = opts || {};
+    var r = 16;                      // commit circle radius (matches svgCommit)
     var sameRow = Math.abs(y1 - y2) < 2;
+    var dir = (x2 >= x1) ? 1 : -1;
+    var sx = x1 + r * dir;           // attach on the circle equator,
+    var ex = x2 - r * dir;           // same point a horizontal stroke uses
     var d;
     if (sameRow) {
-      d = 'M ' + (x1 + 16) + ' ' + y1 + ' L ' + (x2 - 16) + ' ' + y2;
+      d = 'M ' + sx + ' ' + y1 + ' L ' + ex + ' ' + y2;
     } else {
-      var startOffset = (y2 > y1 ? 9 : -9);
-      var endOffset   = (y2 > y1 ? -9 : 9);
-      d = 'M ' + (x1 + 12) + ' ' + (y1 + startOffset) +
-          ' C ' + (x1 + 30) + ' ' + y1 + ', ' + (x2 - 30) + ' ' + y2 +
-          ', ' + (x2 - 12) + ' ' + (y2 + endOffset);
+      // Both endpoints sit on the equator; the bezier uses horizontal
+      // tangents at start and end so the curve leaves and arrives at
+      // the circle exactly like a horizontal line would, just bending
+      // through the middle to span the row gap. ctrlOffset scales with
+      // the horizontal travel so longer spans stay smooth.
+      var ctrlOffset = Math.max(20, Math.abs(ex - sx) * 0.45);
+      d = 'M ' + sx + ' ' + y1 +
+          ' C ' + (sx + ctrlOffset * dir) + ' ' + y1 +
+          ', ' + (ex - ctrlOffset * dir) + ' ' + y2 +
+          ', ' + ex + ' ' + y2;
     }
     var dash = opts.dashed ? ' stroke-dasharray="4 4"' : '';
     var op   = opts.opacity != null ? ' stroke-opacity="' + opts.opacity + '"' : '';
@@ -243,36 +301,91 @@
 
   function svgCommit(x, y, color, label, opts) {
     opts = opts || {};
-    var ring = '';
-    if (opts.merge) {
-      ring = '<circle cx="' + x + '" cy="' + y + '" r="24" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-dasharray="2 3" stroke-opacity="0.7"/>';
-    }
-    var inner = opts.merge
-      ? '<circle cx="' + x + '" cy="' + y + '" r="16" fill="var(--paper-inset)" stroke="' + color + '" stroke-width="1.5"/>' +
-        '<circle cx="' + x + '" cy="' + y + '" r="7" fill="' + color + '"/>'
-      : '<circle cx="' + x + '" cy="' + y + '" r="16" fill="var(--paper-inset)" stroke="' + color + '" stroke-width="1.5"/>';
+    // No dashed/dotted rings around commits. Merge commits read as
+    // "merges" via two incoming edges (each painted in its source
+    // branch's colour) plus a contrast fill: outline and label stay
+    // HEAD is rendered by svgBranchLabel as part of the pointer chain.
+    var fill = 'var(--paper-inset)';
+    var inner = '<circle cx="' + x + '" cy="' + y + '" r="16" fill="' + fill + '" stroke="' + color + '" stroke-width="1.5"/>';
     var labelEl = label
       ? '<text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="14" font-weight="600" fill="' + color + '">' + label + '</text>'
       : '';
-    var head = '';
-    if (opts.head) {
-      head =
-        '<rect x="' + (x - 26) + '" y="' + (y - 50) + '" width="52" height="18" rx="3" fill="' + color + '"/>' +
-        '<text x="' + x + '" y="' + (y - 37) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="13" font-weight="700" fill="var(--paper-raised)" letter-spacing="0.5">HEAD</text>';
-    }
     var op = opts.dim ? ' opacity="0.35"' : '';
-    return '<g' + op + '>' + ring + inner + labelEl + head + '</g>';
+    var idAttr = opts.id ? ' data-commit-id="' + opts.id + '"' : '';
+    return '<g' + op + idAttr + '>' + inner + labelEl + '</g>';
   }
 
-  function svgBranchLabel(x, y, label, color) {
-    return '<g>' +
-      '<rect x="' + x + '" y="' + (y - 10) + '" width="60" height="20" rx="3" fill="var(--paper-raised)" stroke="' + color + '" stroke-width="1.5"/>' +
-      '<text x="' + (x + 30) + '" y="' + (y + 4) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="10" font-weight="600" fill="' + color + '">' + label + '</text>' +
-      '</g>';
-  }
+  // Branch pointer: branches are pointers to commits, so we render
+  // them as a rectangle stacked vertically above or below the commit
+  // with a small grey line + arrowhead pointing from the rectangle
+  // toward the commit. If opts.head is true, HEAD is rendered further
+  // out in the same direction with the same line+arrow idiom (HEAD ->
+  // branch -> commit, mirroring Git's actual reference chain).
+  //
+  // Arguments are the COMMIT centre coordinates (cx, cy); the helper
+  // computes rectangle and arrow positions from there.
+  function svgBranchLabel(cx, cy, label, color, opts) {
+    opts = opts || {};
+    var sign = (opts.direction === 'above') ? -1 : 1;   // 'below' default
+    // Pointer arrow uses the branch/commit's own colour (not a neutral
+    // grey) so the lineage is legible at a glance. Both branch->commit
+    // and HEAD->branch arrows render in this colour.
+    var arrowColor = color;
+    // Branch and HEAD rectangles share the same width so the pointer
+    // chain reads as a uniform stack. Spacing values give the chain
+    // more breathing room around the commit and between rectangles.
+    var commitR = 16, rectGap = 24, rectW = 64, rectH = 20;
+    var headGap = 22, headW = 64, headH = 20;
+    // tipGap leaves a small visual gap between the arrowhead and the
+    // element it points at, so the arrow doesn\'t collide with the
+    // destination border.
+    var arrowSize = 6, lineStroke = 2.2, tipGap = 4;
 
-  function svgRing(x, y, r, color) {
-    return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-dasharray="3 3"/>';
+    function arrow(fromY, toY) {
+      // motion = +1 if arrow points DOWN (toY > fromY), -1 for UP.
+      // The tip stops `tipGap` short of the destination edge to avoid
+      // colliding with the rectangle / circle border. Polygon body
+      // sits behind the tip and the line ends at the polygon base.
+      var motion = (toY > fromY) ? 1 : -1;
+      var tipY = toY - motion * tipGap;
+      var baseY = tipY - motion * arrowSize;
+      return '<line x1="' + cx + '" y1="' + fromY + '" x2="' + cx + '" y2="' + baseY + '" stroke="' + arrowColor + '" stroke-width="' + lineStroke + '"/>' +
+        '<polygon points="' + cx + ',' + tipY +
+          ' ' + (cx - arrowSize) + ',' + baseY +
+          ' ' + (cx + arrowSize) + ',' + baseY + '" fill="' + arrowColor + '"/>';
+    }
+
+    // ── Branch rectangle stacked above or below the commit ──
+    var branchTop = (sign > 0)
+      ? cy + commitR + rectGap
+      : cy - commitR - rectGap - rectH;
+    var branchBottom = branchTop + rectH;
+    var branchMidY = branchTop + rectH / 2;
+    var branchClose = (sign > 0) ? branchTop : branchBottom;
+    var commitClose = (sign > 0) ? cy + commitR : cy - commitR;
+    var branchArrow = arrow(branchClose, commitClose);
+    var branchRect =
+      '<rect x="' + (cx - rectW / 2) + '" y="' + branchTop + '" width="' + rectW + '" height="' + rectH + '" rx="3" fill="var(--paper-raised)" stroke="' + color + '" stroke-width="1.5"/>' +
+      '<text x="' + cx + '" y="' + (branchMidY + 4) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="10" font-weight="600" fill="' + color + '">' + label + '</text>';
+
+    if (!opts.head) {
+      return branchArrow + branchRect;
+    }
+
+    // ── HEAD rectangle, further out in the same direction ──
+    var headTop = (sign > 0)
+      ? branchBottom + headGap
+      : branchTop - headGap - headH;
+    var headBottom = headTop + headH;
+    var headMidY = headTop + headH / 2;
+    var headClose = (sign > 0) ? headTop : headBottom;
+    var branchFar  = (sign > 0) ? branchBottom : branchTop;
+    var headArrow = arrow(headClose, branchFar);
+    var headRect =
+      '<rect x="' + (cx - headW / 2) + '" y="' + headTop + '" width="' + headW + '" height="' + headH + '" rx="3" fill="' + color + '"/>' +
+      '<text x="' + cx + '" y="' + (headMidY + 4) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="11" font-weight="700" fill="var(--paper-raised)" letter-spacing="0.5">HEAD</text>';
+
+    return branchArrow + branchRect + headArrow + headRect;
   }
 
   function svgCaption(x, y, color, text, anchor) {
@@ -311,9 +424,8 @@
     var list = div('');
     list.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
 
-    ENTRIES.forEach(function (e, i) {
+    ENTRIES.forEach(function (e) {
       var nn = String(e.num).padStart(2, '0');
-      var pp = String(i + 2).padStart(2, '0');
       var row = document.createElement('a');
       row.className = 'role-toc-row gm-toc-row';
       row.href = '#sec-' + nn;
@@ -321,8 +433,7 @@
       row.innerHTML =
         '<span class="role-toc-index">' + nn + '</span>' +
         '<span class="role-toc-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + e.title + '</span>' +
-        '<span class="role-toc-leader" style="flex: 1; border-bottom: 1px dotted currentColor; transform: translateY(-3px); min-width: 24px;"></span>' +
-        '<span class="role-toc-page">' + pp + '</span>';
+        '<span class="role-toc-leader" style="flex: 1; border-bottom: 1px dotted currentColor; transform: translateY(-3px); min-width: 24px;"></span>';
       list.appendChild(row);
     });
 
@@ -330,7 +441,6 @@
     sec.appendChild(frame);
     root.appendChild(sec);
 
-    // Click flash, mirroring mcp-exploration.js.
     list.querySelectorAll('.gm-toc-row').forEach(function (row) {
       row.addEventListener('click', function () {
         row.classList.remove('role-toc-row');
@@ -352,47 +462,162 @@
 
     sec.appendChild(el('p', 'gm-body',
       'When a branch forks off, both lineages share history up to one ' +
-      'commit: the <strong>merge base</strong>. Git uses this third point to ' +
-      'perform a <strong>three-way merge</strong>, comparing each branch tip ' +
-      'against the base to determine what changed on both sides.'));
+      'commit: the <span class="gm-ilink" data-gm-action="show-merge-base">merge base</span>. ' +
+      'Git uses this third point to perform a <strong>three-way merge</strong>, ' +
+      'comparing each branch tip against the base to determine what changed on ' +
+      'both sides. The contrasting tab below shows what a <strong>two-way ' +
+      'merge</strong> sees without that third reference.'));
 
-    var mainY = 90, featY = 170;
-    var xs = [60, 130, 200, 270, 340, 410];
-    var svg =
-      '<svg viewBox="0 0 480 240">' +
-        svgEdge(xs[0], mainY, xs[1], mainY, INK) +
-        svgEdge(xs[1], mainY, xs[2], mainY, INK) +
-        svgEdge(xs[2], mainY, xs[3], mainY, INK) +
-        svgEdge(xs[3], mainY, xs[4], mainY, INK) +
-        svgEdge(xs[2], mainY, xs[3], featY, ACC) +
-        svgEdge(xs[3], featY, xs[4], featY, ACC) +
-        svgRing(xs[2], mainY, 33, ACC) +
-        svgCaption(xs[2], mainY - 42, ACC, 'merge base') +
-        svgCommit(xs[0], mainY, INK, 'a1') +
-        svgCommit(xs[1], mainY, INK, 'b2') +
-        svgCommit(xs[2], mainY, INK, 'c3') +
-        svgCommit(xs[3], mainY, INK, 'd4') +
-        svgCommit(xs[4], mainY, INK, 'e5', { head: true }) +
-        svgCommit(xs[3], featY, ACC, 'f6') +
-        svgCommit(xs[4], featY, ACC, 'g7') +
-        svgBranchLabel(xs[4] + 28, mainY, 'main', INK) +
-        svgBranchLabel(xs[4] + 28, featY, 'feature', ACC) +
-      '</svg>';
+    // Tabbed comparison: three-way (with a shared base) vs. two-way
+    // (no shared base, so every difference becomes a conflict).
+    var OPTIONS = [
+      { id: 'three', label: 'Three-way merge' },
+      { id: 'two',   label: 'Two-way merge'   }
+    ];
+    var active = 'three';
 
-    // Panel mirrors the tabbed-view recipe (svg-bg + arch-desc), minus
-    // the tab bar, so the description sits flush with its visualisation.
     var panel = div('gm-panel');
-    var svgBg = div('gm-svg-bg', svg);
+    var tabsBar = div('mcp-tabs');
+    panel.appendChild(tabsBar);
+    var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
-    var desc = div('gm-arch-desc');
-    desc.innerHTML =
-      '<h3>Three-way diff against the base</h3>' +
-      '<p>Here, <code>c3</code> is the merge base of <code>main</code> ' +
-      '(tip <code>e5</code>) and <code>feature</code> (tip <code>g7</code>). ' +
-      'Git computes <code>git diff c3..e5</code> and <code>git diff c3..g7</code> ' +
-      'to determine each side\'s contribution.</p>';
-    panel.appendChild(desc);
+    var descArea = div('gm-arch-desc');
+    panel.appendChild(descArea);
+
+    function renderThreeWay() {
+      var mainY = 120, featY = 200;
+      var xs = [60, 130, 200, 270, 340, 410];
+      svgBg.innerHTML =
+        '<svg viewBox="0 0 480 270">' +
+          svgEdge(xs[0], mainY, xs[1], mainY, INK) +
+          svgEdge(xs[1], mainY, xs[2], mainY, INK) +
+          svgEdge(xs[2], mainY, xs[3], mainY, INK) +
+          svgEdge(xs[3], mainY, xs[4], mainY, INK) +
+          svgEdge(xs[2], mainY, xs[3], featY, ACC) +
+          svgEdge(xs[3], featY, xs[4], featY, ACC) +
+          svgCaption(xs[2], mainY - 26, ACC, 'Merge Base') +
+          '<circle id="gm-merge-base-ping" cx="' + xs[2] + '" cy="' + mainY + '" r="16" fill="none" stroke="' + ACC + '"/>' +
+          svgCommit(xs[0], mainY, INK, 'a1') +
+          svgCommit(xs[1], mainY, INK, 'b2') +
+          svgCommit(xs[2], mainY, INK, 'c3') +
+          svgCommit(xs[3], mainY, INK, 'd4') +
+          svgCommit(xs[4], mainY, INK, 'e5') +
+          svgCommit(xs[3], featY, ACC, 'f6') +
+          svgCommit(xs[4], featY, ACC, 'g7') +
+          // Branches stack vertically away from the row, with a grey
+          // arrow line pointing back to the commit. HEAD chains
+          // further out and points to its branch.
+          svgBranchLabel(xs[4], mainY, 'main', INK, { head: true, direction: 'above' }) +
+          svgBranchLabel(xs[4], featY, 'feature', ACC, { direction: 'below' }) +
+        '</svg>';
+    }
+
+    function renderTwoWay() {
+      var twoY1 = 120, twoY2 = 200;
+      var twoXs = [60, 160, 260, 360];
+      svgBg.innerHTML =
+        '<svg viewBox="0 0 480 270">' +
+          // Two parallel rows with no shared origin.
+          svgEdge(twoXs[0], twoY1, twoXs[1], twoY1, INK) +
+          svgEdge(twoXs[1], twoY1, twoXs[2], twoY1, INK) +
+          svgEdge(twoXs[2], twoY1, twoXs[3], twoY1, INK) +
+          svgEdge(twoXs[0], twoY2, twoXs[1], twoY2, ACC) +
+          svgEdge(twoXs[1], twoY2, twoXs[2], twoY2, ACC) +
+          svgEdge(twoXs[2], twoY2, twoXs[3], twoY2, ACC) +
+          svgCommit(twoXs[0], twoY1, INK, 'a1') +
+          svgCommit(twoXs[1], twoY1, INK, 'b2') +
+          svgCommit(twoXs[2], twoY1, INK, 'c3') +
+          svgCommit(twoXs[3], twoY1, INK, 'd4') +
+          svgCommit(twoXs[0], twoY2, ACC, 'p1') +
+          svgCommit(twoXs[1], twoY2, ACC, 'p2') +
+          svgCommit(twoXs[2], twoY2, ACC, 'p3') +
+          svgCommit(twoXs[3], twoY2, ACC, 'p4') +
+          svgBranchLabel(twoXs[3], twoY1, 'ours',   INK, { head: true, direction: 'above' }) +
+          svgBranchLabel(twoXs[3], twoY2, 'theirs', ACC, { direction: 'below' }) +
+          svgCaption(twoXs[1] + 50, (twoY1 + twoY2) / 2 + 4, MUTED, 'no shared ancestor') +
+        '</svg>';
+    }
+
+    function renderTabs() {
+      tabsBar.innerHTML = '';
+      OPTIONS.forEach(function (o) {
+        var b = document.createElement('button');
+        b.className = 'mcp-tab' + (o.id === active ? ' active' : '');
+        b.type = 'button';
+        b.textContent = o.label;
+        b.onclick = function () { active = o.id; render(); };
+        tabsBar.appendChild(b);
+      });
+    }
+
+    function renderDesc() {
+      if (active === 'three') {
+        descArea.innerHTML =
+          '<h3>Three-way diff against the base</h3>' +
+          '<p>Here, <code>c3</code> is the merge base of <code>main</code> ' +
+          '(tip <code>e5</code>) and <code>feature</code> (tip <code>g7</code>). ' +
+          'Git computes <code>git diff c3..e5</code> and ' +
+          '<code>git diff c3..g7</code> to determine each side\'s contribution.</p>';
+      } else {
+        descArea.innerHTML =
+          '<h3>Two-way merge: no third reference point</h3>' +
+          '<p>Imagine the merge tool sees only the two file versions:</p>' +
+          '<div class="gm-table-wrap" style="margin: 8px 0 14px;">' +
+            '<div class="role-table-frame">' +
+              '<table class="gm-table">' +
+                '<thead><tr class="role-table-head">' +
+                  '<th class="role-table-head-cell">Ours <span class="gm-vershead-sub">(d4)</span></th>' +
+                  '<th class="role-table-head-cell">Theirs <span class="gm-vershead-sub">(p4)</span></th>' +
+                '</tr></thead>' +
+                '<tbody><tr>' +
+                  '<td class="gm-cell-pre"><pre class="role-code-block">' +
+                    '<span class="line"><span class="gm-kw">let</span> retries = <span class="gm-str">3</span></span>' +
+                  '</pre></td>' +
+                  '<td class="gm-cell-pre"><pre class="role-code-block">' +
+                    '<span class="line"><span class="gm-kw">let</span> retries = <span class="gm-str">5</span></span>' +
+                  '</pre></td>' +
+                '</tr></tbody>' +
+              '</table>' +
+            '</div>' +
+          '</div>' +
+          '<p>Both lines exist; both differ. Did <em>ours</em> raise the ' +
+          'limit, or did <em>theirs</em> lower it? With only two points, ' +
+          'there is no answer: a two-way merge must flag every difference ' +
+          'as a conflict.</p>' +
+          '<p>A three-way merge consults the merge base. If the base read ' +
+          '<code>retries = 3</code>, only <em>theirs</em> changed it, so ' +
+          'Git auto-resolves to <code>5</code>. Both sides changing the ' +
+          'same line is the only case that still needs human input.</p>';
+      }
+    }
+
+    function render() {
+      renderTabs();
+      if (active === 'three') renderThreeWay();
+      else renderTwoWay();
+      renderDesc();
+    }
+    render();
     sec.appendChild(panel);
+
+    // Wire the in-prose link: clicking "merge base" switches to the
+    // three-way tab (since that's where the concept is illustrated)
+    // and emits a radial ping from c3's centre.
+    sec.querySelectorAll('[data-gm-action="show-merge-base"]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (active !== 'three') {
+          active = 'three';
+          render();
+        }
+        requestAnimationFrame(function () {
+          var ping = svgBg.querySelector('#gm-merge-base-ping');
+          if (!ping) return;
+          ping.classList.remove('gm-radial-pulse');
+          void ping.getBoundingClientRect();
+          ping.classList.add('gm-radial-pulse');
+        });
+      });
+    });
 
     root.appendChild(sec);
   }
@@ -423,9 +648,10 @@
           '<p>The <strong>diff</strong> of <code>g7</code> is replayed on top of ' +
           '<code>main</code> as a brand-new commit (<code>g7\'</code>) with a ' +
           '<strong>new hash</strong>. There is no tie back to <code>feature</code>.</p>' +
-          '<p>Use this when only one commit\'s worth of change is wanted, e.g. ' +
-          'porting a fix to a maintenance branch. Note that a subsequent merge ' +
-          'of <code>feature</code> may surface the change a second time.</p>' }
+          '<p>This could be useful when only one commit\'s worth of change is ' +
+          'wanted, e.g. porting a fix to a maintenance branch. Note that a ' +
+          'subsequent merge of <code>feature</code> may surface the change a ' +
+          'second time.</p>' }
     ];
 
     var active = 'merge';
@@ -437,7 +663,7 @@
     var descArea = div('gm-arch-desc');
     panel.appendChild(descArea);
 
-    var mainY = 80, featY = 170;
+    var mainY = 120, featY = 200;
     var xs = [50, 120, 190, 260, 330, 400, 470];
 
     function renderSVG() {
@@ -459,20 +685,22 @@
       var rest;
       if (active === 'merge') {
         rest =
-          svgEdge(xs[4], mainY, xs[5], mainY, ACC) +
+          // Main-side incoming to the merge commit keeps its INK colour;
+          // only the feature-side curve stays coral.
+          svgEdge(xs[4], mainY, xs[5], mainY, INK) +
           svgEdge(xs[4], featY, xs[5], mainY, ACC) +
-          svgCommit(xs[5], mainY, ACC, 'M', { merge: true, head: true }) +
-          svgBranchLabel(xs[5] + 36, mainY, 'main', INK) +
-          svgBranchLabel(xs[4] + 28, featY, 'feature', ACC);
+          svgCommit(xs[5], mainY, ACC, 'M', { merge: true }) +
+          svgBranchLabel(xs[5], mainY, 'main', INK, { head: true, direction: 'above' }) +
+          svgBranchLabel(xs[4], featY, 'feature', ACC, { direction: 'below' });
       } else {
         rest =
           svgEdge(xs[4], mainY, xs[5], mainY, ACC, { dashed: true }) +
-          svgCommit(xs[5], mainY, ACC, "g7'", { head: true }) +
-          svgBranchLabel(xs[5] + 28, mainY, 'main', INK) +
-          svgBranchLabel(xs[4] + 28, featY, 'feature', ACC) +
-          svgCaption(xs[5], mainY - 50, ACC, 'new commit, same diff');
+          svgCommit(xs[5], mainY, ACC, "g7'") +
+          svgBranchLabel(xs[5], mainY, 'main', INK, { head: true, direction: 'above' }) +
+          svgBranchLabel(xs[4], featY, 'feature', ACC, { direction: 'below' }) +
+          svgCaption(xs[5], mainY + 36, ACC, 'new commit, same diff');
       }
-      svgBg.innerHTML = '<svg viewBox="0 0 540 240">' + trunk + rest + '</svg>';
+      svgBg.innerHTML = '<svg viewBox="0 0 540 270">' + trunk + rest + '</svg>';
     }
 
     function renderTabs() {
@@ -505,34 +733,44 @@
     var sec = el('section', 'gm-section');
     sec.appendChild(sectionHeader(2, 'How Conflicts Arise'));
 
+    // Body uses the concrete example from the code block below: ours
+    // edits the function name on line 1 (greet -> intro), theirs edits
+    // the greeting on line 3 (Hello -> Hi). These are independent
+    // changes, so Git auto-resolves them. The conflict in the table
+    // sits on line 2 (both sides changed the colour).
     sec.appendChild(el('p', 'gm-body',
       'Git\'s three-way merge can auto-resolve <strong>independent</strong> ' +
-      'changes: if one side edited line 5 and the other side edited line 50, ' +
-      'then there are no issues. A conflict arises when both branches modify ' +
+      'changes. If <span class="gm-ilink" data-gm-action="show-indep-lines">' +
+      'one side edited line 1 and the other side edited line 3</span>, then ' +
+      'there are no issues. A conflict arises when both branches modify ' +
       '<strong>the same line</strong> differently, or when one side edits while ' +
       'the other deletes. Git cannot infer which intent to honour, so it stops ' +
       'and requests user input.'));
 
-    // Swift versions of greet, one cell per version. The conflicting
-    // line (the one both sides modified differently) is wrapped in a
-    // .line.hl span so the difference is visible at a glance. Each line
-    // is its own block-display span, so the .hl line does not introduce
-    // an extra newline (which it did when mixed with raw "\n" separators).
-    function lineSwiftDecl() {
-      return '<span class="line"><span class="gm-kw">func</span> greet(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>';
+    // Swift snippets for the file-version table. Each line carries a
+    // data-line index so the in-prose link can flash the independent
+    // edits (line 1 in Ours, line 3 in Theirs) on click.
+    function lineDecl(funcName, hl) {
+      return '<span class="line' + (hl ? ' hl' : '') + '" data-line="1">' +
+        '<span class="gm-kw">func</span> ' + funcName +
+        '(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>';
     }
     function lineColor(colour, hl) {
-      return '<span class="line' + (hl ? ' hl' : '') + '">    <span class="gm-kw">let</span> color = <span class="gm-str">"' + colour + '"</span></span>';
+      return '<span class="line' + (hl ? ' hl' : '') + '" data-line="2">' +
+        '    <span class="gm-kw">let</span> color = <span class="gm-str">"' + colour + '"</span></span>';
     }
-    function lineReturn(greeting) {
-      return '<span class="line">    <span class="gm-kw">return</span> <span class="gm-str">"' + greeting + ', \\(name)!"</span></span>';
+    function lineReturn(greeting, hl) {
+      return '<span class="line' + (hl ? ' hl' : '') + '" data-line="3">' +
+        '    <span class="gm-kw">return</span> <span class="gm-str">"' + greeting + ', \\(name)!"</span></span>';
     }
-    function lineClose() { return '<span class="line">}</span>'; }
+    function lineClose() { return '<span class="line" data-line="4">}</span>'; }
 
-    function swiftBody(colour, hl) {
-      var greeting = (colour === 'green') ? 'Hi' : 'Hello';
-      return lineSwiftDecl() + lineColor(colour, hl) + lineReturn(greeting) + lineClose();
-    }
+    // Per-cell composition: base is unchanged; ours renames the function
+    // to "intro" (line 1) and changes colour to red (line 2); theirs
+    // changes colour to green (line 2) and greeting to "Hi" (line 3).
+    var baseCell  = lineDecl('greet', false) + lineColor('blue',  false) + lineReturn('Hello', false) + lineClose();
+    var oursCell  = lineDecl('intro', false) + lineColor('red',   true)  + lineReturn('Hello', false) + lineClose();
+    var theirsCell = lineDecl('greet', false) + lineColor('green', true)  + lineReturn('Hi',    false) + lineClose();
 
     var fileTable = div('gm-table-wrap');
     fileTable.innerHTML =
@@ -542,17 +780,17 @@
             '<tr class="role-table-head">' +
               '<th class="role-table-head-cell">Merge Base ' +
                 '<span class="gm-vershead-sub">(c3)</span></th>' +
-              '<th class="role-table-head-cell">Ours ' +
+              '<th class="role-table-head-cell" data-gm-col="ours">Ours ' +
                 '<span class="gm-vershead-sub">(e5, main)</span></th>' +
-              '<th class="role-table-head-cell">Theirs ' +
+              '<th class="role-table-head-cell" data-gm-col="theirs">Theirs ' +
                 '<span class="gm-vershead-sub">(g7, feature)</span></th>' +
             '</tr>' +
           '</thead>' +
           '<tbody>' +
             '<tr>' +
-              '<td class="gm-cell-pre"><pre class="role-code-block">' + swiftBody('blue',  false) + '</pre></td>' +
-              '<td class="gm-cell-pre"><pre class="role-code-block">' + swiftBody('red',   true)  + '</pre></td>' +
-              '<td class="gm-cell-pre"><pre class="role-code-block">' + swiftBody('green', true)  + '</pre></td>' +
+              '<td class="gm-cell-pre"><pre class="role-code-block">' + baseCell + '</pre></td>' +
+              '<td class="gm-cell-pre" data-gm-col="ours"><pre class="role-code-block">' + oursCell + '</pre></td>' +
+              '<td class="gm-cell-pre" data-gm-col="theirs"><pre class="role-code-block">' + theirsCell + '</pre></td>' +
             '</tr>' +
           '</tbody>' +
         '</table>' +
@@ -568,7 +806,7 @@
     conflictArea.innerHTML =
       '<pre class="role-code-block gm-conflict-block" style="margin: 0;">' +
         '<span class="line gm-cmt">// CONFLICT (content): Merge conflict in greet.swift</span>' +
-        '<span class="line"><span class="gm-kw">func</span> greet(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>' +
+        '<span class="line"><span class="gm-kw">func</span> intro(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>' +
         '<span class="line gm-cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (main)</span>' +
         '<span class="line gm-ours">    <span class="gm-kw">let</span> color = <span class="gm-str">"red"</span></span>' +
         '<span class="line gm-cm">=======</span>' +
@@ -582,15 +820,47 @@
     var conflictDesc = div('gm-arch-desc');
     conflictDesc.innerHTML =
       '<h3>Resolving the conflict</h3>' +
-      '<p>Line 3 is not conflicted. Only <code>main</code> is unchanged ' +
-      'from base, and only <code>feature</code> changed <code>"Hello"</code> ' +
-      '→ <code>"Hi"</code>, so Git takes <code>feature</code>\'s version ' +
-      'automatically. The conflict is purely on line 2.</p>' +
+      '<p>Lines 1 and 3 are not conflicted. Only <code>main</code> renamed ' +
+      'the function (<code>greet</code> → <code>intro</code>), and only ' +
+      '<code>feature</code> changed the greeting (<code>"Hello"</code> → ' +
+      '<code>"Hi"</code>), so Git takes each side\'s version automatically. ' +
+      'The conflict is purely on line 2, where both sides changed the colour ' +
+      'to incompatible values.</p>' +
       '<p>The conflict is resolved by editing the file (picking, combining, ' +
       'or rewriting), staging it with <code>git add</code>, and committing. ' +
       '<strong>That commit</strong> is the merge commit.</p>';
     conflictPanel.appendChild(conflictDesc);
     sec.appendChild(conflictPanel);
+
+    // Sequential edits on a single branch don't conflict, even when
+    // they touch the same line; this paragraph addresses that follow-on
+    // question as regular prose beneath the visual.
+    var sameBranchPara = el('p', 'gm-body',
+      'Why don\'t two commits on the same branch conflict when they touch ' +
+      'the same line? Because each commit has a single parent: the second ' +
+      'commit\'s diff is applied directly to the state left by the first, ' +
+      'so the order and the result are unambiguous. A conflict needs two ' +
+      'divergent histories meeting at a merge, not a single line of edits.');
+    sameBranchPara.style.marginTop = '36px';
+    sec.appendChild(sameBranchPara);
+
+    // Wire the in-prose link: flash line 1 in the Ours column and line
+    // 3 in the Theirs column with a brief blue backdrop, restarting the
+    // animation on each click.
+    sec.querySelectorAll('[data-gm-action="show-indep-lines"]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        var targets = [
+          fileTable.querySelector('td[data-gm-col="ours"] [data-line="1"]'),
+          fileTable.querySelector('td[data-gm-col="theirs"] [data-line="3"]')
+        ];
+        targets.forEach(function (n) {
+          if (!n) return;
+          n.classList.remove('gm-line-flash');
+          void n.getBoundingClientRect();
+          n.classList.add('gm-line-flash');
+        });
+      });
+    });
 
     root.appendChild(sec);
   }
@@ -604,9 +874,10 @@
 
 
     sec.appendChild(el('p', 'gm-body',
-      'A merge commit is a <strong>regular commit with two (or more) parent ' +
-      'pointers</strong>. Its tree is whatever the working directory looked ' +
-      'like when <code>git commit</code> ran after resolution, which means ' +
+      'A merge commit is a regular commit with two (or more) ' +
+      '<span class="gm-ilink" data-gm-action="pulse-parents">parent pointers</span>. ' +
+      'Its tree is whatever the working directory looked like when ' +
+      '<code>git commit</code> ran after resolution, which means ' +
       '<strong>the merge commit\'s contents include the conflict resolution</strong>. ' +
       'If there were no conflicts, the merge commit is often empty in terms of ' +
       '"new" content and just records that two histories joined.'));
@@ -617,11 +888,18 @@
     function L(html, cls) {
       return '<span class="line' + (cls ? ' ' + cls : '') + '">' + html + '</span>';
     }
+    // Parent SHAs are wrapped in .gm-parent-sha so the in-prose
+    // "parent pointers" link and the anatomy table's "Parents" link
+    // can pulse them on click. The "two/three parents" inline comment
+    // is also part of the highlight so the count is legible.
+    var PSHA1 = '<span class="gm-parent-sha">3e1b7a2</span>';
+    var PSHA2 = '<span class="gm-parent-sha">c8d4f0a</span>';
+    var PSHA3 = '<span class="gm-parent-sha">a1b2c3d</span>';
     var COMMIT_VARIANTS = [
       { id: 'conflict', label: 'With Conflict Resolution',
         lines: [
           L('<span class="gm-msg">commit</span> 9f2a8c1d4b… <span class="gm-key">(HEAD → main)</span>'),
-          L('<span class="gm-key">Merge:</span> 3e1b7a2 c8d4f0a   <span class="gm-cmt">// two parents</span>'),
+          L('<span class="gm-key">Merge:</span> ' + PSHA1 + ' ' + PSHA2 + '   <span class="gm-cmt">// two parents</span>'),
           L('<span class="gm-key">Author:</span> Harry Du Bois &lt;harry@example.com&gt;'),
           L('<span class="gm-key">Date:</span>   Wed May 7 14:22 2026'),
           L('&nbsp;'),
@@ -635,7 +913,7 @@
       { id: 'clean', label: 'Clean Merge',
         lines: [
           L('<span class="gm-msg">commit</span> 4a17e0f6c1… <span class="gm-key">(HEAD → main)</span>'),
-          L('<span class="gm-key">Merge:</span> 3e1b7a2 c8d4f0a   <span class="gm-cmt">// two parents</span>'),
+          L('<span class="gm-key">Merge:</span> ' + PSHA1 + ' ' + PSHA2 + '   <span class="gm-cmt">// two parents</span>'),
           L('<span class="gm-key">Author:</span> Harry Du Bois &lt;harry@example.com&gt;'),
           L('<span class="gm-key">Date:</span>   Wed May 7 14:22 2026'),
           L('&nbsp;'),
@@ -646,7 +924,7 @@
       { id: 'octopus', label: 'Octopus Merge',
         lines: [
           L('<span class="gm-msg">commit</span> 7c2b9af3e0… <span class="gm-key">(HEAD → main)</span>'),
-          L('<span class="gm-key">Merge:</span> 3e1b7a2 c8d4f0a a1b2c3d   <span class="gm-cmt">// three parents</span>'),
+          L('<span class="gm-key">Merge:</span> ' + PSHA1 + ' ' + PSHA2 + ' ' + PSHA3 + '   <span class="gm-cmt">// three parents</span>'),
           L('<span class="gm-key">Author:</span> Harry Du Bois &lt;harry@example.com&gt;'),
           L('<span class="gm-key">Date:</span>   Wed May 7 14:22 2026'),
           L('&nbsp;'),
@@ -685,20 +963,27 @@
       '<div class="role-table-frame">' +
         '<table class="gm-table">' +
           '<thead><tr class="role-table-head">' +
-            '<th class="role-table-head-cell" style="width:18%; white-space: nowrap;">Field</th>' +
+            '<th class="role-table-head-cell" style="width:18%; white-space: nowrap;">&nbsp;</th>' +
             '<th class="role-table-head-cell">What it holds</th>' +
           '</tr></thead>' +
           '<tbody>' +
-            '<tr><td class="role-table-cell"><strong>Two parents</strong></td>' +
+            '<tr><td class="role-table-cell">' +
+              '<span class="gm-ilink" data-gm-action="pulse-parents"><strong>Parents</strong></span>' +
+            '</td>' +
             '<td class="role-table-cell">First parent is the branch the merge ' +
               'was performed on (<code>main</code>); second is the branch ' +
               'merged in (<code>feature</code>). This ordering is what ' +
-              '<code>HEAD^N</code> walks: <code>HEAD^1</code> resolves to the ' +
-              'first parent (<code>main</code>\'s previous tip), ' +
-              '<code>HEAD^2</code> to the second parent (<code>feature</code>\'s ' +
-              'tip). <code>HEAD^3</code> only exists for an octopus merge ' +
-              '(three or more parents); on a regular two-parent merge it errors ' +
-              'out as "no such ref".</td></tr>' +
+              '<code>HEAD^N</code> walks:' +
+              '<ul class="gm-keys" style="margin: 8px 0 0 22px;">' +
+                '<li><code>HEAD^1</code> resolves to the first parent ' +
+                  '(<code>main</code>\'s previous tip).</li>' +
+                '<li><code>HEAD^2</code> resolves to the second parent ' +
+                  '(<code>feature</code>\'s tip).</li>' +
+                '<li><code>HEAD^3</code> only exists for an octopus merge ' +
+                  '(three or more parents); on a regular two-parent merge it ' +
+                  'errors out as "no such ref".</li>' +
+              '</ul>' +
+            '</td></tr>' +
             '<tr><td class="role-table-cell"><strong>Tree (snapshot)</strong></td>' +
             '<td class="role-table-cell">The full state of all files post-resolution. ' +
               'If conflicts existed, the hand-edited file is what is stored: ' +
@@ -720,78 +1005,154 @@
     // a merge commit M with its two parents (e5 on main, g7 on feature),
     // plus the operation's effect on history.
     function svgRevert() {
-      var mY = 70, fY = 150;
-      // Chain shifted left so the trailing "main" branch label
-      // (offset +36 + width 60) clears the viewBox right edge.
-      var xs = [30, 110, 190, 270, 350];
-      return '<svg viewBox="0 0 460 200">' +
-        // main trunk c3 - d4 - e5 - M - R
-        svgEdge(xs[0], mY, xs[1], mY, INK) +
-        svgEdge(xs[1], mY, xs[2], mY, INK) +
-        svgEdge(xs[2], mY, xs[3], mY, ACC) +
-        svgEdge(xs[3], mY, xs[4], mY, ACC) +
-        // feature into M
-        svgEdge(xs[1], mY, xs[2], fY, ACC) +
-        svgEdge(xs[2], fY, xs[3], mY, ACC) +
-        svgCommit(xs[0], mY, INK, 'c3') +
-        svgCommit(xs[1], mY, INK, 'd4') +
-        svgCommit(xs[2], mY, INK, 'e5') +
-        svgCommit(xs[3], mY, ACC, 'M', { merge: true }) +
-        svgCommit(xs[4], mY, ACC, 'R', { head: true }) +
-        svgCommit(xs[2], fY, ACC, 'g7', { dim: true }) +
-        svgCaption(xs[4], mY + 50, 'var(--coral-strong)', 'undoes feature\'s diff') +
-        svgBranchLabel(xs[4] + 36, mY, 'main', INK) +
-        '</svg>';
-    }
-
-    function svgCherryMerge() {
-      var sY = 60, mY = 150;
-      var xs = [50, 130, 210, 290, 370, 450];
-      return '<svg viewBox="0 0 540 210">' +
-        // release branch (top): two existing commits then M' cherry-picked
-        svgEdge(xs[3], sY, xs[4], sY, INK) +
-        svgEdge(xs[4], sY, xs[5], sY, ACC, { dashed: true }) +
-        svgCommit(xs[3], sY, INK, 'r1') +
-        svgCommit(xs[4], sY, INK, 'r2') +
-        svgCommit(xs[5], sY, ACC, "M'", { head: true }) +
-        svgBranchLabel(xs[5] + 28, sY, 'release', INK) +
-        // main (bottom): regular merge with feature
-        svgEdge(xs[0], mY, xs[1], mY, INK) +
-        svgEdge(xs[1], mY, xs[2], mY, INK) +
-        svgEdge(xs[2], mY, xs[3], mY, ACC) +
-        svgEdge(xs[1], mY, xs[2], mY + 40, ACC) +
-        svgEdge(xs[2], mY + 40, xs[3], mY, ACC) +
-        svgCommit(xs[0], mY, INK, 'c3') +
-        svgCommit(xs[1], mY, INK, 'd4') +
-        svgCommit(xs[2], mY, INK, 'e5') +
-        svgCommit(xs[3], mY, ACC, 'M', { merge: true }) +
-        svgCommit(xs[2], mY + 40, ACC, 'g7', { dim: true }) +
-        svgBranchLabel(xs[3] + 36, mY, 'main', INK) +
-        '</svg>';
-    }
-
-    function svgSquash() {
-      var mY = 70, fY = 150;
-      var xs = [50, 130, 210, 290, 370];
-      return '<svg viewBox="0 0 460 200">' +
-        // main with a single squash commit S (no merge link)
+      var mY = 120, fY = 200;
+      var xs = [30, 100, 170, 240, 310, 380];
+      return '<svg viewBox="0 0 480 230">' +
+        // main trunk c3 - d4 - e5 - f6 (merge) - g7' (revert).
+        // The main-side incoming edge into the merge stays INK; the
+        // feature-side curve into the merge stays ACC.
         svgEdge(xs[0], mY, xs[1], mY, INK) +
         svgEdge(xs[1], mY, xs[2], mY, INK) +
         svgEdge(xs[2], mY, xs[3], mY, INK) +
         svgEdge(xs[3], mY, xs[4], mY, ACC) +
-        // feature, dimmed (its commits exist but are not linked into S)
-        svgEdge(xs[1], mY, xs[2], fY, ACC, { opacity: 0.4 }) +
-        svgEdge(xs[2], fY, xs[3], fY, ACC, { opacity: 0.4 }) +
+        // feature: branches off c3, has two commits, second merges into f6
+        svgEdge(xs[0], mY, xs[1], fY, ACC) +
+        svgEdge(xs[1], fY, xs[2], fY, ACC) +
+        svgEdge(xs[2], fY, xs[3], mY, ACC) +
         svgCommit(xs[0], mY, INK, 'c3') +
         svgCommit(xs[1], mY, INK, 'd4') +
         svgCommit(xs[2], mY, INK, 'e5') +
-        svgCommit(xs[3], mY, INK, 'f0') +
-        svgCommit(xs[4], mY, ACC, 'S', { head: true }) +
-        svgCommit(xs[2], fY, ACC, 'f6', { dim: true }) +
-        svgCommit(xs[3], fY, ACC, 'g7', { dim: true }) +
-        svgCaption(xs[4], mY + 50, ACC, 'combined diff, no merge link') +
-        svgBranchLabel(xs[4] + 28, mY, 'main', INK) +
-        svgBranchLabel(xs[3] + 28, fY, 'feature', ACC) +
+        svgCommit(xs[3], mY, ACC, 'f6', { merge: true }) +
+        svgCommit(xs[4], mY, ACC, "g7'") +
+        svgCommit(xs[1], fY, ACC, 'x1', { dim: true }) +
+        svgCommit(xs[2], fY, ACC, 'x2', { dim: true }) +
+        svgCaption(xs[4] + 4, mY + 36, 'var(--coral-strong)', 'Undo feature\'s diff') +
+        svgBranchLabel(xs[4], mY, 'main', INK, { head: true, direction: 'above' }) +
+        '</svg>';
+    }
+
+    function svgCherryMerge() {
+      var sY = 120, mY = 200, fY = 265;
+      var xs = [40, 110, 180, 250, 320, 390, 460];
+      return '<svg viewBox="0 0 560 335">' +
+        // release branch (top): two existing commits then f6' cherry-picked
+        svgEdge(xs[4], sY, xs[5], sY, INK) +
+        svgEdge(xs[5], sY, xs[6], sY, ACC, { dashed: true }) +
+        svgCommit(xs[4], sY, INK, 'r1') +
+        svgCommit(xs[5], sY, INK, 'r2') +
+        svgCommit(xs[6], sY, ACC, "f6'") +
+        svgBranchLabel(xs[6], sY, 'release', INK, { head: true, direction: 'above' }) +
+        // main (middle): c3, d4, e5 then merge commit f6.
+        // Main-side edge into the merge stays INK; feature-side curve stays ACC.
+        svgEdge(xs[0], mY, xs[1], mY, INK) +
+        svgEdge(xs[1], mY, xs[2], mY, INK) +
+        svgEdge(xs[2], mY, xs[4], mY, INK) +
+        // feature (bottom): three commits, last merges into f6
+        svgEdge(xs[0], mY, xs[1], fY, ACC) +
+        svgEdge(xs[1], fY, xs[2], fY, ACC) +
+        svgEdge(xs[2], fY, xs[3], fY, ACC) +
+        svgEdge(xs[3], fY, xs[4], mY, ACC) +
+        svgCommit(xs[0], mY, INK, 'c3') +
+        svgCommit(xs[1], mY, INK, 'd4') +
+        svgCommit(xs[2], mY, INK, 'e5') +
+        svgCommit(xs[4], mY, ACC, 'f6', { merge: true }) +
+        svgCommit(xs[1], fY, ACC, 'x1', { dim: true }) +
+        svgCommit(xs[2], fY, ACC, 'x2', { dim: true }) +
+        svgCommit(xs[3], fY, ACC, 'x3', { dim: true }) +
+        svgBranchLabel(xs[3], fY, 'feature', ACC, { direction: 'below' }) +
+        '</svg>';
+    }
+
+    function svgSquash() {
+      // Three stacked chains, each gets a left-side eyebrow label so the
+      // viewer can tell them apart at a glance.
+      //   1. REFERENCE (faded): the original merge state with x1, x2
+      //      brought in via the merge commit M, plus a post-merge
+      //      commit n1 to make the squash scenario realistic.
+      //   2. rebase -i: walks first-parent only, drops the merge, so
+      //      the feature work disappears.
+      //   3. --squash: an alternative path that never records a merge
+      //      commit; a single S holds the feature's combined diff.
+      var c1 = 50, c1f = 105, c2 = 180, c3 = 250;
+      var xs = [110, 180, 250, 320, 390];
+      function eyebrow(x, y, text) {
+        return '<text x="' + x + '" y="' + (y - 12) + '" text-anchor="start" font-family="var(--font-mono)" font-size="10" font-weight="600" fill="var(--ink-muted)" letter-spacing="0.5">' + text + '</text>';
+      }
+
+      var chain1 =
+        eyebrow(15, c1, 'REFERENCE') +
+        '<g opacity="0.45">' +
+          svgEdge(xs[0], c1, xs[1], c1, INK) +
+          svgEdge(xs[1], c1, xs[2], c1, INK) +
+          svgEdge(xs[2], c1, xs[3], c1, INK) +
+          svgEdge(xs[3], c1, xs[4], c1, INK) +
+          svgEdge(xs[0], c1, xs[1], c1f, ACC) +
+          svgEdge(xs[1], c1f, xs[2], c1f, ACC) +
+          svgEdge(xs[2], c1f, xs[3], c1, ACC) +
+          svgCommit(xs[0], c1, INK, 'c3') +
+          svgCommit(xs[1], c1, INK, 'd4') +
+          svgCommit(xs[2], c1, INK, 'e5') +
+          svgCommit(xs[3], c1, ACC, 'M', { merge: true }) +
+          svgCommit(xs[4], c1, INK, 'n1') +
+          svgCommit(xs[1], c1f, ACC, 'x1') +
+          svgCommit(xs[2], c1f, ACC, 'x2') +
+        '</g>';
+
+      var chain2 =
+        eyebrow(15, c2, 'rebase -i') +
+        svgEdge(xs[0], c2, xs[1], c2, INK) +
+        svgEdge(xs[1], c2, xs[2], c2, INK) +
+        svgEdge(xs[2], c2, xs[3], c2, INK) +
+        svgCommit(xs[0], c2, INK, 'c3') +
+        svgCommit(xs[1], c2, INK, 'd4') +
+        svgCommit(xs[2], c2, INK, 'e5') +
+        svgCommit(xs[3], c2, ACC, "n1'") +
+        '<text x="' + (xs[3] + 28) + '" y="' + (c2 + 5) + '" font-family="var(--font-mono)" font-size="10" fill="var(--coral-strong)">feature work vanished</text>';
+
+      var chain3 =
+        eyebrow(15, c3, '--squash') +
+        svgEdge(xs[0], c3, xs[1], c3, INK) +
+        svgEdge(xs[1], c3, xs[2], c3, INK) +
+        svgEdge(xs[2], c3, xs[3], c3, ACC) +
+        svgCommit(xs[0], c3, INK, 'c3') +
+        svgCommit(xs[1], c3, INK, 'd4') +
+        svgCommit(xs[2], c3, INK, 'e5') +
+        svgCommit(xs[3], c3, ACC, 'S') +
+        '<text x="' + (xs[3] + 28) + '" y="' + (c3 + 5) + '" font-family="var(--font-mono)" font-size="10" fill="var(--coral)">combined diff, no merge link</text>';
+
+      return '<svg viewBox="0 0 540 295">' + chain1 + chain2 + chain3 + '</svg>';
+    }
+
+    // Visual for the "Read History" scenario: the same merge state as
+    // the reference chain, but with the first-parent line drawn as a
+    // bold coral path and feature commits dimmed, mirroring what
+    // `git log --first-parent` highlights.
+    function svgFirstParent() {
+      var mY = 80, fY = 160;
+      var xs = [50, 130, 210, 290, 370];
+      // The first-parent line is highlighted by stroke width alone now,
+      // so the main-side colour stays INK (no special highlight tint).
+      function boldEdge(x1, y1, x2, y2) {
+        return svgEdge(x1, y1, x2, y2, INK, { width: 3 });
+      }
+      return '<svg viewBox="0 0 480 220">' +
+        // Dimmed feature edges and commits
+        svgEdge(xs[0], mY, xs[1], fY, ACC, { opacity: 0.3 }) +
+        svgEdge(xs[1], fY, xs[2], fY, ACC, { opacity: 0.3 }) +
+        svgEdge(xs[2], fY, xs[3], mY, ACC, { opacity: 0.3 }) +
+        // Bold first-parent line on main (INK, width 3)
+        boldEdge(xs[0], mY, xs[1], mY) +
+        boldEdge(xs[1], mY, xs[2], mY) +
+        boldEdge(xs[2], mY, xs[3], mY) +
+        boldEdge(xs[3], mY, xs[4], mY) +
+        svgCommit(xs[0], mY, INK, 'c3') +
+        svgCommit(xs[1], mY, INK, 'd4') +
+        svgCommit(xs[2], mY, INK, 'e5') +
+        svgCommit(xs[3], mY, ACC, 'M', { merge: true }) +
+        svgCommit(xs[4], mY, INK, 'n1') +
+        svgCommit(xs[1], fY, ACC, 'x1', { dim: true }) +
+        svgCommit(xs[2], fY, ACC, 'x2', { dim: true }) +
+        svgCaption(xs[2], mY - 26, 'var(--coral-strong)', '--first-parent walks this line') +
         '</svg>';
     }
 
@@ -803,18 +1164,20 @@
           'Git cannot tell which side of the merge to revert. <code>-m</code> ' +
           'selects the parent that represents the line of history to keep:</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
-          '<span class="cmd">git revert -m 1 9f2a8c1</span>\n' +
+          '<span class="cmd">git revert -m 1 f6</span>\n' +
           '<span class="cmt"># -m 1: keep main (first parent); undo feature\'s changes</span></pre>' +
           '<p>The reversal is the inverse of the diff from the chosen parent ' +
-          'to the merge commit (<code>git diff e5..M</code> with <code>-m 1</code>), ' +
-          'not the diff from the merge base. That diff captures everything the ' +
-          'merge brought in via the second parent, plus any conflict-resolution ' +
-          'edits, so the new commit <code>R</code> subtracts ' +
-          '<code>feature</code>\'s contribution while leaving the merge itself ' +
-          'in history. Caveat: re-merging <code>feature</code> later does not ' +
-          'bring those changes back, because Git still sees them as already ' +
-          'merged. The remedy is usually to revert the revert.</p>' },
-      { id: 'cherry',  label: 'Cherry-pick', title: 'Cherry-picking a merge',
+          'to the merge commit (<code>git diff e5..f6</code> with <code>-m 1</code>), ' +
+          'not the diff from the merge base. That direction is what captures ' +
+          'feature\'s contribution: <code>e5</code> is main\'s tip just before ' +
+          'the merge, and <code>f6</code> includes everything the merge pulled ' +
+          'in from the second parent (<code>x2</code>) plus any conflict-' +
+          'resolution edits. The new commit <code>g7\'</code> subtracts that ' +
+          'contribution while leaving the merge itself in history. Caveat: ' +
+          're-merging <code>feature</code> later does not bring those changes ' +
+          'back, because Git still sees them as already merged. The remedy is ' +
+          'usually to revert the revert.</p>' },
+      { id: 'cherry',  label: 'Cherry-Pick', title: 'Cherry-picking a merge',
         svg: svgCherryMerge,
         body:
           '<p>By default <code>git cherry-pick</code> refuses a merge commit ' +
@@ -822,11 +1185,18 @@
           '<code>-m</code> selects the mainline parent, and the cherry-pick ' +
           'becomes "everything that was added relative to that parent":</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
-          '<span class="cmd">git cherry-pick -m 1 9f2a8c1</span></pre>' +
+          '<span class="cmd">git cherry-pick -m 1 f6</span></pre>' +
+          '<p>"Everything added relative to the parent" means the combined ' +
+          'diff of every commit the merge brought in via its second parent, ' +
+          'collapsed into one new commit. In the diagram above, ' +
+          '<code>f6</code> absorbed three feature commits ' +
+          '(<code>x1</code>, <code>x2</code>, <code>x3</code>) on the source ' +
+          'side; cherry-picking it onto <code>release</code> produces a ' +
+          'single commit <code>f6\'</code> whose diff is the union of those ' +
+          'three.</p>' +
           '<p>This is occasionally useful for porting a feature-bundle to ' +
-          'another long-lived branch, but the result is a single ' +
-          'squashed-feeling commit (<code>M\'</code>), not a faithful replay ' +
-          'of the individual feature work.</p>' },
+          'another long-lived branch, but the result is squashed: the ' +
+          'individual feature commits are not replayed.</p>' },
       { id: 'squash',  label: 'Squash',      title: 'Squashing across a merge commit',
         svg: svgSquash,
         body:
@@ -834,8 +1204,10 @@
           'by walking commits one parent at a time. By default, when it hits ' +
           'a merge commit it <strong>drops</strong> the merge entirely and ' +
           'replays only the first-parent line: any commits brought in by the ' +
-          'merge\'s second parent vanish. This bites the unwary when a quick ' +
-          'squash on top of a freshly-merged feature appears to lose work.</p>' +
+          'merge\'s second parent vanish. The middle chain above shows the ' +
+          'aftermath: the post-merge commit <code>n1</code> is replayed as ' +
+          '<code>n1\'</code>, but the feature work (<code>x1</code>, ' +
+          '<code>x2</code>) is gone.</p>' +
           '<p>To preserve the merge structure while rewriting, use ' +
           '<code>--rebase-merges</code>:</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
@@ -845,16 +1217,17 @@
           'into a single tidy commit on top of <code>main</code>), it is ' +
           'almost always cleaner to <strong>not</strong> have made the merge ' +
           'in the first place: <code>git merge --squash feature</code> stages ' +
-          'the feature\'s combined diff without recording a merge commit ' +
-          '(commit <code>S</code> in the diagram), then a normal commit lands ' +
-          'it on <code>main</code>.</p>' },
-      { id: 'history', label: 'Read history', title: 'Reading history past a merge',
+          'the feature\'s combined diff without recording a merge commit. The ' +
+          'bottom chain (commit <code>S</code>) shows that result; a normal ' +
+          '<code>git commit</code> lands it on <code>main</code>.</p>' },
+      { id: 'history', label: 'Read History', title: 'Reading history past a merge',
+        svg: svgFirstParent,
         body:
           '<p>Two flags make merges legible after the fact. ' +
-          '<code>git log --first-parent</code> follows only the mainline, ' +
-          'producing a "headline" history where each feature appears as a ' +
-          'single merge entry rather than the full sequence of feature ' +
-          'commits.</p>' +
+          '<code>git log --first-parent</code> follows only the mainline (' +
+          'highlighted in the diagram above), producing a high-level ' +
+          'summary where each feature appears as a single merge entry ' +
+          'rather than the full sequence of feature commits.</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
           '<span class="cmd">git log --oneline --graph --first-parent main</span></pre>' +
           '<p><code>git diff HEAD^1..HEAD^2</code> shows what the merged-in ' +
@@ -895,6 +1268,19 @@
     renderScenarios();
     sec.appendChild(sPanel);
 
+    // "parent pointers" / "Parents" internal links: pulse the parent
+    // SHAs in whichever commit-log variant is currently active. The
+    // commit log is always visible above, so the cue is reliable.
+    sec.querySelectorAll('[data-gm-action="pulse-parents"]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        commitArea.querySelectorAll('.gm-parent-sha').forEach(function (sha) {
+          sha.classList.remove('gm-sha-pulse');
+          void sha.getBoundingClientRect();
+          sha.classList.add('gm-sha-pulse');
+        });
+      });
+    });
+
     root.appendChild(sec);
   }
 
@@ -906,25 +1292,28 @@
     sec.appendChild(sectionHeader(3, 'Merge Conventions'));
 
     sec.appendChild(el('p', 'gm-body',
-      'The convention is <strong>"merge X into Y"</strong>, where ' +
-      '<strong>Y is the current branch (HEAD)</strong> and X is the branch ' +
-      'named in the command. So running:'));
+      'The convention is <em>merge X into Y</em>, where Y is the current ' +
+      'branch (the one <code>HEAD</code> points at) and X is the branch named ' +
+      'in the command. So running:'));
 
+    // HEAD is annotated as an inline comment alongside each command,
+    // making the "merge X into Y" convention legible from the code
+    // alone.
     sec.appendChild(el('pre', 'role-code-block',
-      '<span class="prompt">$</span> <span class="cmd">git checkout main</span>\n' +
-      '<span class="prompt">$</span> <span class="cmd">git merge feature</span>\n' +
-      '<span class="cmt"># merge feature INTO main</span>'));
+      '<span class="prompt">$</span> <span class="cmd">git checkout main</span>     <span class="cmt"># HEAD now points at main</span>\n' +
+      '<span class="prompt">$</span> <span class="cmd">git merge feature</span>    <span class="cmt"># merge feature INTO HEAD (main)</span>'));
 
-    var mainY = 75, featY = 165;
+    var mainY = 120, featY = 200;
     var xs = [60, 140, 220, 300, 380];
     var svg =
-      '<svg viewBox="0 0 480 230">' +
+      '<svg viewBox="0 0 480 270">' +
         svgEdge(xs[0], mainY, xs[1], mainY, INK) +
         svgEdge(xs[1], mainY, xs[2], mainY, INK) +
         svgEdge(xs[2], mainY, xs[3], mainY, INK) +
         svgEdge(xs[1], mainY, xs[2], featY, ACC) +
         svgEdge(xs[2], featY, xs[3], featY, ACC) +
-        svgEdge(xs[3], mainY, xs[4], mainY, ACC) +
+        // Main-side incoming to the merge keeps INK; feature-side stays ACC.
+        svgEdge(xs[3], mainY, xs[4], mainY, INK) +
         svgEdge(xs[3], featY, xs[4], mainY, ACC) +
         svgCommit(xs[0], mainY, INK, 'a1') +
         svgCommit(xs[1], mainY, INK, 'b2') +
@@ -932,22 +1321,27 @@
         svgCommit(xs[3], mainY, INK, 'd4') +
         svgCommit(xs[2], featY, ACC, 'f6') +
         svgCommit(xs[3], featY, ACC, 'g7') +
-        svgCommit(xs[4], mainY, ACC, 'M', { merge: true, head: true }) +
-        svgBranchLabel(xs[4] + 36, mainY, 'main', INK) +
-        svgBranchLabel(xs[3] + 28, featY, 'feature', ACC) +
+        svgCommit(xs[4], mainY, ACC, 'M', { merge: true }) +
+        svgBranchLabel(xs[4], mainY, 'main', INK, { head: true, direction: 'above' }) +
+        svgBranchLabel(xs[3], featY, 'feature', ACC, { direction: 'below' }) +
       '</svg>';
-    sec.appendChild(div('gm-frame', svg));
 
-    var keys = el('ul', 'gm-keys');
-    keys.innerHTML =
-      '<li><code>main</code> moves forward: it now points to the new merge ' +
-        'commit M.</li>' +
-      '<li><code>feature</code> stays put: its tip is still <code>g7</code>. ' +
-        'It has been "absorbed", but not consumed.</li>' +
-      '<li><code>HEAD</code> follows <code>main</code>: <code>main</code> was ' +
-        'the current branch when the merge ran, so <code>HEAD</code> moves ' +
-        'to M with <code>main</code>.</li>';
-    sec.appendChild(keys);
+    // Mirror §01's panel recipe: visual on top (svg-bg), description /
+    // bullets in arch-desc beneath, all inside a single gm-panel so the
+    // dot points read as part of the figure rather than floating prose.
+    var panel = div('gm-panel');
+    panel.appendChild(div('gm-svg-bg', svg));
+    var desc = div('gm-arch-desc');
+    desc.innerHTML =
+      '<h3>What moves, what stays</h3>' +
+      '<ul class="gm-keys" style="margin: 0 0 0 22px;">' +
+        '<li><code>main</code> moves forward: it now points to the new ' +
+          'merge commit M.</li>' +
+        '<li><code>feature</code> stays put: its tip is still ' +
+          '<code>g7</code>. It has been "absorbed", but not consumed.</li>' +
+      '</ul>';
+    panel.appendChild(desc);
+    sec.appendChild(panel);
 
     root.appendChild(sec);
   }
@@ -963,7 +1357,7 @@
       { id: 'before', label: 'Before Rebase',
         title: 'Before: feature still rooted at the old base',
         body:
-          '<p><code>main</code> has moved on to <code>e5</code>; ' +
+          '<p><code>main</code> has moved on to <code>e5</code> and ' +
           '<code>feature</code> still sprouts from the old merge base ' +
           '<code>c3</code>. Both branches share <code>c3</code> as ancestor, ' +
           'and a merge here would record both lineages with a merge commit.</p>' },
@@ -975,7 +1369,8 @@
           'applying the same diffs on top of <code>e5</code>. The branch tip ' +
           'now points at <code>g7\'</code>, and the original commits are ' +
           'unreachable (Git\'s reflog still retains them for ~90 days).</p>' +
-          '<p>History is linear; the parallelism that did happen is erased.</p>' }
+          '<p>The resulting history is linear, and the parallelism that ' +
+          'actually happened is no longer recorded.</p>' }
     ];
 
     var rActive = 'before';
@@ -987,7 +1382,7 @@
     var desc = div('gm-arch-desc');
     panel.appendChild(desc);
 
-    var mainY = 80, featY = 170;
+    var mainY = 120, featY = 200;
     var xs = [50, 120, 190, 260, 330, 400, 470];
 
     function renderSVG() {
@@ -1008,19 +1403,19 @@
           svgEdge(xs[2], mainY, xs[3], featY, ACC) +
           svgEdge(xs[3], featY, xs[4], featY, ACC) +
           svgCommit(xs[3], featY, ACC, 'f6') +
-          svgCommit(xs[4], featY, ACC, 'g7', { head: true }) +
-          svgBranchLabel(xs[4] + 28, mainY, 'main', INK) +
-          svgBranchLabel(xs[4] + 28, featY, 'feature', ACC);
+          svgCommit(xs[4], featY, ACC, 'g7') +
+          svgBranchLabel(xs[4], mainY, 'main', INK, { direction: 'above' }) +
+          svgBranchLabel(xs[4], featY, 'feature', ACC, { head: true, direction: 'below' });
       } else {
         rest =
           svgEdge(xs[4], mainY, xs[5], mainY, ACC) +
           svgEdge(xs[5], mainY, xs[6], mainY, ACC) +
           svgCommit(xs[5], mainY, ACC, "f6'") +
-          svgCommit(xs[6], mainY, ACC, "g7'", { head: true }) +
-          svgBranchLabel(xs[4] + 28, mainY + 35, 'main', INK) +
-          svgBranchLabel(xs[6] + 28, mainY, 'feature', ACC);
+          svgCommit(xs[6], mainY, ACC, "g7'") +
+          svgBranchLabel(xs[4], mainY, 'main', INK, { direction: 'below' }) +
+          svgBranchLabel(xs[6], mainY, 'feature', ACC, { head: true, direction: 'above' });
       }
-      svgBg.innerHTML = '<svg viewBox="0 0 560 240">' + trunk + rest + '</svg>';
+      svgBg.innerHTML = '<svg viewBox="0 0 560 310">' + trunk + rest + '</svg>';
     }
 
     function render() {
@@ -1100,8 +1495,10 @@
     var rcDesc = div('gm-arch-desc');
     rcPanel.appendChild(rcDesc);
 
-    var rcMainY = 80;
+    var rcMainY = 120;
     var rcXs = [50, 120, 190, 260, 330, 400, 470];
+    // (Single-row diagram; viewBox just needs head-chain clearance
+    // above and the main-pointer extent below.)
 
     // Swift snippets reuse the same .line / .gm-kw / .gm-str / gm-cm /
     // gm-ours / gm-theirs spans as §03 so the surface is uniform.
@@ -1146,27 +1543,25 @@
         svgCommit(rcXs[4], rcMainY, INK, 'e5') +
         svgCommit(rcXs[5], rcMainY, ACC, "f6'");
 
-      // Both states share a "main" label below e5 (the rebase target);
-      // the right-most position carries either the conflict ring or the
-      // resolved g7' with the feature label.
-      var mainLabel = svgBranchLabel(rcXs[4] - 5, rcMainY + 35, 'main', INK);
+      // Both states share a "main" pointer below e5 (the rebase target).
+      var mainLabel = svgBranchLabel(rcXs[4], rcMainY, 'main', INK, { direction: 'below' });
 
       var rest;
       if (rcActive === 'paused') {
-        // g7 is paused mid-replay: drawn dashed and ringed in coral-strong.
+        // g7 is paused mid-replay: drawn dimmed with a coral-strong
+        // "paused" caption (no dashed ring per the v3 cleanup).
         rest = mainLabel +
           svgEdge(rcXs[5], rcMainY, rcXs[6], rcMainY, ACC, { dashed: true, opacity: 0.6 }) +
-          '<circle cx="' + rcXs[6] + '" cy="' + rcMainY + '" r="33" fill="none" stroke="var(--coral-strong)" stroke-width="1.5" stroke-dasharray="3 3"/>' +
           svgCommit(rcXs[6], rcMainY, ACC, 'g7', { dim: true }) +
-          '<text x="' + rcXs[6] + '" y="' + (rcMainY + 50) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="10" fill="var(--coral-strong)">⚠ paused</text>' +
-          svgBranchLabel(rcXs[6] + 44, rcMainY, 'feature', ACC);
+          '<text x="' + rcXs[6] + '" y="' + (rcMainY + 36) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="10" fill="var(--coral-strong)">⚠ paused</text>' +
+          svgBranchLabel(rcXs[6], rcMainY, 'feature', ACC, { direction: 'above' });
       } else {
         rest = mainLabel +
           svgEdge(rcXs[5], rcMainY, rcXs[6], rcMainY, ACC) +
-          svgCommit(rcXs[6], rcMainY, ACC, "g7'", { head: true }) +
-          svgBranchLabel(rcXs[6] + 28, rcMainY, 'feature', ACC);
+          svgCommit(rcXs[6], rcMainY, ACC, "g7'") +
+          svgBranchLabel(rcXs[6], rcMainY, 'feature', ACC, { head: true, direction: 'above' });
       }
-      rcSvgBg.innerHTML = '<svg viewBox="0 0 580 220">' + trunk + rest + '</svg>';
+      rcSvgBg.innerHTML = '<svg viewBox="0 0 580 200">' + trunk + rest + '</svg>';
     }
 
     function renderRc() {

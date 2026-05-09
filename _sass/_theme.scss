@@ -61,6 +61,17 @@
     --sx-comment:     #9A9A9F;
     --sx-path:        #6E6E73;
 
+    // Line-highlight washes (Design Language v3). Each pair sits on
+    // paperInset / paper at low chroma so the syntax colours still read
+    // clearly; the `-rule` token drives the leading 3px stem applied
+    // via box-shadow.
+    --hl-add-bg:      #E4EFDD;   // soft green wash -- additions / theirs
+    --hl-add-rule:    #5E8B3E;
+    --hl-del-bg:      #F4DCD3;   // soft red wash   -- removals / ours
+    --hl-del-rule:    #B5462C;
+    --hl-info-bg:     #DAE4EF;   // soft blue wash  -- notes / focus
+    --hl-info-rule:   #3D6BA0;
+
     // ---- Type stacks (theme-agnostic) --------------------------------
     // Both display + text resolve to Gill Sans Nova per user direction.
     // The variable split is preserved so a future palette migration can
@@ -148,6 +159,15 @@
     --sx-string:      #E8B895;
     --sx-comment:     #6E6E74;
     --sx-path:        #9A9AA0;
+
+    // Line-highlight washes (Design Language v3) -- darker pairs for
+    // the dark palette, calibrated to sit on paper-inset / paper.
+    --hl-add-bg:      #2A3826;
+    --hl-add-rule:    #7FB05A;
+    --hl-del-bg:      #3A2622;
+    --hl-del-rule:    #D87257;
+    --hl-info-bg:     #2C3A50;
+    --hl-info-rule:   #8FB6E0;
 
     // Legacy tag pill chrome (kept until tag styling is fully migrated).
     --color-tag-bg:   #35353A;
@@ -489,6 +509,37 @@ code.chip {
     font-family: var(--font-mono);
     font-size: var(--size-md);
     font-weight: 600;
+}
+
+// code.block-inset -- boxed variant of .role-code-block. Per the v3
+// design language: the regular paper-inset bg + hairline reads
+// correctly only when the code sits directly on the page surface.
+// When code lives INSIDE an enclosed surface (.gm-panel, .mcp-panel,
+// any panel.frame host), the panel already supplies the chrome, so
+// the code area should drop the inner border + paper-inset and switch
+// to a darker `--paper` fill instead, reading as an "inset hole" in
+// the surrounding panel. Add this class alongside .role-code-block.
+.role-code-block-inset {
+    background: var(--paper);
+    border: none;
+}
+
+// code.hl-* -- single-line highlight washes inside a code block.
+// Each role pairs a wash bg with a 3px leading rule applied via
+// inset box-shadow. The line is full-bleed across the host block:
+// consumers should give it negative horizontal margins matching the
+// block's padding so the wash and rule reach the block edges.
+.role-code-hl-add {
+    background: var(--hl-add-bg);
+    box-shadow: inset 3px 0 0 var(--hl-add-rule);
+}
+.role-code-hl-del {
+    background: var(--hl-del-bg);
+    box-shadow: inset 3px 0 0 var(--hl-del-rule);
+}
+.role-code-hl-info {
+    background: var(--hl-info-bg);
+    box-shadow: inset 3px 0 0 var(--hl-info-rule);
 }
 
 // post.section-* -- horizontal section delineator (rule + index + name)
@@ -1137,6 +1188,31 @@ blockquote {
         margin: 0 0 4px;
 
         > p:last-child { margin-bottom: 0; }
+
+        // Excerpt thumbnail. Posts that lack an opening paragraph can
+        // declare a thumbnail image with class .post-excerpt-thumb;
+        // it appears on the homepage stream only (hidden in the post
+        // body via the rule below) and inherits the same paper-inset
+        // figure frame the post uses for its own diagrams, so the
+        // homepage preview matches the in-post styling.
+        .post-excerpt-thumb {
+            display: block;
+            background: var(--paper-inset);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 22px 18px;
+            margin: 4px 0 8px;
+            box-sizing: border-box;
+            text-align: center;
+
+            img {
+                display: block;
+                width: 100%;
+                height: auto;
+                max-width: 480px;
+                margin: 0 auto;
+            }
+        }
     }
 
     // post.continue.
@@ -1156,6 +1232,12 @@ blockquote {
         }
     }
 }
+
+// Hide the excerpt thumbnail when it lands inside a post body (the
+// post layout wraps content in .post-content). Pairs with the
+// .post-stream-excerpt nested rule above so the same markup renders
+// only on the homepage stream.
+.post-content .post-excerpt-thumb { display: none; }
 
 // --- Theme toggle -------------------------------------------------------
 // Lives inside the main site-nav trigger so it collapses with the menu
