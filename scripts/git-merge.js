@@ -463,7 +463,7 @@
 
     sec.appendChild(el('p', 'gm-body',
       'When a branch forks off, both lineages share history up to one ' +
-      'commit: the <span class="gm-ilink" data-gm-action="show-merge-base">merge base</span>. ' +
+      'commit (the <span class="gm-ilink" data-gm-action="show-merge-base">merge base</span>). ' +
       'Git uses this third point to perform a <strong>three-way merge</strong>, ' +
       'comparing each branch tip against the base to determine what changed on ' +
       'both sides. The contrasting tab below shows what a <strong>two-way ' +
@@ -567,9 +567,9 @@
           'in different repositories joined with <code>git remote add</code>, ' +
           'or were created as orphan branches via ' +
           '<code>git checkout --orphan</code>. With no common ancestor, Git ' +
-          'has no baseline to measure either side\'s changes against: every ' +
+          'has no baseline to determine either side\'s changes and every ' +
           'differing line must be flagged as a conflict. See the ' +
-          '<strong>Two-way merge</strong> tab in the next section for a ' +
+          '<a href="#sec-02" class="gm-ilink">Two-way merge</a> tab in the next section for a ' +
           'concrete example.</p>';
       }
     }
@@ -752,24 +752,24 @@
     function lineDecl(funcName, hl) {
       return '<span class="line' + (hl ? ' hl' : '') + '" data-line="1">' +
         '<span class="gm-kw">func</span> ' + funcName +
-        '(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>';
+        '(name: <span class="gm-kw">String</span>) {</span>';
     }
     function lineColor(colour, hl) {
       return '<span class="line' + (hl ? ' hl' : '') + '" data-line="2">' +
         '    <span class="gm-kw">let</span> color = <span class="gm-str">"' + colour + '"</span></span>';
     }
-    function lineReturn(greeting, hl) {
+    function linePrint(greeting, hl) {
       return '<span class="line' + (hl ? ' hl' : '') + '" data-line="3">' +
-        '    <span class="gm-kw">return</span> <span class="gm-str">"' + greeting + ', \\(name)!"</span></span>';
+        '    print(<span class="gm-str">"' + greeting + ', \\(name)!"</span>)</span>';
     }
     function lineClose() { return '<span class="line" data-line="4">}</span>'; }
 
     // Per-cell composition: base is unchanged; ours renames the function
     // to "intro" (line 1) and changes colour to red (line 2); theirs
     // changes colour to green (line 2) and greeting to "Hi" (line 3).
-    var baseCell  = lineDecl('greet', false) + lineColor('blue',  false) + lineReturn('Hello', false) + lineClose();
-    var oursCell  = lineDecl('intro', false) + lineColor('red',   true)  + lineReturn('Hello', false) + lineClose();
-    var theirsCell = lineDecl('greet', false) + lineColor('green', true)  + lineReturn('Hi',    false) + lineClose();
+    var baseCell  = lineDecl('greet', false) + lineColor('blue',  false) + linePrint('Hello', false) + lineClose();
+    var oursCell  = lineDecl('intro', false) + lineColor('red',   true)  + linePrint('Hello', false) + lineClose();
+    var theirsCell = lineDecl('greet', false) + lineColor('green', true)  + linePrint('Hi',    false) + lineClose();
 
     var fileTable = div('gm-table-wrap');
     fileTable.innerHTML =
@@ -800,13 +800,13 @@
     conflictArea.innerHTML =
       '<pre class="role-code-block gm-conflict-block" style="margin: 0;">' +
         '<span class="line gm-cmt">// CONFLICT (content): Merge conflict in greet.swift</span>' +
-        '<span class="line"><span class="gm-kw">func</span> intro(name: <span class="gm-kw">String</span>) -&gt; <span class="gm-kw">String</span> {</span>' +
+        '<span class="line"><span class="gm-kw">func</span> intro(name: <span class="gm-kw">String</span>) {</span>' +
         '<span class="line gm-cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (main)</span>' +
         '<span class="line gm-ours">    <span class="gm-kw">let</span> color = <span class="gm-str">"red"</span></span>' +
         '<span class="line gm-cm">=======</span>' +
         '<span class="line gm-theirs">    <span class="gm-kw">let</span> color = <span class="gm-str">"green"</span></span>' +
         '<span class="line gm-cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature</span>' +
-        '<span class="line">    <span class="gm-kw">return</span> <span class="gm-str">"Hi, \\(name)!"</span></span>' +
+        '<span class="line">    print(<span class="gm-str">"Hi, \\(name)!"</span>)</span>' +
         '<span class="line">}</span>' +
       '</pre>';
 
@@ -828,7 +828,7 @@
     // there is no baseline to determine which side changed what.
     var twoDesc = div('gm-arch-desc');
     twoDesc.innerHTML =
-      '<h3>No shared ancestor: all differences are conflicts</h3>' +
+      '<h3>No shared ancestor</h3>' +
       '<p>Without a common ancestor, Git sees only two file snapshots. ' +
       'Imagine the merge tool sees:</p>' +
       '<div class="gm-table-wrap" style="margin: 8px 0 14px;">' +
