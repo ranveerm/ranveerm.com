@@ -568,8 +568,8 @@
           'or were created as orphan branches via ' +
           '<code>git checkout --orphan</code>. With no common ancestor, Git ' +
           'has no baseline to determine either side\'s changes and every ' +
-          'differing line must be flagged as a conflict. See the ' +
-          '<a href="#sec-02" class="gm-ilink">Two-way merge</a> tab in the next section for a ' +
+          'differing line must be flagged as a conflict. The ' +
+          '<a href="#sec-02" class="gm-ilink">next section</a> provides a ' +
           'concrete example.</p>';
       }
     }
@@ -751,8 +751,7 @@
     // edits (line 1 in Ours, line 3 in Theirs) on click.
     function lineDecl(funcName, hl) {
       return '<span class="line' + (hl ? ' hl' : '') + '" data-line="1">' +
-        '<span class="gm-kw">func</span> ' + funcName +
-        '(name: <span class="gm-kw">String</span>) {</span>';
+        '<span class="gm-kw">func</span> ' + funcName + '() {</span>';
     }
     function lineColor(colour, hl) {
       return '<span class="line' + (hl ? ' hl' : '') + '" data-line="2">' +
@@ -760,7 +759,7 @@
     }
     function linePrint(greeting, hl) {
       return '<span class="line' + (hl ? ' hl' : '') + '" data-line="3">' +
-        '    print(<span class="gm-str">"' + greeting + ', \\(name)!"</span>)</span>';
+        '    print(<span class="gm-str">"' + greeting + '!"</span>)</span>';
     }
     function lineClose() { return '<span class="line" data-line="4">}</span>'; }
 
@@ -800,13 +799,13 @@
     conflictArea.innerHTML =
       '<pre class="role-code-block gm-conflict-block" style="margin: 0;">' +
         '<span class="line gm-cmt">// CONFLICT (content): Merge conflict in greet.swift</span>' +
-        '<span class="line"><span class="gm-kw">func</span> intro(name: <span class="gm-kw">String</span>) {</span>' +
+        '<span class="line"><span class="gm-kw">func</span> intro() {</span>' +
         '<span class="line gm-cm">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (main)</span>' +
         '<span class="line gm-ours">    <span class="gm-kw">let</span> color = <span class="gm-str">"red"</span></span>' +
         '<span class="line gm-cm">=======</span>' +
         '<span class="line gm-theirs">    <span class="gm-kw">let</span> color = <span class="gm-str">"green"</span></span>' +
         '<span class="line gm-cm">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature</span>' +
-        '<span class="line">    print(<span class="gm-str">"Hi, \\(name)!"</span>)</span>' +
+        '<span class="line">    print(<span class="gm-str">"Hi!"</span>)</span>' +
         '<span class="line">}</span>' +
       '</pre>';
 
