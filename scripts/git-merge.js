@@ -43,6 +43,8 @@
       '.gm-eyebrow .role-post-section-rule { flex: 1; }',
       '.gm-section-title { font-family: var(--font-display); font-size: var(--size-h2); color: var(--ink-primary); font-weight: 400; letter-spacing: var(--track-snug); line-height: var(--lh-snug); margin: 0 0 14px; }',
       '.gm-body { color: var(--ink-secondary); font-family: var(--font-display); font-size: 18px; font-weight: 400; line-height: var(--lh-loose); margin-bottom: 22px; }',
+      '.gm-panel + .gm-body, .gm-panel + .gm-table-wrap { margin-top: 36px; }',
+      '.gm-table-wrap + .gm-body, .gm-table-wrap + .gm-table-wrap { margin-top: 20px; }',
       '.gm-body em { color: var(--ink-primary); font-style: italic; }',
       '.gm-body strong { color: var(--ink-primary); font-weight: 500; }',
 
@@ -820,7 +822,7 @@
       'to incompatible values.</p>' +
       '<p>The conflict is resolved by editing the file (picking, combining, ' +
       'or rewriting), staging it with <code>git add</code>, and committing. ' +
-      '<a href="#sec-04" class="gm-ilink">That commit</a> is the merge commit.</p>';
+      'That commit is the <a href="#sec-04" class="gm-ilink">merge commit</a>.</p>';
 
     // ── Two-way content (moved from §01) ──
     // Without a shared ancestor, every differing line is a conflict because
@@ -828,8 +830,7 @@
     var twoDesc = div('gm-arch-desc');
     twoDesc.innerHTML =
       '<h3>No shared ancestor</h3>' +
-      '<p>Without a common ancestor, Git sees only two file snapshots. ' +
-      'Imagine the merge tool sees:</p>' +
+      '<p>Without a common ancestor, Git sees only two file snapshots.</p>' +
       '<div class="gm-table-wrap" style="margin: 8px 0 14px;">' +
         '<div class="role-table-frame">' +
           '<table class="gm-table">' +
@@ -848,11 +849,11 @@
           '</table>' +
         '</div>' +
       '</div>' +
-      '<p>Both lines differ. Did <em>ours</em> raise the limit, or did ' +
-      '<em>theirs</em> lower it? With only two points there is no answer: ' +
+      '<p>Both lines differ. Did <code>ours</code> raise the limit, or did ' +
+      '<code>theirs</code> lower it? With only two points there is no answer: ' +
       'a two-way merge must flag every difference as a conflict.</p>' +
       '<p>A three-way merge consults the merge base. If the base read ' +
-      '<code>retries = 3</code>, only <em>theirs</em> changed it, so ' +
+      '<code>retries = 3</code>, only <code>theirs</code> changed it, so ' +
       'Git auto-resolves to <code>5</code>. Both sides changing the same ' +
       'line is the only case that still needs human input.</p>';
 
@@ -887,11 +888,10 @@
     // question as regular prose beneath the panel.
     var sameBranchPara = el('p', 'gm-body',
       'Why don\'t two commits on the same branch conflict when they touch ' +
-      'the same line? Because each commit has a single parent: the second ' +
+      'the same line? Because each commit has a single parent- the second ' +
       'commit\'s diff is applied directly to the state left by the first, ' +
-      'so the order and the result are unambiguous. A conflict needs two ' +
-      'divergent histories meeting at a merge, not a single line of edits.');
-    sameBranchPara.style.marginTop = '36px';
+      'so the order and the result are unambiguous. A conflict results via two ' +
+      'divergent histories meeting at a merge, not a single stream of edits.');
     sec.appendChild(sameBranchPara);
 
     // Wire the in-prose link: switch to the three-way tab if needed, then
@@ -991,7 +991,6 @@
 
     var cActive = 'conflict';
     var commitPanel = div('gm-panel');
-    commitPanel.style.margin = '0 0 16px';
     var commitTabs  = div('mcp-tabs');
     var commitArea  = div('gm-commit-area');
     commitPanel.appendChild(commitTabs);
@@ -1041,8 +1040,7 @@
             '</td></tr>' +
             '<tr><td class="role-table-cell"><strong>Tree (snapshot)</strong></td>' +
             '<td class="role-table-cell">The full state of all files post-resolution. ' +
-              'If conflicts existed, the hand-edited file is what is stored: ' +
-              '<strong>not</strong> a "diff of diffs", but a complete snapshot ' +
+              'If conflicts existed, the hand-edited file is what is stored as a complete snapshot, ' +
               'like any other commit.</td></tr>' +
           '</tbody>' +
         '</table>' +
@@ -1053,8 +1051,7 @@
       'A merge commit\'s special structure can usually be ignored: it just ' +
       'sits in history like any other commit. The shape only matters when an ' +
       'operation has to choose <strong>which</strong> parent to follow, or ' +
-      'has to decide what to do when a merge appears inside a range. The four ' +
-      'common scenarios:'));
+      'has to decide what to do when a merge appears inside a range.'));
 
     // Small SVGs accompany the first three scenarios. Each diagram shows
     // a merge commit M with its two parents (e5 on main, g7 on feature),
@@ -1079,8 +1076,8 @@
         svgCommit(xs[2], mY, INK, 'e5') +
         svgCommit(xs[3], mY, ACC, 'f6', { merge: true }) +
         svgCommit(xs[4], mY, ACC, "g7'") +
-        svgCommit(xs[1], fY, ACC, 'x1', { dim: true }) +
-        svgCommit(xs[2], fY, ACC, 'x2', { dim: true }) +
+        svgCommit(xs[1], fY, ACC, 'z1', { dim: true }) +
+        svgCommit(xs[2], fY, ACC, 'z2', { dim: true }) +
         svgCaption(xs[4] + 4, mY + 36, 'var(--coral-strong)', 'Undo feature\'s diff') +
         svgBranchLabel(xs[4], mY, 'main', INK, { head: true, direction: 'above' }) +
         '</svg>';
@@ -1111,9 +1108,9 @@
         svgCommit(xs[1], mY, INK, 'd4') +
         svgCommit(xs[2], mY, INK, 'e5') +
         svgCommit(xs[4], mY, ACC, 'f6', { merge: true }) +
-        svgCommit(xs[1], fY, ACC, 'x1', { dim: true }) +
-        svgCommit(xs[2], fY, ACC, 'x2', { dim: true }) +
-        svgCommit(xs[3], fY, ACC, 'x3', { dim: true }) +
+        svgCommit(xs[1], fY, ACC, 'z1', { dim: true }) +
+        svgCommit(xs[2], fY, ACC, 'z2', { dim: true }) +
+        svgCommit(xs[3], fY, ACC, 'z3', { dim: true }) +
         svgBranchLabel(xs[3], fY, 'feature', ACC, { direction: 'below' }) +
         '</svg>';
     }
@@ -1121,7 +1118,7 @@
     function svgSquash() {
       // Three stacked chains, each gets a left-side eyebrow label so the
       // viewer can tell them apart at a glance.
-      //   1. REFERENCE (faded): the original merge state with x1, x2
+      //   1. REFERENCE (faded): the original merge state with z1, z2
       //      brought in via the merge commit M, plus a post-merge
       //      commit n1 to make the squash scenario realistic.
       //   2. rebase -i: walks first-parent only, drops the merge, so
@@ -1149,8 +1146,8 @@
           svgCommit(xs[2], c1, INK, 'e5') +
           svgCommit(xs[3], c1, ACC, 'M', { merge: true }) +
           svgCommit(xs[4], c1, INK, 'n1') +
-          svgCommit(xs[1], c1f, ACC, 'x1') +
-          svgCommit(xs[2], c1f, ACC, 'x2') +
+          svgCommit(xs[1], c1f, ACC, 'z1') +
+          svgCommit(xs[2], c1f, ACC, 'z2') +
         '</g>';
 
       var chain2 =
@@ -1205,8 +1202,8 @@
         svgCommit(xs[2], mY, INK, 'e5') +
         svgCommit(xs[3], mY, ACC, 'M', { merge: true }) +
         svgCommit(xs[4], mY, INK, 'n1') +
-        svgCommit(xs[1], fY, ACC, 'x1', { dim: true }) +
-        svgCommit(xs[2], fY, ACC, 'x2', { dim: true }) +
+        svgCommit(xs[1], fY, ACC, 'z1', { dim: true }) +
+        svgCommit(xs[2], fY, ACC, 'z2', { dim: true }) +
         svgCaption(xs[2], mY - 26, 'var(--coral-strong)', '--first-parent walks this line') +
         '</svg>';
     }
@@ -1218,15 +1215,15 @@
           '<p>A plain <code>git revert &lt;merge-sha&gt;</code> fails, because ' +
           'Git cannot tell which side of the merge to revert. <code>-m</code> ' +
           'selects the parent that represents the line of history to keep:</p>' +
-          '<pre class="role-code-block"><span class="prompt">$</span> ' +
-          '<span class="cmd">git revert -m 1 f6</span>\n' +
-          '<span class="cmt"># -m 1: keep main (first parent); undo feature\'s changes</span></pre>' +
+          '<pre class="role-code-block"><span class="cmt"># -m 1: keep main (first parent); undo feature\'s changes</span>\n' +
+          '<span class="prompt">$</span> ' +
+          '<span class="cmd">git revert -m 1 f6</span></pre>' +
           '<p>The reversal is the inverse of the diff from the chosen parent ' +
           'to the merge commit (<code>git diff e5..f6</code> with <code>-m 1</code>), ' +
           'not the diff from the merge base. That direction is what captures ' +
           'feature\'s contribution: <code>e5</code> is main\'s tip just before ' +
           'the merge, and <code>f6</code> includes everything the merge pulled ' +
-          'in from the second parent (<code>x2</code>) plus any conflict-' +
+          'in from the second parent (<code>z2</code>) plus any conflict-' +
           'resolution edits. The new commit <code>g7\'</code> subtracts that ' +
           'contribution while leaving the merge itself in history. Caveat: ' +
           're-merging <code>feature</code> later does not bring those changes ' +
@@ -1245,7 +1242,7 @@
           'diff of every commit the merge brought in via its second parent, ' +
           'collapsed into one new commit. In the diagram above, ' +
           '<code>f6</code> absorbed three feature commits ' +
-          '(<code>x1</code>, <code>x2</code>, <code>x3</code>) on the source ' +
+          '(<code>z1</code>, <code>z2</code>, <code>z3</code>) on the source ' +
           'side; cherry-picking it onto <code>release</code> produces a ' +
           'single commit <code>f6\'</code> whose diff is the union of those ' +
           'three.</p>' +
@@ -1261,8 +1258,8 @@
           'replays only the first-parent line: any commits brought in by the ' +
           'merge\'s second parent vanish. The middle chain above shows the ' +
           'aftermath: the post-merge commit <code>n1</code> is replayed as ' +
-          '<code>n1\'</code>, but the feature work (<code>x1</code>, ' +
-          '<code>x2</code>) is gone.</p>' +
+          '<code>n1\'</code>, but the feature work (<code>z1</code>, ' +
+          '<code>z2</code>) is gone.</p>' +
           '<p>To preserve the merge structure while rewriting, use ' +
           '<code>--rebase-merges</code>:</p>' +
           '<pre class="role-code-block"><span class="prompt">$</span> ' +
@@ -1355,8 +1352,8 @@
     // making the "merge X into Y" convention legible from the code
     // alone.
     sec.appendChild(el('pre', 'role-code-block',
-      '<span class="prompt">$</span> <span class="cmd">git checkout main</span>     <span class="cmt"># HEAD now points at main</span>\n' +
-      '<span class="prompt">$</span> <span class="cmd">git merge feature</span>    <span class="cmt"># merge feature INTO HEAD (main)</span>'));
+      '<span class="prompt">$</span> <span class="cmd">git checkout main</span>    <span class="cmt"># HEAD now points at main</span>\n' +
+      '<span class="prompt">$</span> <span class="cmd">git merge feature</span>    <span class="cmt"># merge feature into HEAD (main)</span>'));
 
     var mainY = 120, featY = 200;
     var xs = [60, 140, 220, 300, 380];
@@ -1388,7 +1385,6 @@
     panel.appendChild(div('gm-svg-bg', svg));
     var desc = div('gm-arch-desc');
     desc.innerHTML =
-      '<h3>What moves, what stays</h3>' +
       '<ul class="gm-keys" style="margin: 0 0 0 22px;">' +
         '<li><code>main</code> moves forward: it now points to the new ' +
           'merge commit M.</li>' +
