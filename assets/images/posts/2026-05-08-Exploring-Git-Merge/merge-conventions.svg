@@ -1,86 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" role="img" aria-label="A main branch merging a feature branch through a merge commit M, with HEAD pointing to main">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" role="img" aria-label="A main branch merging a feature branch through a merge commit M, with HEAD pointing to main">
   <style>
-    .ink-stroke { stroke: #3A3A3D; }
-    .coral-stroke { stroke: #C96442; }
-    .commit { fill: #F3F1EC; stroke-width: 1.5; }
-    .head-rect { fill: #C96442; }
-    .head-text { fill: #FFFFFF; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
-    .label-ink { fill: #3A3A3D; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 14px; font-weight: 600; }
-    .label-coral { fill: #C96442; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 14px; font-weight: 600; }
-    .branch-rect-fill { fill: #FFFFFF; }
-    .branch-text-ink { fill: #3A3A3D; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 10px; font-weight: 600; }
-    .branch-text-coral { fill: #C96442; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 10px; font-weight: 600; }
-    /* Pointer arrow takes the destination's own colour so the lineage
-       is legible at a glance; in this diagram everything in the chain
-       (M, main rect, HEAD rect) is coral, so the pointer is coral. */
-    .ptr-line { stroke: #C96442; stroke-width: 2.2; fill: none; }
-    .ptr-arrow { fill: #C96442; }
-    @media (prefers-color-scheme: dark) {
-      .ink-stroke { stroke: #D9D9DE; }
-      .coral-stroke { stroke: #E8957A; }
-      .commit { fill: #36363A; }
-      .head-rect { fill: #E8957A; }
-      .head-text { fill: #2F2F33; }
-      .label-ink { fill: #D9D9DE; }
-      .label-coral { fill: #E8957A; }
-      .branch-rect-fill { fill: #2F2F33; }
-      .branch-text-ink { fill: #D9D9DE; }
-      .branch-text-coral { fill: #E8957A; }
-      .ptr-line { stroke: #E8957A; }
-      .ptr-arrow { fill: #E8957A; }
+    :root {
+      --g-ink: #3A3A3D;
+      --g-acc: #C96442;
+      --g-paper: #F3F1EC;
+      --g-raised: #FFFFFF;
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --g-ink: #D9D9DE;
+        --g-acc: #E8957A;
+        --g-paper: #36363A;
+        --g-raised: #2F2F33;
+      }
+    }
+    text { font-family: 'SFMono-Regular', Menlo, monospace; }
   </style>
 
-  <!-- Main trunk: a1 - b2 - c3 - d4 (all on y=110) -->
-  <path d="M 76 110 L 124 110" class="ink-stroke" stroke-width="1.5" fill="none"/>
-  <path d="M 156 110 L 204 110" class="ink-stroke" stroke-width="1.5" fill="none"/>
-  <path d="M 236 110 L 284 110" class="ink-stroke" stroke-width="1.5" fill="none"/>
+  <!-- Main trunk edges (INK): a1-b2, b2-c3, c3-d4, d4-M -->
+  <path d="M 76 120 L 124 120" stroke="var(--g-ink)" stroke-width="1.5" fill="none"/>
+  <path d="M 156 120 L 204 120" stroke="var(--g-ink)" stroke-width="1.5" fill="none"/>
+  <path d="M 236 120 L 284 120" stroke="var(--g-ink)" stroke-width="1.5" fill="none"/>
+  <path d="M 316 120 L 364 120" stroke="var(--g-ink)" stroke-width="1.5" fill="none"/>
 
-  <!-- b2 -> f6 (curve down). Endpoints sit on the circle equator
-       with horizontal-tangent control points. -->
-  <path d="M 156 110 C 178 110, 182 190, 204 190" class="coral-stroke" stroke-width="1.5" fill="none"/>
-  <!-- f6 -> g7 (same row at y=190) -->
-  <path d="M 236 190 L 284 190" class="coral-stroke" stroke-width="1.5" fill="none"/>
-  <!-- d4 -> M (same row at y=110). Main-side incoming to the merge
-       keeps INK; only the curve from g7 stays coral. -->
-  <path d="M 316 110 L 364 110" class="ink-stroke" stroke-width="1.5" fill="none"/>
-  <!-- g7 -> M (curve up) -->
-  <path d="M 316 190 C 338 190, 342 110, 364 110" class="coral-stroke" stroke-width="1.5" fill="none"/>
+  <!-- Feature branch edges (ACC): b2->f6 curve, f6-g7, g7->M curve -->
+  <path d="M 156 120 C 178 120, 182 200, 204 200" stroke="var(--g-acc)" stroke-width="1.5" fill="none"/>
+  <path d="M 236 200 L 284 200" stroke="var(--g-acc)" stroke-width="1.5" fill="none"/>
+  <path d="M 316 200 C 338 200, 342 120, 364 120" stroke="var(--g-acc)" stroke-width="1.5" fill="none"/>
 
-  <!-- Commits on main row (y=110) -->
-  <g><circle cx="60" cy="110" r="16" class="commit ink-stroke"/><text x="60" y="115" text-anchor="middle" class="label-ink">a1</text></g>
-  <g><circle cx="140" cy="110" r="16" class="commit ink-stroke"/><text x="140" y="115" text-anchor="middle" class="label-ink">b2</text></g>
-  <g><circle cx="220" cy="110" r="16" class="commit ink-stroke"/><text x="220" y="115" text-anchor="middle" class="label-ink">c3</text></g>
-  <g><circle cx="300" cy="110" r="16" class="commit ink-stroke"/><text x="300" y="115" text-anchor="middle" class="label-ink">d4</text></g>
+  <!-- Commits on main row (y=120) -->
+  <circle cx="60"  cy="120" r="16" fill="var(--g-paper)" stroke="var(--g-ink)" stroke-width="1.5"/>
+  <text x="60"  y="125" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-ink)">a1</text>
 
-  <!-- Commits on feature row (y=190) -->
-  <g><circle cx="220" cy="190" r="16" class="commit coral-stroke"/><text x="220" y="195" text-anchor="middle" class="label-coral">f6</text></g>
-  <g><circle cx="300" cy="190" r="16" class="commit coral-stroke"/><text x="300" y="195" text-anchor="middle" class="label-coral">g7</text></g>
+  <circle cx="140" cy="120" r="16" fill="var(--g-paper)" stroke="var(--g-ink)" stroke-width="1.5"/>
+  <text x="140" y="125" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-ink)">b2</text>
 
-  <!-- Merge commit M (coral outline + label) -->
-  <g><circle cx="380" cy="110" r="16" class="commit coral-stroke"/><text x="380" y="115" text-anchor="middle" class="label-coral">M</text></g>
+  <circle cx="220" cy="120" r="16" fill="var(--g-paper)" stroke="var(--g-ink)" stroke-width="1.5"/>
+  <text x="220" y="125" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-ink)">c3</text>
 
-  <!-- Branch pointer "main" stacked ABOVE M. Commit cy=110, rectGap=24,
-       rectH=20: branch occupies y=50..70. Arrow tip stops 4px short of
-       commit-top (94), so tip at y=90 and polygon base at y=84. -->
-  <line x1="380" y1="70" x2="380" y2="84" class="ptr-line"/>
-  <polygon points="380,90 374,84 386,84" class="ptr-arrow"/>
-  <rect x="348" y="50" width="64" height="20" rx="3" class="branch-rect-fill coral-stroke" stroke-width="1.5"/>
-  <text x="380" y="64" text-anchor="middle" class="branch-text-coral">main</text>
+  <circle cx="300" cy="120" r="16" fill="var(--g-paper)" stroke="var(--g-ink)" stroke-width="1.5"/>
+  <text x="300" y="125" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-ink)">d4</text>
 
-  <!-- HEAD pointer further above "main". headGap=22, headH=20:
-       HEAD occupies y=8..28. Arrow tip stops 4px short of branch-top
-       (50), so tip at y=46 and polygon base at y=40. -->
-  <line x1="380" y1="28" x2="380" y2="40" class="ptr-line"/>
-  <polygon points="380,46 374,40 386,40" class="ptr-arrow"/>
-  <rect x="348" y="8" width="64" height="20" rx="3" class="head-rect"/>
-  <text x="380" y="22" text-anchor="middle" class="head-text">HEAD</text>
+  <!-- Commits on feature row (y=200) -->
+  <circle cx="220" cy="200" r="16" fill="var(--g-paper)" stroke="var(--g-acc)" stroke-width="1.5"/>
+  <text x="220" y="205" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-acc)">f6</text>
 
-  <!-- Branch pointer "feature" stacked BELOW g7 (cy=190). Branch
-       occupies y=230..250. Arrow tip stops 4px short of commit-bottom
-       (206), so tip at y=210 and polygon base at y=216. -->
-  <line x1="300" y1="230" x2="300" y2="216" class="ptr-line"/>
-  <polygon points="300,210 294,216 306,216" class="ptr-arrow"/>
-  <rect x="268" y="230" width="64" height="20" rx="3" class="branch-rect-fill coral-stroke" stroke-width="1.5"/>
-  <text x="300" y="244" text-anchor="middle" class="branch-text-coral">feature</text>
+  <circle cx="300" cy="200" r="16" fill="var(--g-paper)" stroke="var(--g-acc)" stroke-width="1.5"/>
+  <text x="300" y="205" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-acc)">g7</text>
+
+  <!-- Merge commit M (ACC outline, paper fill) -->
+  <circle cx="380" cy="120" r="16" fill="var(--g-paper)" stroke="var(--g-acc)" stroke-width="1.5"/>
+  <text x="380" y="125" text-anchor="middle" font-size="14" font-weight="600" fill="var(--g-acc)">M</text>
+
+  <!-- Branch pointer "main" stacked above M, INK colour chain.
+       Branch rect: y=60..80. Arrow tip at commit equator (y=104), gap 4px. -->
+  <line x1="380" y1="80" x2="380" y2="94" stroke="var(--g-ink)" stroke-width="2.2"/>
+  <polygon points="380,100 374,94 386,94" fill="var(--g-ink)"/>
+  <rect x="348" y="60" width="64" height="20" rx="3" fill="var(--g-raised)" stroke="var(--g-ink)" stroke-width="1.5"/>
+  <text x="380" y="74" text-anchor="middle" font-size="10" font-weight="600" fill="var(--g-ink)">main</text>
+
+  <!-- HEAD pointer further above "main".
+       HEAD rect: y=18..38. Arrow tip at branch-top (y=56), gap 4px. -->
+  <line x1="380" y1="38" x2="380" y2="50" stroke="var(--g-ink)" stroke-width="2.2"/>
+  <polygon points="380,56 374,50 386,50" fill="var(--g-ink)"/>
+  <rect x="348" y="18" width="64" height="20" rx="3" fill="var(--g-ink)"/>
+  <text x="380" y="32" text-anchor="middle" font-size="11" font-weight="700" fill="var(--g-raised)" letter-spacing="0.5">HEAD</text>
+
+  <!-- Branch pointer "feature" stacked below g7, ACC colour.
+       Branch rect: y=240..260. Arrow tip at commit equator (y=220), gap 4px. -->
+  <line x1="300" y1="240" x2="300" y2="226" stroke="var(--g-acc)" stroke-width="2.2"/>
+  <polygon points="300,220 294,226 306,226" fill="var(--g-acc)"/>
+  <rect x="268" y="240" width="64" height="20" rx="3" fill="var(--g-raised)" stroke="var(--g-acc)" stroke-width="1.5"/>
+  <text x="300" y="254" text-anchor="middle" font-size="10" font-weight="600" fill="var(--g-acc)">feature</text>
 </svg>

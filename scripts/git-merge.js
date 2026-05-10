@@ -213,12 +213,13 @@
       '.gm-ilink { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; cursor: pointer; }',
       '.gm-ilink:hover { color: var(--coral); }',
 
-      /* Radial pulse (§01 merge-base highlight). A circle anchored at
-         c3 grows outward and fades, repeated a couple of times so the
-         viewer sees a sonar-style ping originating from the commit
-         centre. Animating r/opacity keeps the geometric centre fixed. */
-      '@keyframes gm-radial-ping { 0% { r: 16; opacity: 0.85; stroke-width: 2.5; } 100% { r: 56; opacity: 0; stroke-width: 0.5; } }',
-      '.gm-radial-pulse { animation: gm-radial-ping 1.2s ease-out 2; opacity: 0; }',
+      /* Radial pulse (§01 merge-base highlight). The ping circle scales
+         outward from the commit centre and fades. Using transform:scale()
+         with transform-box:fill-box keeps the geometric centre fixed
+         across all browsers (animating SVG r in keyframes is not
+         supported on iOS Safari). */
+      '@keyframes gm-radial-ping { 0% { transform: scale(1); opacity: 0.85; } 100% { transform: scale(3.5); opacity: 0; } }',
+      '.gm-radial-pulse { animation: gm-radial-ping 1.2s ease-out 2; opacity: 0; transform-box: fill-box; transform-origin: center; }',
 
       /* Pulse animation (§04 parent-pointer highlight). */
       '@keyframes gm-pulse { 0% { stroke-width: 1.5; } 25% { stroke: var(--coral-strong); stroke-width: 3.5; } 50% { stroke-width: 1.5; } 75% { stroke: var(--coral-strong); stroke-width: 3.5; } 100% { stroke-width: 1.5; } }',
@@ -560,34 +561,16 @@
           '<code>git diff c3..g7</code> to determine each side\'s contribution.</p>';
       } else {
         descArea.innerHTML =
-          '<h3>Two-way merge: no third reference point</h3>' +
-          '<p>Imagine the merge tool sees only the two file versions:</p>' +
-          '<div class="gm-table-wrap" style="margin: 8px 0 14px;">' +
-            '<div class="role-table-frame">' +
-              '<table class="gm-table">' +
-                '<thead><tr class="role-table-head">' +
-                  '<th class="role-table-head-cell">Ours <span class="gm-vershead-sub">(d4)</span></th>' +
-                  '<th class="role-table-head-cell">Theirs <span class="gm-vershead-sub">(p4)</span></th>' +
-                '</tr></thead>' +
-                '<tbody><tr>' +
-                  '<td class="gm-cell-pre"><pre class="role-code-block">' +
-                    '<span class="line"><span class="gm-kw">let</span> retries = <span class="gm-str">3</span></span>' +
-                  '</pre></td>' +
-                  '<td class="gm-cell-pre"><pre class="role-code-block">' +
-                    '<span class="line"><span class="gm-kw">let</span> retries = <span class="gm-str">5</span></span>' +
-                  '</pre></td>' +
-                '</tr></tbody>' +
-              '</table>' +
-            '</div>' +
-          '</div>' +
-          '<p>Both lines exist; both differ. Did <em>ours</em> raise the ' +
-          'limit, or did <em>theirs</em> lower it? With only two points, ' +
-          'there is no answer: a two-way merge must flag every difference ' +
-          'as a conflict.</p>' +
-          '<p>A three-way merge consults the merge base. If the base read ' +
-          '<code>retries = 3</code>, only <em>theirs</em> changed it, so ' +
-          'Git auto-resolves to <code>5</code>. Both sides changing the ' +
-          'same line is the only case that still needs human input.</p>';
+          '<h3>No shared ancestor</h3>' +
+          '<p><code>a1</code> and <code>p1</code> are initial commits ' +
+          'from completely separate histories, as if the branches originated ' +
+          'in different repositories joined with <code>git remote add</code>, ' +
+          'or were created as orphan branches via ' +
+          '<code>git checkout --orphan</code>. With no common ancestor, Git ' +
+          'has no baseline to measure either side\'s changes against: every ' +
+          'differing line must be flagged as a conflict. See the ' +
+          '<strong>Two-way merge</strong> tab in the next section for a ' +
+          'concrete example.</p>';
       }
     }
 
@@ -747,6 +730,22 @@
       'the other deletes. Git cannot infer which intent to honour, so it stops ' +
       'and requests user input.'));
 
+    // Tab group: three-way (greet.swift conflict resolution) vs two-way
+    // (retries example, moved from §01 to show why all diffs conflict
+    // without a shared ancestor).
+    var OPTS = [
+      { id: 'three', label: 'Three-way merge' },
+      { id: 'two',   label: 'Two-way merge'   }
+    ];
+    var active = 'three';
+
+    var panel = div('gm-panel');
+    var tabsBar = div('mcp-tabs');
+    panel.appendChild(tabsBar);
+    var contentArea = div('');
+    panel.appendChild(contentArea);
+
+    // ── Three-way content ──
     // Swift snippets for the file-version table. Each line carries a
     // data-line index so the in-prose link can flash the independent
     // edits (line 1 in Ours, line 3 in Theirs) on click.
@@ -795,12 +794,7 @@
           '</tbody>' +
         '</table>' +
       '</div>';
-    sec.appendChild(fileTable);
 
-    // Conflict marker block sits inside a panel with the description
-    // immediately below, mirroring the tabbed-view recipe (svg-bg +
-    // arch-desc) minus the tab bar.
-    var conflictPanel = div('gm-panel');
     var conflictArea = div('gm-svg-bg');
     conflictArea.style.display = 'block';
     conflictArea.innerHTML =
@@ -815,7 +809,6 @@
         '<span class="line">    <span class="gm-kw">return</span> <span class="gm-str">"Hi, \\(name)!"</span></span>' +
         '<span class="line">}</span>' +
       '</pre>';
-    conflictPanel.appendChild(conflictArea);
 
     var conflictDesc = div('gm-arch-desc');
     conflictDesc.innerHTML =
@@ -828,13 +821,71 @@
       'to incompatible values.</p>' +
       '<p>The conflict is resolved by editing the file (picking, combining, ' +
       'or rewriting), staging it with <code>git add</code>, and committing. ' +
-      '<strong>That commit</strong> is the merge commit.</p>';
-    conflictPanel.appendChild(conflictDesc);
-    sec.appendChild(conflictPanel);
+      '<a href="#sec-04" class="gm-ilink">That commit</a> is the merge commit.</p>';
+
+    // ── Two-way content (moved from §01) ──
+    // Without a shared ancestor, every differing line is a conflict because
+    // there is no baseline to determine which side changed what.
+    var twoDesc = div('gm-arch-desc');
+    twoDesc.innerHTML =
+      '<h3>No shared ancestor: all differences are conflicts</h3>' +
+      '<p>Without a common ancestor, Git sees only two file snapshots. ' +
+      'Imagine the merge tool sees:</p>' +
+      '<div class="gm-table-wrap" style="margin: 8px 0 14px;">' +
+        '<div class="role-table-frame">' +
+          '<table class="gm-table">' +
+            '<thead><tr class="role-table-head">' +
+              '<th class="role-table-head-cell">Ours <span class="gm-vershead-sub">(d4)</span></th>' +
+              '<th class="role-table-head-cell">Theirs <span class="gm-vershead-sub">(p4)</span></th>' +
+            '</tr></thead>' +
+            '<tbody><tr>' +
+              '<td class="gm-cell-pre"><pre class="role-code-block">' +
+                '<span class="line"><span class="gm-kw">let</span> retries = <span class="gm-str">3</span></span>' +
+              '</pre></td>' +
+              '<td class="gm-cell-pre"><pre class="role-code-block">' +
+                '<span class="line"><span class="gm-kw">let</span> retries = <span class="gm-str">5</span></span>' +
+              '</pre></td>' +
+            '</tr></tbody>' +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+      '<p>Both lines differ. Did <em>ours</em> raise the limit, or did ' +
+      '<em>theirs</em> lower it? With only two points there is no answer: ' +
+      'a two-way merge must flag every difference as a conflict.</p>' +
+      '<p>A three-way merge consults the merge base. If the base read ' +
+      '<code>retries = 3</code>, only <em>theirs</em> changed it, so ' +
+      'Git auto-resolves to <code>5</code>. Both sides changing the same ' +
+      'line is the only case that still needs human input.</p>';
+
+    function renderTabs() {
+      tabsBar.innerHTML = '';
+      OPTS.forEach(function (o) {
+        var b = document.createElement('button');
+        b.className = 'mcp-tab' + (o.id === active ? ' active' : '');
+        b.type = 'button';
+        b.textContent = o.label;
+        b.onclick = function () { active = o.id; render(); };
+        tabsBar.appendChild(b);
+      });
+    }
+
+    function render() {
+      renderTabs();
+      contentArea.innerHTML = '';
+      if (active === 'three') {
+        contentArea.appendChild(fileTable);
+        contentArea.appendChild(conflictArea);
+        contentArea.appendChild(conflictDesc);
+      } else {
+        contentArea.appendChild(twoDesc);
+      }
+    }
+    render();
+    sec.appendChild(panel);
 
     // Sequential edits on a single branch don't conflict, even when
     // they touch the same line; this paragraph addresses that follow-on
-    // question as regular prose beneath the visual.
+    // question as regular prose beneath the panel.
     var sameBranchPara = el('p', 'gm-body',
       'Why don\'t two commits on the same branch conflict when they touch ' +
       'the same line? Because each commit has a single parent: the second ' +
@@ -844,20 +895,25 @@
     sameBranchPara.style.marginTop = '36px';
     sec.appendChild(sameBranchPara);
 
-    // Wire the in-prose link: flash line 1 in the Ours column and line
-    // 3 in the Theirs column with a brief blue backdrop, restarting the
-    // animation on each click.
+    // Wire the in-prose link: switch to the three-way tab if needed, then
+    // flash line 1 in the Ours column and line 3 in the Theirs column.
     sec.querySelectorAll('[data-gm-action="show-indep-lines"]').forEach(function (link) {
       link.addEventListener('click', function () {
-        var targets = [
-          fileTable.querySelector('td[data-gm-col="ours"] [data-line="1"]'),
-          fileTable.querySelector('td[data-gm-col="theirs"] [data-line="3"]')
-        ];
-        targets.forEach(function (n) {
-          if (!n) return;
-          n.classList.remove('gm-line-flash');
-          void n.getBoundingClientRect();
-          n.classList.add('gm-line-flash');
+        if (active !== 'three') {
+          active = 'three';
+          render();
+        }
+        requestAnimationFrame(function () {
+          var targets = [
+            fileTable.querySelector('td[data-gm-col="ours"] [data-line="1"]'),
+            fileTable.querySelector('td[data-gm-col="theirs"] [data-line="3"]')
+          ];
+          targets.forEach(function (n) {
+            if (!n) return;
+            n.classList.remove('gm-line-flash');
+            void n.getBoundingClientRect();
+            n.classList.add('gm-line-flash');
+          });
         });
       });
     });
