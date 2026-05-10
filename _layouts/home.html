@@ -86,7 +86,12 @@ layout: default
           {%- if site.show_excerpts -%}
           <div class="post-stream-excerpt">
             {% assign excerptParts = post.excerpt | split: "<!-- excerpt-start -->" %}
-            {{ excerptParts[1] | strip_newlines | truncatewords: 50 }}
+            {% assign excerptBody = excerptParts[1] | strip_newlines %}
+            {% if excerptBody contains '<figure' %}
+              {{ excerptBody }}
+            {% else %}
+              {{ excerptBody | truncatewords: 50 }}
+            {% endif %}
           </div>
           {%- endif -%}
 
