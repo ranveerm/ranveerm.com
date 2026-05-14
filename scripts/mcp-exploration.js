@@ -43,7 +43,7 @@
       '.mcp-stat-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); color: var(--ink-faint); text-transform: uppercase; margin-bottom: 6px; }',
       '.mcp-stat-value { font-family: var(--font-display); font-size: 28px; font-weight: 400; }',
 
-      /* Tabs — desktop: horizontal bar with coral 2px bottom indicator.
+      /* Tabs, desktop: horizontal bar with coral 2px bottom indicator.
          Mobile (≤640px): vertical segmented list with 3px coral left bar
          on the active row. !important is required on the mobile active rule
          because §03/§08 apply borderBottomColor as an inline style. */

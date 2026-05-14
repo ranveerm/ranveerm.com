@@ -20,7 +20,7 @@ Start the Jekyll live preview server for this site.
 
 ## Notes
 
-- Do **not** start the server with `Bash` — always use the
+- Do **not** start the server with `Bash`; always use the
   `mcp__Claude_Preview__preview_start` tool so the harness can manage
   the process lifecycle and surface the live URL.
 - If a different port or runtime configuration is needed, edit

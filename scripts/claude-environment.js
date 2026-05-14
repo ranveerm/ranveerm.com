@@ -45,10 +45,11 @@
     },
     config: {
       label: '2. Permissions',
+      badge: '🔐',
       sublabel: 'Behavioural controls',
       color: '#7c3aed',
       description: 'Permissions, model selection, and feature toggles. Defines what Claude can do without asking.',
-      aggregation: 'Full precedence chain (highest first): managed policy → CLI flags → `settings.local.json` → `settings.json` → `~/.claude/settings.json`. Array values like `permissions.allow` and `deny` are concatenated and deduplicated across all scopes. Scalar values like `model` are taken from the highest-precedence scope that sets them. None of this enters the model context, it only governs runtime behaviour.',
+      aggregation: 'Full precedence chain (highest first): managed policy → CLI flags → `settings.local.json` → `settings.json` → `~/.claude/settings.json` → plugin-provided settings. Array values like `permissions.allow` and `deny` are concatenated and deduplicated across all scopes. Scalar values like `model` are taken from the highest-precedence scope that sets them. None of this enters the model context, it only governs runtime behaviour.',
       precedenceFiles: ['settings-local', 'settings-project', 'settings-global'],
       interactionExample:
         '# How three settings.json files merge\n' +
@@ -67,6 +68,7 @@
     },
     tools: {
       label: '3. Tools',
+      badge: '⚒️',
       sublabel: 'Primitive actions',
       color: '#db2777',
       description: 'The fundamental actions Claude can take. Built-ins like Read, Write, Bash, Grep are always available. Everything else in the environment either restricts these, orchestrates them, or extends them.',
@@ -75,10 +77,11 @@
     },
     invocable: {
       label: '4. Invocable Knowledge',
+      badge: '📚',
       sublabel: 'Workflows and commands',
       color: '#d97706',
       description: 'Reusable patterns. Skills auto-load based on natural language; commands are invoked explicitly with a slash.',
-      aggregation: 'Discovered at session start but not loaded. Each skill\'s short description (~30 tokens) is in context so Claude can match; **bodies load on demand**. Commands only enter context on explicit `/command` invocation.',
+      aggregation: 'Discovered at session start but not loaded. Each skill\'s short description (~30 tokens) is in context so Claude can match; **bodies load on demand**. Commands only enter context on explicit `/command` invocation. On name collision, skills resolve `managed > user > project` (note: user beats project for skills, the opposite of subagents). Plugin-provided skills sit alongside, namespaced as `/<plugin>:<skill>` to avoid clashes.',
       nodes: ['skills', 'commands']
     },
     delegation: {
@@ -86,15 +89,15 @@
       sublabel: 'Specialised agents',
       color: '#e11d48',
       description: 'Spawn focused subagents that run in their own fresh context windows. Only a summary returns to the main conversation.',
-      aggregation: 'Only the agent\'s description is loaded into the parent system prompt. The agent\'s own system prompt and any files it reads stay isolated in its **fresh context window** - only the final summary returns.',
+      aggregation: 'Only the agent\'s description is loaded into the parent system prompt. The agent\'s own system prompt and any files it reads stay isolated in its **fresh context window** - only the final summary returns. On name collision, subagents resolve `managed > CLI flag > project > user > plugin` (note: project beats user here, the opposite of skills).',
       nodes: ['agents']
     },
     automation: {
       label: '6. Automation',
       sublabel: 'Event-driven scripts',
       color: '#059669',
-      description: 'Shell scripts triggered by tool events. Enforce standards without model involvement, formatters, linters, validators.',
-      aggregation: 'Hooks fire deterministically on tool lifecycle events. **Zero model context cost** - they run shell-side, outside the model loop.',
+      description: 'Shell scripts triggered by tool events. Enforce standards without model involvement, formatters, linters, validators. Instructions (CLAUDE.md, skills) are **requests**: Claude interprets them and may exercise judgment. Hooks are **conditions**: they always fire when the event matches, regardless of model reasoning.',
+      aggregation: 'Hooks fire deterministically on tool lifecycle events. **Zero model context cost** - they run shell-side, outside the model loop. Hooks **merge across all sources** (user, project, plugin); every registered hook fires for its matching event regardless of where it was defined.',
       nodes: ['hooks']
     },
     external: {
@@ -102,7 +105,7 @@
       sublabel: 'Protocol-based integrations',
       color: '#2563eb',
       description: 'MCP is the odd one out: an OPEN PROTOCOL, not a Claude Code convention. Portable across Cursor, VS Code, and other clients.',
-      aggregation: 'When an MCP server is connected, its tool definitions are added to the system prompt - same context cost model as built-in tools.',
+      aggregation: 'When an MCP server is connected, its tool definitions are added to the system prompt - same context cost model as built-in tools. On name collision, MCP servers resolve `local > project > user`. Plugins can also bundle MCP servers, which load alongside the per-scope ones.',
       nodes: ['mcp']
     },
     state: {
@@ -110,7 +113,7 @@
       sublabel: 'Session management',
       color: '#64748b',
       description: 'How Claude remembers across sessions and isolates parallel work.',
-      aggregation: 'On-disk only. Nothing here enters context until you `--resume` a session - and even then, only the prior turn transcript is replayed.',
+      aggregation: 'The only information that persists across sessions by default is what Claude has written to **memory** (MEMORY.md). Session transcripts are on-disk but enter context only when you `--resume`. The exception is forking: a forked session carries the entire ancestor transcript, not just memory.',
       nodes: ['sessions', 'worktreeinclude']
     }
   };
@@ -139,7 +142,7 @@
     'claude-md-project': {
       layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
       title: 'CLAUDE.md (project)',
-      description: 'Project-level **instructions** committed to git. Team-shared memory for build commands, architecture, conventions. Loaded in full at session start.',
+      description: 'Project-level **instructions** committed to git. The right home for **conventions, common commands, and architecture** (things every session and every contributor needs). Loaded in full at session start.',
       example: '# Acme API\n\n## Commands\nnpm run dev\nnpm run test\n\n## Conventions\n- Validate with zod\n- Return { data, error, meta }\n- Never expose stack traces',
       priority: 'Team-level instructions',
       tokenNote: 'Sum of section tokens below. Sections can be moved to skills to defer loading.',
@@ -160,10 +163,34 @@
           skillCost: 310 }
       ]
     },
+    'claude-json': {
+      layer: 'config', label: '~/.claude.json', icon: 'file-text-o',
+      title: '~/.claude.json',
+      description: 'User-owned state file. Holds everything that must stay personal and out of version control: OAuth session, MCP server configs, per-project trust grants, and machine-level preferences. Never committed.',
+      priority: 'Not part of the settings.json precedence chain; managed separately',
+      tokens: 0,
+      tokenNote: 'Does not enter the model context.',
+      extended: {
+        heading: 'What lives here (and why not in settings.json)',
+        body: [
+          { label: '/config interface', text: 'The `/config` command is the interactive interface for both files. Behavioural settings (permissions, model) write to `settings.json`. MCP server management, OAuth auth flow, and machine preferences write here.' },
+          { label: 'vs settings.json', text: '`settings.json` is structured and shareable; it can live at project scope and be committed. This file holds user-specific state that must never reach a repo: the OAuth session, per-project tool-trust grants, caches, and machine preferences like `autoConnectIde`.' },
+          { label: 'Personal MCP vs .mcp.json', text: '`.mcp.json` is committed to git and shared with the team. Personal servers (private API keys, home-machine utilities) and local-scope servers that apply only to one project but carry credentials belong here instead.' }
+        ]
+      }
+    },
+    keybindings: {
+      layer: 'config', label: 'keybindings.json', icon: 'keyboard-o',
+      title: 'keybindings.json',
+      description: 'Keybindings applicable to the CLI.',
+      priority: 'CLI and desktop only',
+      tokens: 0,
+      tokenNote: 'Runtime only. Keybindings do not enter the model context.'
+    },
     'claude-md-global': {
       layer: 'memory', label: '~/.claude/CLAUDE.md', icon: 'file-text-o',
       title: '~/.claude/CLAUDE.md',
-      description: 'Global **instructions** that apply to every project on your machine. Your personal preferences across all work.',
+      description: 'Global **instructions** that apply to every project on your machine. The right home for **style and conventions applicable to all sessions** (e.g. commit message format, response tone, language preferences).',
       example: '## Global preferences\n- Always use TypeScript strict mode\n- Prefer functional patterns\n- Explain reasoning before big changes',
       priority: 'Loaded earliest in the read order (filesystem root first); project files come after',
       tokens: 600,
@@ -283,7 +310,7 @@
           { label: 'Context isolation', text: "Main session stays clean. An audit that reads 40 files doesn’t pollute your main conversation, only the summary returns. This is the primary reason to use them." },
           { label: 'Parallel execution', text: 'Multiple subagents run concurrently. A code review can dispatch style-checker, security-scanner, and test-coverage at once, minutes → seconds.' },
           { label: 'Tool restriction', text: "Scope each agent’s tools precisely. A read-only reviewer doesn’t need Write or Bash; a security auditor doesn’t need Edit." },
-          { label: 'Scope (project vs user)', text: 'Define in `.claude/agents/` (team-shared) or `~/.claude/agents/` (personal, portable across projects). Project-level takes precedence on name collision.' },
+          { label: 'Scope and precedence', text: 'Define in `.claude/agents/` (team-shared), `~/.claude/agents/` (personal, portable across projects), or bundle inside a **plugin** for cross-repo distribution. Full precedence on name collision: `managed > CLI flag > project > user > plugin`. Note this differs from skills, where user beats project.' },
           { label: 'Skill vs agent', text: 'Use a **skill** when you want procedural knowledge injected into the current context. Use an **agent** when the work is noisy and only the summary matters.' },
           { label: 'Agent vs worktree', text: 'Agents isolate context; worktrees isolate filesystems. Combine them for truly parallel multi-branch work.' },
           { label: "Can't nest", text: 'Subagents cannot spawn further subagents. Depth is exactly one, this prevents infinite recursion.' },
@@ -321,9 +348,9 @@
     sessions: {
       layer: 'state', label: 'Projects', icon: 'sitemap',
       title: 'Projects (~/.claude/projects/)',
-      description: 'Session transcripts stored on disk. Each conversation is saved here so you can `--resume` a prior session to replay its turn history into context. The `<project>` key is derived from the git repository, so all worktrees share one projects directory.',
+      description: 'Every turn is logged here: user messages, tool calls, and tool results. This gives you three capabilities: **rewind** (inspect prior reasoning), **resume** (replay a prior session into context with `--resume`), and **fork** (branch from any point in history, with the full forked transcript preserved). The `<project>` key is derived from the git repository, so all worktrees share one projects directory.',
       example: '~/.claude/projects/<project>/\n└── sessions/\n    └── session-<id>.json',
-      priority: 'On-disk only; never enters context unless you --resume',
+      priority: 'On-disk only; never enters context unless you --resume or fork',
       tokens: 0,
       tokenNote: 'Filesystem only. Session transcripts enter context only on --resume.',
       seeAlso: { nodeId: 'auto-memory', label: 'Auto-memory (MEMORY.md)' }
@@ -532,10 +559,13 @@
       '.claudeenv .ce-inspector-pill.token { border-left-color: var(--coral-strong); background: var(--coral-wash); color: var(--ink-secondary); line-height: var(--lh-normal); font-family: var(--font-display); font-size: var(--size-md); }',
       /* viz.section-label: ink-faint, mono, xs, eyebrow tracking, upper. */
       '.claudeenv .ce-inspector-section-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; margin-top: 4px; }',
-      '.claudeenv .ce-inspector-extended-body { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }',
-      '.claudeenv .ce-inspector-extended-item { border-left: 1px solid var(--line); padding: 2px 0 2px 10px; }',
-      '.claudeenv .ce-inspector-extended-item-label { font-family: var(--font-mono); font-size: 0.68rem; color: var(--coral); margin-bottom: 1px; }',
-      '.claudeenv .ce-inspector-extended-item-text { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); line-height: var(--lh-normal); margin: 0; }',
+      '.claudeenv .ce-inspector-extended-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 12px; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; }',
+      '.claudeenv .ce-inspector-extended-table tr { background: transparent; }',
+      '.claudeenv .ce-inspector-extended-table tr:nth-child(even) { background: transparent; }',
+      '.claudeenv .ce-inspector-extended-table td { padding: 14px 18px; vertical-align: top; border: none; border-top: 1px solid var(--table-line); line-height: var(--lh-normal); background: transparent; }',
+      '.claudeenv .ce-inspector-extended-table tr:first-child td { border-top: none; }',
+      '.claudeenv .ce-inspector-extended-table td.ce-inspector-extended-item-label { font-family: var(--font-text); font-size: var(--size-smd); font-weight: 600; letter-spacing: var(--track-snug); color: var(--ink-primary); white-space: nowrap; width: 1%; border-right: 1px solid var(--table-line); }',
+      '.claudeenv .ce-inspector-extended-table td.ce-inspector-extended-item-text { font-family: var(--font-text); font-size: var(--size-md); color: var(--ink-secondary); }',
       /* code.block: paper-inset bg, line border, sx-text, mono, smd. */
       '.claudeenv .ce-inspector-example { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
 
@@ -589,7 +619,7 @@
       '.claudeenv .ce-section-row.in-skill .ce-section-cost { color: var(--sx-path); }',
       '.claudeenv .ce-section-row.fixed .ce-section-cost { color: var(--ink-faint); }',
       '.claudeenv .ce-section-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }',
-      '.claudeenv .ce-section-toggle button { font-family: var(--font-text); font-size: var(--size-smd); padding: 4px 10px; background: transparent; border: none; cursor: pointer; color: var(--ink-muted); border-right: 1px solid var(--line); }',
+      '.claudeenv .ce-section-toggle button { font-family: var(--font-text); font-size: var(--size-smd); padding: 4px 10px; background: transparent; border: none; cursor: pointer; color: var(--ink-muted); border-right: 1px solid var(--line); display: inline-flex; align-items: center; gap: 5px; }',
       '.claudeenv .ce-section-toggle button:last-child { border-right: none; }',
       '.claudeenv .ce-section-toggle button.on { background: var(--paper-inset); color: var(--ink-primary); font-weight: 600; }',
       '.claudeenv .ce-section-toggle button.on.skill-mode { background: var(--paper-inset); color: var(--ink-primary); }',
@@ -694,6 +724,8 @@
       // included[id] = false → file is excluded from environment.
       // Default (undefined) is included.
       included: {},
+      // 'all' | 'cli' | 'gui' — filters filesystem view to context-relevant files.
+      clientFilter: 'all',
       // sectionMode[sectionId] = 'skill' → section moved out of CLAUDE.md.
       // Default (undefined) is 'inline'.
       sectionMode: {},
@@ -703,7 +735,10 @@
       contextOpen: true
     };
 
-    function isIncluded(id) { return state.included[id] !== false; }
+    function isIncluded(id) {
+      if (id === 'keybindings' && state.clientFilter === 'gui') return false;
+      return state.included[id] !== false;
+    }
     function setIncluded(id, val) { state.included[id] = val; rerender(); }
     function setAllIncluded(val) {
       TOGGLEABLE.forEach(function(id) { state.included[id] = val; });
@@ -920,7 +955,7 @@
             var tx = c * STEP, ty = r * STEP;
             var cx = tx + TILE / 2, cy = ty + TILE / 2;
 
-            // Radial falloff with per-tile radius jitter — breaks the hard edge.
+            // Radial falloff with per-tile radius jitter; breaks the hard edge.
             // Higher power (3.5) makes edges fall off more steeply.
             var dx = cx - centerX, dy = cy - centerY;
             var dist = Math.sqrt(dx * dx + dy * dy);
@@ -1054,6 +1089,9 @@
         return row;
       }
 
+      // ~/.claude.json — home-level, before the ~/.claude/ directory
+      treeBody.appendChild(fileRow('claude-json', '~/.claude.json', 'file-text-o', 0));
+
       // ~/.claude/ root
       var userRoot = el('button', { class: 'ce-tree-root', type: 'button' }, [
         el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedUser ? ' open' : '') }),
@@ -1068,7 +1106,10 @@
         var userChildren = el('div', { class: 'ce-tree-children' });
         userChildren.appendChild(fileRow('claude-md-global', 'CLAUDE.md', 'file-text-o', 1));
         userChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 1));
-        userChildren.appendChild(fileRow('settings-global', 'settings.json', 'cog', 1));
+        userChildren.appendChild(fileRow('settings-global', 'settings.json', 'file-text-o', 1));
+        if (state.clientFilter !== 'gui') {
+          userChildren.appendChild(fileRow('keybindings', 'keybindings.json', 'keyboard-o', 1));
+        }
         userChildren.appendChild(fileRow('sessions', 'Projects', 'sitemap', 1, true));
         treeBody.appendChild(userChildren);
       }
@@ -1091,7 +1132,7 @@
         projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 1));
         // `.mcp.json` and `.worktreeinclude` live at the project root,
         // not inside `.claude/`. Indent 1 keeps that hierarchy honest.
-        projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'server', 1));
+        projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'file-text-o', 1));
         projectChildren.appendChild(fileRow('worktreeinclude', '.worktreeinclude', 'file-text-o', 1));
         // `.claude/` is non-selectable but should mirror other folder rows.
         // Use the same `.ce-tree-row` + `.ce-tree-node.dir` structure with a
@@ -1103,8 +1144,8 @@
         claudeNode.appendChild(el('span', { class: 'ce-label' }, '.claude/'));
         claudeRow.appendChild(claudeNode);
         projectChildren.appendChild(claudeRow);
-        projectChildren.appendChild(fileRow('settings-project', 'settings.json', 'cog', 2));
-        projectChildren.appendChild(fileRow('settings-local', 'settings.local.json', 'cog', 2));
+        projectChildren.appendChild(fileRow('settings-project', 'settings.json', 'file-text-o', 2));
+        projectChildren.appendChild(fileRow('settings-local', 'settings.local.json', 'file-text-o', 2));
         projectChildren.appendChild(fileRow('rules', 'rules/', 'folder-o', 2, true));
         projectChildren.appendChild(fileRow('commands', 'commands/', 'folder-o', 2, true));
         projectChildren.appendChild(fileRow('skills', 'skills/', 'folder-o', 2, true));
@@ -1135,6 +1176,24 @@
       });
       bulkRow.appendChild(bulkCheck);
       bulkRow.appendChild(bulkLabel);
+      var clientSeg = el('div', { class: 'ce-section-toggle', style: 'margin-left: auto; flex-shrink: 0;' });
+      var segOpts = [
+        { label: 'All',  key: 'all',  icon: null },
+        { label: 'CLI',  key: 'cli',  icon: 'keyboard-o' },
+        { label: 'GUI',  key: 'gui',  icon: 'desktop' }
+      ];
+      segOpts.forEach(function(opt) {
+        var btn = el('button', { type: 'button', class: state.clientFilter === opt.key ? 'on' : '' });
+        if (opt.icon) btn.appendChild(fa(opt.icon));
+        btn.appendChild(document.createTextNode(opt.label));
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          state.clientFilter = opt.key;
+          rerender();
+        });
+        clientSeg.appendChild(btn);
+      });
+      bulkRow.appendChild(clientSeg);
       treeBody.appendChild(bulkRow);
     }
 
@@ -1537,9 +1596,7 @@
         if (state.selectedLayer === 'memory') {
           // Tips first (no heading)
           var tips = el('ul', { class: 'ce-instr-tips' });
-          ['<200 lines',
-           'Conventions, common commands, architecture',
-           'Adherence to instruction ∝ specific/concise nature of instruction'
+          ['Adherence to instruction ∝ specific/concise nature of instruction'
           ].forEach(function(tip) { tips.appendChild(el('li', null, tip)); });
           body.appendChild(tips);
 
@@ -1641,16 +1698,18 @@
 
       if (node.extended) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label' }, node.extended.heading));
-        var extBody = el('div', { class: 'ce-inspector-extended-body' });
+        var extTable = el('table', { class: 'ce-inspector-extended-table' });
+        var extTbody = el('tbody', {});
         node.extended.body.forEach(function(item) {
-          var row = el('div', { class: 'ce-inspector-extended-item' });
-          row.appendChild(el('div', { class: 'ce-inspector-extended-item-label' }, item.label));
-          var t = el('p', { class: 'ce-inspector-extended-item-text' });
-          t.appendChild(renderDescription(item.text));
-          row.appendChild(t);
-          extBody.appendChild(row);
+          var tr = el('tr', {});
+          tr.appendChild(el('td', { class: 'ce-inspector-extended-item-label' }, item.label));
+          var cell = el('td', { class: 'ce-inspector-extended-item-text' });
+          cell.appendChild(renderDescription(item.text));
+          tr.appendChild(cell);
+          extTbody.appendChild(tr);
         });
-        body.appendChild(extBody);
+        extTable.appendChild(extTbody);
+        body.appendChild(extTable);
       }
       if (node.example) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'Example'));

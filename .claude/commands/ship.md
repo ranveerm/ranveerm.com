@@ -22,14 +22,14 @@ Commit the current changes (using the guidelines below), then propagate them to 
 
 4. **Merge the working branch into `main`** (only if `<branch>` ≠ `main`).
    - `git merge --ff-only <branch>`
-   - If the merge can't fast-forward, **stop and ask the user** — their branch likely needs to be rebased on the new `main` first. Don't force.
+   - If the merge can't fast-forward, **stop and ask the user**. Their branch likely needs to be rebased on the new `main` first. Don't force.
 
 5. **Push `main` to `origin`.**
    - `git push origin main`
 
 6. **Return to the working branch and rebase** (only if `<branch>` ≠ `main`).
    - `git checkout <branch>`
-   - `git rebase main` — usually a no-op after the fast-forward merge, but safe to run and brings in any independent commits to `main` that landed during the operation.
+   - `git rebase main` (usually a no-op after the fast-forward merge, but safe to run and brings in any independent commits to `main` that landed during the operation).
 
 7. **Confirm.** Run `git status` to verify a clean tree on `<branch>`.
 
@@ -52,9 +52,9 @@ Multiple emojis are fine when the commit genuinely spans categories (e.g. `🪄�
 
 ## Safety rules
 
-- **Never amend** an existing commit — always create a new one.
+- **Never amend** an existing commit; always create a new one.
 - **Never skip hooks** (`--no-verify`).
 - **Never force-push** to `main` (or any shared branch).
-- **Never commit secrets** — warn the user and stop if any appear in the diff.
+- **Never commit secrets**; warn the user and stop if any appear in the diff.
 - If any step fails (merge conflict, push rejection, dirty tree, hook failure), **stop and explain** rather than working around. Diagnose the root cause; let the user decide how to proceed.
 - Use `git pull --ff-only` (not a plain `pull`) so an unexpected diverge surfaces as an error instead of an automatic merge commit.
