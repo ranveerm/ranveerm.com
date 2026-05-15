@@ -41,7 +41,7 @@
         '  docs note Claude "may pick one arbitrarily". Putting personal\n' +
         '  overrides in CLAUDE.local.md gets them read last, which tends\n' +
         '  to nudge the model, but is not guaranteed.',
-      nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'rules', 'auto-memory']
+      nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'claude-md-org', 'rules', 'auto-memory']
     },
     config: {
       label: '2. Permissions',
@@ -80,7 +80,7 @@
       badge: '📚',
       sublabel: 'Workflows and commands',
       color: '#d97706',
-      description: 'Reusable patterns. Skills auto-load based on natural language; commands are invoked explicitly with a slash.',
+      description: 'Reusable patterns. Skills auto-load based on natural language; commands are invoked explicitly with a slash. **Plugins** sit alongside as a packaging layer: a plugin bundles skills, subagents, hooks, and MCP servers into one installable unit, distributed through marketplaces.',
       aggregation: 'Discovered at session start but not loaded. Each skill\'s short description (~30 tokens) is in context so Claude can match; **bodies load on demand**. Commands only enter context on explicit `/command` invocation. On name collision, skills resolve `managed > user > project` (note: user beats project for skills, the opposite of subagents). Plugin-provided skills sit alongside, namespaced as `/<plugin>:<skill>` to avoid clashes.',
       nodes: ['skills', 'commands']
     },
@@ -141,10 +141,9 @@
     },
     'claude-md-project': {
       layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
-      title: 'CLAUDE.md (project)',
-      description: 'Project-level **instructions** committed to git. The right home for **conventions, common commands, and architecture** (things every session and every contributor needs). Loaded in full at session start.',
+      title: 'CLAUDE.md',
+      description: 'Team-level\n* Workflows\n* Architecture',
       example: '# Acme API\n\n## Commands\nnpm run dev\nnpm run test\n\n## Conventions\n- Validate with zod\n- Return { data, error, meta }\n- Never expose stack traces',
-      priority: 'Team-level instructions',
       tokenNote: 'Sum of section tokens below. Sections can be moved to skills to defer loading.',
       sections: [
         { id: 'overview',        label: 'Project header and overview',     tokens:  90, fixed: true,
@@ -184,13 +183,30 @@
       title: 'keybindings.json',
       description: 'Keybindings applicable to the CLI.',
       priority: 'CLI and desktop only',
+      clientOnly: 'cli',
       tokens: 0,
       tokenNote: 'Runtime only. Keybindings do not enter the model context.'
+    },
+    'claude-md-home': {
+      layer: 'memory', label: '~/CLAUDE.md', icon: 'file-text-o',
+      title: '~/CLAUDE.md',
+      description: 'Home-level **instructions**. Claude Code walks up the directory tree loading CLAUDE.md files from each parent; a file here applies to every project nested under your home directory.',
+      priority: 'Lower priority than ~/.claude/CLAUDE.md; superseded by project-level files',
+      tokens: 300,
+      tokenNote: 'Loaded for sessions in any project under your home directory.'
+    },
+    'claude-md-org': {
+      layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
+      title: '/Library/AS/ClaudeCode/CLAUDE.md',
+      description: '* Security policy\n* Compliance requirements',
+      priority: 'Loaded first — lowest precedence, superseded by user and project files',
+      tokens: 400,
+      tokenNote: 'Loaded for every session on this machine.'
     },
     'claude-md-global': {
       layer: 'memory', label: '~/.claude/CLAUDE.md', icon: 'file-text-o',
       title: '~/.claude/CLAUDE.md',
-      description: 'Global **instructions** that apply to every project on your machine. The right home for **style and conventions applicable to all sessions** (e.g. commit message format, response tone, language preferences).',
+      description: 'Guidance for\n* Standards/conventions/style',
       example: '## Global preferences\n- Always use TypeScript strict mode\n- Prefer functional patterns\n- Explain reasoning before big changes',
       priority: 'Loaded earliest in the read order (filesystem root first); project files come after',
       tokens: 600,
@@ -386,7 +402,7 @@
   }
 
   // Lightweight inline-markdown renderer: **bold**, `code`.
-  function renderDescription(text) {
+  function renderInline(text) {
     var frag = document.createDocumentFragment();
     var parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/);
     parts.forEach(function(part) {
@@ -399,6 +415,33 @@
         frag.appendChild(document.createTextNode(part));
       }
     });
+    return frag;
+  }
+
+  function renderDescription(text) {
+    var frag = document.createDocumentFragment();
+    var lines = text.split('\n');
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      if (line.charAt(0) === '*' && line.charAt(1) === ' ') {
+        var ul = el('ul', { class: 'ce-desc-list' });
+        while (i < lines.length && lines[i].charAt(0) === '*' && lines[i].charAt(1) === ' ') {
+          var li = el('li', null);
+          li.appendChild(renderInline(lines[i].slice(2)));
+          ul.appendChild(li);
+          i++;
+        }
+        frag.appendChild(ul);
+      } else {
+        if (line) {
+          var span = el('span', null);
+          span.appendChild(renderInline(line));
+          frag.appendChild(span);
+        }
+        i++;
+      }
+    }
     return frag;
   }
 
@@ -516,6 +559,8 @@
       '.claudeenv .ce-tree-node .ce-label { font-family: var(--font-mono); font-size: 0.76rem; }',
       '.claudeenv .ce-tree-node .ce-token-tag { margin-left: auto; font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-faint); padding-left: 6px; }',
       '.claudeenv .ce-tree-node.included-bold .ce-token-tag { color: var(--ink-primary); }',
+      '.claudeenv .ce-fs-emoji { font-size: 0.8rem; line-height: 1; flex-shrink: 0; }',
+      '.claudeenv .ce-tree-node .ce-client-badge { margin-left: auto; padding-left: 6px; flex-shrink: 0; }',
       '.claudeenv .ce-tree-node .ce-layer-dot { position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; border-radius: 1px; }',
       /* Spacer that mirrors a checkbox slot for non-toggleable folder rows. */
       '.claudeenv .ce-tree-check-spacer { display: inline-block; width: 14px; flex-shrink: 0; margin: 0 2px 0 6px; }',
@@ -678,6 +723,8 @@
       '.claudeenv .ce-prompt-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: inherit; font: inherit; padding: 0; caret-color: var(--coral); }',
       '.claudeenv .ce-prompt-input::placeholder { color: var(--ink-faint); }',
 
+      '.claudeenv .ce-desc-list { margin: 4px 0 8px 0; padding-left: 18px; color: var(--ink-secondary); font-size: var(--size-md); line-height: var(--lh-normal); }',
+      '.claudeenv .ce-desc-list li { margin-bottom: 2px; }',
       '.claudeenv .ce-bold { font-weight: 600; }',
       '.claudeenv .ce-code { font-family: var(--font-mono); font-size: 0.82em; background: var(--paper-inset); color: var(--sx-keyword); border: 1px solid var(--line); padding: 1px 6px; border-radius: 999px; }',
 
@@ -691,7 +738,7 @@
       '.claudeenv .ce-instr-table td:last-child { border-right: none; }',
       '.claudeenv .ce-instr-table tr:first-child td { border-top: none; }',
       '.claudeenv .ce-instr-table td:first-child { font-size: 1.05rem; width: 28px; text-align: center; padding-right: 8px; }',
-      '.claudeenv .ce-instr-table td:nth-child(2) { font-family: var(--font-mono); font-size: var(--size-smd); color: var(--coral); font-weight: 500; white-space: nowrap; }',
+      '.claudeenv .ce-instr-table td:nth-child(2) { white-space: nowrap; }',
 
       /* Tips list (memory layer) */
       '.claudeenv .ce-instr-tips { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); padding-left: 18px; line-height: var(--lh-normal); margin: 0 0 14px; }',
@@ -719,8 +766,12 @@
     var state = {
       selectedNode: null,
       selectedLayer: null,
+      expandedOrg: true,
+      expandedOrgClaude: true,
+      expandedHome: true,
       expandedUser: true,
       expandedProject: true,
+      expandedProjectClaude: true,
       // included[id] = false → file is excluded from environment.
       // Default (undefined) is included.
       included: {},
@@ -1049,6 +1100,18 @@
       });
     }
 
+    // Emoji used for filesystem icons. Keyed by the legacy FA icon name so
+    // call sites don't need to be updated when icons change.
+    var FS_EMOJI = {
+      'file-text-o': '📄',
+      'folder-o':    '🗂️',
+      'folder':      '🗂️',
+      'sitemap':     '🗂️',
+      'keyboard-o':  '⌨️',
+      'desktop':     '🖥️',
+      'home':        '🏠'
+    };
+
     function renderTree() {
       treeBody.innerHTML = '';
       var hi = highlightedNodes();
@@ -1082,76 +1145,137 @@
         if (highlighted && !selected) {
           btn.appendChild(el('span', { class: 'ce-layer-dot', style: 'background: rgba(0,0,0,0.35); left: 0;' }));
         }
-        btn.appendChild(fa(iconName));
+        btn.appendChild(el('span', { class: 'ce-fs-emoji' }, FS_EMOJI[iconName] || '📄'));
         btn.appendChild(el('span', { class: 'ce-label' }, label));
+        if (node && node.clientOnly) {
+          var badgeEmoji = node.clientOnly === 'cli' ? '⌨️' : '🖥️';
+          btn.appendChild(el('span', { class: 'ce-fs-emoji ce-client-badge' }, badgeEmoji));
+        }
         row.appendChild(btn);
 
         return row;
       }
 
-      // ~/.claude.json — home-level, before the ~/.claude/ directory
-      treeBody.appendChild(fileRow('claude-json', '~/.claude.json', 'file-text-o', 0));
-
-      // ~/.claude/ root
-      var userRoot = el('button', { class: 'ce-tree-root', type: 'button' }, [
-        el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedUser ? ' open' : '') }),
-        el('span', { class: 'fa fa-home ce-home' }),
-        el('span', { class: 'ce-label' }, '~/.claude/'),
-        el('span', { class: 'ce-scope' }, 'user-level')
+      // /Library/AS org root
+      var orgRoot = el('button', { class: 'ce-tree-root', type: 'button' }, [
+        el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedOrg ? ' open' : '') }),
+        el('span', { class: 'ce-fs-emoji' }, '🏢'),
+        el('span', { class: 'ce-label' }, '/Library/AS/'),
+        el('span', { class: 'ce-scope' }, 'organisation')
       ]);
-      hook(userRoot, function() { state.expandedUser = !state.expandedUser; rerender(); });
-      treeBody.appendChild(userRoot);
+      hook(orgRoot, function() { state.expandedOrg = !state.expandedOrg; rerender(); });
+      treeBody.appendChild(orgRoot);
 
-      if (state.expandedUser) {
-        var userChildren = el('div', { class: 'ce-tree-children' });
-        userChildren.appendChild(fileRow('claude-md-global', 'CLAUDE.md', 'file-text-o', 1));
-        userChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 1));
-        userChildren.appendChild(fileRow('settings-global', 'settings.json', 'file-text-o', 1));
-        if (state.clientFilter !== 'gui') {
-          userChildren.appendChild(fileRow('keybindings', 'keybindings.json', 'keyboard-o', 1));
+      if (state.expandedOrg) {
+        var orgChildren = el('div', { class: 'ce-tree-children',
+          style: 'border-left: none; margin-left: 0; padding-left: 0;' });
+
+        var orgClaudeRoot = el('button', { class: 'ce-tree-root', type: 'button',
+          style: 'padding-left: 22px;' }, [
+          el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedOrgClaude ? ' open' : '') }),
+          el('span', { class: 'ce-fs-emoji' }, '🗂️'),
+          el('span', { class: 'ce-label' }, 'ClaudeCode/')
+        ]);
+        hook(orgClaudeRoot, function() { state.expandedOrgClaude = !state.expandedOrgClaude; rerender(); });
+        orgChildren.appendChild(orgClaudeRoot);
+
+        if (state.expandedOrgClaude) {
+          var orgClaudeChildren = el('div', { class: 'ce-tree-children', style: 'margin-left: 27px;' });
+          orgClaudeChildren.appendChild(fileRow('claude-md-org', 'CLAUDE.md', 'file-text-o', 0));
+          orgChildren.appendChild(orgClaudeChildren);
         }
-        userChildren.appendChild(fileRow('sessions', 'Projects', 'sitemap', 1, true));
-        treeBody.appendChild(userChildren);
+
+        treeBody.appendChild(orgChildren);
       }
 
-      treeBody.appendChild(el('div', { class: 'ce-tree-spacer' }));
-
-      // your-project/
-      var projectRoot = el('button', { class: 'ce-tree-root', type: 'button' }, [
-        el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedProject ? ' open' : '') }),
-        el('span', { class: 'fa fa-folder ce-folder' }),
-        el('span', { class: 'ce-label' }, 'your-project/'),
-        el('span', { class: 'ce-scope' }, 'project-level')
+      // ~/ home root
+      var homeRoot = el('button', { class: 'ce-tree-root', type: 'button' }, [
+        el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedHome ? ' open' : '') }),
+        el('span', { class: 'ce-fs-emoji ce-home' }, '🏠'),
+        el('span', { class: 'ce-label' }, '~/'),
+        el('span', { class: 'ce-scope' }, 'home')
       ]);
-      hook(projectRoot, function() { state.expandedProject = !state.expandedProject; rerender(); });
-      treeBody.appendChild(projectRoot);
+      hook(homeRoot, function() { state.expandedHome = !state.expandedHome; rerender(); });
+      treeBody.appendChild(homeRoot);
 
-      if (state.expandedProject) {
-        var projectChildren = el('div', { class: 'ce-tree-children' });
-        projectChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 1));
-        projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 1));
-        // `.mcp.json` and `.worktreeinclude` live at the project root,
-        // not inside `.claude/`. Indent 1 keeps that hierarchy honest.
-        projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'file-text-o', 1));
-        projectChildren.appendChild(fileRow('worktreeinclude', '.worktreeinclude', 'file-text-o', 1));
-        // `.claude/` is non-selectable but should mirror other folder rows.
-        // Use the same `.ce-tree-row` + `.ce-tree-node.dir` structure with a
-        // checkbox spacer so the icon aligns with peer files at indent 1.
-        var claudeRow = el('div', { class: 'ce-tree-row', style: 'padding-left: 14px;' });
-        claudeRow.appendChild(el('span', { class: 'ce-tree-check-spacer' }));
-        var claudeNode = el('div', { class: 'ce-tree-node dir non-interactive' });
-        claudeNode.appendChild(fa('folder-o'));
-        claudeNode.appendChild(el('span', { class: 'ce-label' }, '.claude/'));
-        claudeRow.appendChild(claudeNode);
-        projectChildren.appendChild(claudeRow);
-        projectChildren.appendChild(fileRow('settings-project', 'settings.json', 'file-text-o', 2));
-        projectChildren.appendChild(fileRow('settings-local', 'settings.local.json', 'file-text-o', 2));
-        projectChildren.appendChild(fileRow('rules', 'rules/', 'folder-o', 2, true));
-        projectChildren.appendChild(fileRow('commands', 'commands/', 'folder-o', 2, true));
-        projectChildren.appendChild(fileRow('skills', 'skills/', 'folder-o', 2, true));
-        projectChildren.appendChild(fileRow('agents', 'agents/', 'folder-o', 2, true));
-        projectChildren.appendChild(fileRow('hooks', 'hooks/', 'folder-o', 2, true));
-        treeBody.appendChild(projectChildren);
+      if (state.expandedHome) {
+        // No border-left/margin on the outer container — the home root has no
+        // vertical connecting line; items carry their own indent via padding.
+        var homeChildren = el('div', { class: 'ce-tree-children',
+          style: 'border-left: none; margin-left: 0; padding-left: 0;' });
+        homeChildren.appendChild(fileRow('claude-json', '.claude.json', 'file-text-o', 1));
+
+        // ~/.claude/ subdirectory (collapsible)
+        var userRoot = el('button', { class: 'ce-tree-root', type: 'button',
+          style: 'padding-left: ' + (8 + 14) + 'px;' }, [
+          el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedUser ? ' open' : '') }),
+          el('span', { class: 'ce-fs-emoji' }, '🗂️'),
+          el('span', { class: 'ce-label' }, '.claude/'),
+          el('span', { class: 'ce-scope' }, 'User')
+        ]);
+        hook(userRoot, function() { state.expandedUser = !state.expandedUser; rerender(); });
+        homeChildren.appendChild(userRoot);
+
+        if (state.expandedUser) {
+          // margin-left aligns border-left under the chevron centre (22px indent + 5px half-width).
+          var userChildren = el('div', { class: 'ce-tree-children', style: 'margin-left: 27px;' });
+          userChildren.appendChild(fileRow('claude-md-global', 'CLAUDE.md', 'file-text-o', 2));
+          userChildren.appendChild(fileRow('settings-global', 'settings.json', 'file-text-o', 2));
+          if (state.clientFilter !== 'gui') {
+            userChildren.appendChild(fileRow('keybindings', 'keybindings.json', 'keyboard-o', 2));
+          }
+          userChildren.appendChild(fileRow('sessions', 'Projects', 'sitemap', 2, true));
+          homeChildren.appendChild(userChildren);
+        }
+
+        // your-project/ — same indent level as .claude/
+        var projectRoot = el('button', { class: 'ce-tree-root', type: 'button',
+          style: 'padding-left: ' + (8 + 14) + 'px;' }, [
+          el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedProject ? ' open' : '') }),
+          el('span', { class: 'ce-fs-emoji ce-folder' }, '🗂️'),
+          el('span', { class: 'ce-label' }, 'your-project/'),
+          el('span', { class: 'ce-scope' }, 'Project')
+        ]);
+        hook(projectRoot, function() { state.expandedProject = !state.expandedProject; rerender(); });
+        homeChildren.appendChild(projectRoot);
+
+        if (state.expandedProject) {
+          // margin-left aligns border-left under the chevron centre (22px indent + 5px half-width).
+          var projectChildren = el('div', { class: 'ce-tree-children', style: 'margin-left: 27px;' });
+          projectChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 2));
+          projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 2));
+          projectChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 2));
+          // `.mcp.json` and `.worktreeinclude` live at the project root,
+          // not inside `.claude/`. Indent 2 keeps that hierarchy honest.
+          projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'file-text-o', 2));
+          projectChildren.appendChild(fileRow('worktreeinclude', '.worktreeinclude', 'file-text-o', 2));
+          // .claude/ subdirectory — collapsible, with chevron and connecting line.
+          var projectClaudeRoot = el('button', { class: 'ce-tree-root', type: 'button',
+            style: 'padding-left: 28px;' }, [
+            el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedProjectClaude ? ' open' : '') }),
+            el('span', { class: 'ce-fs-emoji' }, '🗂️'),
+            el('span', { class: 'ce-label' }, '.claude/')
+          ]);
+          hook(projectClaudeRoot, function() { state.expandedProjectClaude = !state.expandedProjectClaude; rerender(); });
+          projectChildren.appendChild(projectClaudeRoot);
+
+          if (state.expandedProjectClaude) {
+            // margin-left aligns border-left under the chevron centre (28px indent + 5px half-width).
+            var claudeChildren = el('div', { class: 'ce-tree-children', style: 'margin-left: 33px;' });
+            claudeChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 0));
+            claudeChildren.appendChild(fileRow('settings-project', 'settings.json', 'file-text-o', 0));
+            claudeChildren.appendChild(fileRow('settings-local', 'settings.local.json', 'file-text-o', 0));
+            claudeChildren.appendChild(fileRow('rules', 'rules/', 'folder-o', 0, true));
+            claudeChildren.appendChild(fileRow('commands', 'commands/', 'folder-o', 0, true));
+            claudeChildren.appendChild(fileRow('skills', 'skills/', 'folder-o', 0, true));
+            claudeChildren.appendChild(fileRow('agents', 'agents/', 'folder-o', 0, true));
+            claudeChildren.appendChild(fileRow('hooks', 'hooks/', 'folder-o', 0, true));
+            projectChildren.appendChild(claudeChildren);
+          }
+          homeChildren.appendChild(projectChildren);
+        }
+
+        treeBody.appendChild(homeChildren);
       }
 
       // Bulk-select footer: sits below all rows.
@@ -1178,13 +1302,13 @@
       bulkRow.appendChild(bulkLabel);
       var clientSeg = el('div', { class: 'ce-section-toggle', style: 'margin-left: auto; flex-shrink: 0;' });
       var segOpts = [
-        { label: 'All',  key: 'all',  icon: null },
-        { label: 'CLI',  key: 'cli',  icon: 'keyboard-o' },
-        { label: 'GUI',  key: 'gui',  icon: 'desktop' }
+        { label: 'All', key: 'all',  emoji: null },
+        { label: 'CLI', key: 'cli',  emoji: '⌨️' },
+        { label: 'GUI', key: 'gui',  emoji: '🖥️' }
       ];
       segOpts.forEach(function(opt) {
         var btn = el('button', { type: 'button', class: state.clientFilter === opt.key ? 'on' : '' });
-        if (opt.icon) btn.appendChild(fa(opt.icon));
+        if (opt.emoji) btn.appendChild(el('span', { class: 'ce-fs-emoji' }, opt.emoji));
         btn.appendChild(document.createTextNode(opt.label));
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -1594,11 +1718,22 @@
         var layer = LAYERS[state.selectedLayer];
 
         if (state.selectedLayer === 'memory') {
-          // Tips first (no heading)
+          // Intent tips
+          body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Intent'));
           var tips = el('ul', { class: 'ce-instr-tips' });
-          ['Adherence to instruction ∝ specific/concise nature of instruction'
+          ['Knowledge shared across sessions',
+           'Treated as a guideline,',
+           'Adherence to instruction is proportional to the specific/concise nature of instruction'
           ].forEach(function(tip) { tips.appendChild(el('li', null, tip)); });
           body.appendChild(tips);
+
+          body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Suggestion'));
+          var suggList = el('ul', { class: 'ce-instr-tips' });
+          ['<200 lines',
+           'Organised sections over dense paragraphs',
+           'Dot points'
+          ].forEach(function(s) { suggList.appendChild(el('li', null, s)); });
+          body.appendChild(suggList);
 
           // "Instructions can be viewed as" styled like a description paragraph
           var intro = el('p', { class: 'ce-inspector-desc' }, 'Instructions can be viewed as');
@@ -1616,11 +1751,12 @@
           var tbody = el('tbody');
           [
             { icon: '🧬', file: 'CLAUDE.md', concept: 'Mechanism to guide behaviour', by: 'User 👨🏾‍💻' },
-            { icon: '🧠', file: 'MEMORY.md', concept: 'Accumulated knowledge through experience', by: '🤖' }
+            { icon: '🧠', file: 'MEMORY.md', concept: 'Accumulated knowledge through experience', by: '🤖' },
+            { icon: '🗂️', file: 'rules/', concept: '', by: '' }
           ].forEach(function(row) {
             tbody.appendChild(el('tr', null, [
               el('td', null, row.icon),
-              el('td', null, row.file),
+              el('td', null, [el('code', { class: 'ce-code' }, row.file)]),
               el('td', null, row.concept),
               el('td', null, row.by)
             ]));
@@ -1689,6 +1825,15 @@
       }
       if (node.flow) {
         body.appendChild(el('div', { class: 'ce-inspector-pill flow' }, node.flow));
+      }
+
+      // /init command (project CLAUDE.md only)
+      if (state.selectedNode === 'claude-md-project') {
+        body.appendChild(el('div', { class: 'ce-inspector-section-label' }, '/init'));
+        var initList = el('ul', { class: 'ce-instr-tips' });
+        initList.appendChild(el('li', null, 'Generate starting instruction file if it doesn\'t exist'));
+        initList.appendChild(el('li', null, 'Or refine existing file'));
+        body.appendChild(initList);
       }
 
       // Section editor (only for CLAUDE.md project)
