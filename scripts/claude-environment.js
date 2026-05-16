@@ -26,21 +26,26 @@
       sublabel: 'Loaded at the start of every session',
       color: '#0891b2',
       description: 'Markdown files concatenated into the system prompt at session start and carried through every turn that follows, without being re-injected per prompt. Claude reads them as **instructions** whose intent is to steer behaviour, codify conventions, and document the commands available in the project.',
-      aggregation: 'All present `CLAUDE.md` files are **concatenated** into context at session start. Files are read from the filesystem root down to your working directory, with `CLAUDE.local.md` appended after `CLAUDE.md` at each level. There is no key-by-key override, when two files give conflicting guidance the docs note Claude may resolve it arbitrarily. Read order tends to nudge the model toward instructions seen last, but it is not enforced.',
+      aggregation: '**Hierarchy walk**: starting at the filesystem root, Claude walks down to the current working directory. At every level it picks up `CLAUDE.md`, then appends `CLAUDE.local.md` right after. Project-level files load **last**, so their guidance is freshest in context.\nRead order:\n* `/Library/AS/ClaudeCode/CLAUDE.md` (organisation)\n* `~/.claude/CLAUDE.md` (user)\n* `<parent>/CLAUDE.md` + `<parent>/CLAUDE.local.md`, for each parent dir walked\n* `./CLAUDE.md` + `./CLAUDE.local.md` (project, loaded last)\n* `.claude/rules/` alongside (always-on or path-scoped via frontmatter)\n* `MEMORY.md` (auto-memory, loaded early in the system prompt)\nConflicting instructions across these levels result in **non-deterministic behaviour**: Claude may resolve the conflict arbitrarily.',
       precedenceFiles: ['claude-local', 'claude-md-project', 'claude-md-global'],
       interactionExample:
-        '# How three CLAUDE.md files load\n' +
+        '# Hierarchy walk: cwd = /Users/me/work/acme/api\n' +
         '\n' +
-        'Read order (filesystem root → working dir, .local appended):\n' +
+        'Claude walks from root down, picking up CLAUDE.md then\n' +
+        'CLAUDE.local.md at each directory level:\n' +
         '\n' +
-        '1. ~/.claude/CLAUDE.md   "Use TypeScript strict mode"\n' +
-        '2. ./CLAUDE.md           "Use npm for installs"\n' +
-        '3. ./CLAUDE.local.md     "Use pnpm instead of npm"\n' +
+        '1. ~/.claude/CLAUDE.md          "Use TypeScript strict mode"\n' +
+        '2. /Users/me/CLAUDE.md          (none)\n' +
+        '3. /Users/me/work/CLAUDE.md     "Prefer pnpm over npm"\n' +
+        '4. /Users/me/work/acme/CLAUDE.md   "Use yarn berry"\n' +
+        '5. ./CLAUDE.md                  "Use npm for installs"\n' +
+        '6. ./CLAUDE.local.md            "Use pnpm in this checkout"\n' +
         '\n' +
-        '→ All three sit in context. Where (2) and (3) conflict the\n' +
-        '  docs note Claude "may pick one arbitrarily". Putting personal\n' +
-        '  overrides in CLAUDE.local.md gets them read last, which tends\n' +
-        '  to nudge the model, but is not guaranteed.',
+        '→ All present files are concatenated. Project-level (5, 6)\n' +
+        '  loads last, so its guidance is freshest. Across (3), (4),\n' +
+        '  (5), (6) the package-manager instruction conflicts; the\n' +
+        '  docs note Claude "may pick one arbitrarily" - read order\n' +
+        '  tends to nudge but is not enforced.',
       nodes: ['claude-local', 'claude-md-project', 'claude-md-global', 'claude-md-org', 'rules', 'auto-memory']
     },
     config: {
@@ -143,7 +148,7 @@
       layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
       title: 'CLAUDE.md',
       description: 'Team-level\n* Workflows\n* Architecture',
-      example: '# Acme API\n\n## Commands\nnpm run dev\nnpm run test\n\n## Conventions\n- Validate with zod\n- Return { data, error, meta }\n- Never expose stack traces',
+      example: '# Acme API\n\n@AGENT.md\n@~/private-instructions.md\n\n## Commands\nnpm run dev\nnpm run test\n\n## Conventions\n- Validate with zod\n- Return { data, error, meta }\n- Never expose stack traces',
       tokenNote: 'Sum of section tokens below. Sections can be moved to skills to defer loading.',
       sections: [
         { id: 'overview',        label: 'Project header and overview',     tokens:  90, fixed: true,
@@ -195,11 +200,28 @@
       tokens: 300,
       tokenNote: 'Loaded for sessions in any project under your home directory.'
     },
+    'import-relative': {
+      layer: 'memory', label: 'AGENT.md', icon: 'file-text-o',
+      title: './AGENT.md',
+      description: 'Project-root instruction file imported by `./CLAUDE.md` via `@AGENT.md`. `AGENT.md` is the cross-tool convention used by Cursor, Codex, and others; importing it from `CLAUDE.md` keeps a single shared spec across AI clients.',
+      example: '# Agent instructions\n\n## Service boundaries\n- Web → API → DB; no cross-tier calls\n- Background jobs read replicas only',
+      tokens: 220,
+      tokenNote: 'Counts against the parent CLAUDE.md token budget.'
+    },
+    'import-home': {
+      layer: 'memory', label: 'private-instructions.md', icon: 'file-text-o',
+      title: '~/private-instructions.md',
+      description: 'Absolute-path file imported by `./CLAUDE.md` via `@~/private-instructions.md`. Lives outside the repo (gitignored by virtue of location); useful for personal tone or proprietary context shared across projects.',
+      example: '## Tone\n- Keep responses terse\n- No emoji unless asked',
+      tokens: 120,
+      tokenNote: 'Loaded only for projects that explicitly import it.'
+    },
     'claude-md-org': {
       layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
       title: '/Library/AS/ClaudeCode/CLAUDE.md',
       description: '* Security policy\n* Compliance requirements',
-      priority: 'Loaded first — lowest precedence, superseded by user and project files',
+      example: '## Security policy\n- Never paste credentials into prompts\n- Tag PRs touching auth with #sec-review\n\n## Compliance\n- All data retention < 30 days\n- Log access to PII tables',
+      priority: 'Loaded first, lowest precedence; superseded by user and project files',
       tokens: 400,
       tokenNote: 'Loaded for every session on this machine.'
     },
@@ -1193,7 +1215,7 @@
         el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedHome ? ' open' : '') }),
         el('span', { class: 'ce-fs-emoji ce-home' }, '🏠'),
         el('span', { class: 'ce-label' }, '~/'),
-        el('span', { class: 'ce-scope' }, 'home')
+        el('span', { class: 'ce-scope' }, 'user')
       ]);
       hook(homeRoot, function() { state.expandedHome = !state.expandedHome; rerender(); });
       treeBody.appendChild(homeRoot);
@@ -1204,6 +1226,7 @@
         var homeChildren = el('div', { class: 'ce-tree-children',
           style: 'border-left: none; margin-left: 0; padding-left: 0;' });
         homeChildren.appendChild(fileRow('claude-json', '.claude.json', 'file-text-o', 1));
+        homeChildren.appendChild(fileRow('import-home', 'private-instructions.md', 'file-text-o', 1));
 
         // ~/.claude/ subdirectory (collapsible)
         var userRoot = el('button', { class: 'ce-tree-root', type: 'button',
@@ -1211,7 +1234,6 @@
           el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedUser ? ' open' : '') }),
           el('span', { class: 'ce-fs-emoji' }, '🗂️'),
           el('span', { class: 'ce-label' }, '.claude/'),
-          el('span', { class: 'ce-scope' }, 'User')
         ]);
         hook(userRoot, function() { state.expandedUser = !state.expandedUser; rerender(); });
         homeChildren.appendChild(userRoot);
@@ -1243,6 +1265,7 @@
           // margin-left aligns border-left under the chevron centre (22px indent + 5px half-width).
           var projectChildren = el('div', { class: 'ce-tree-children', style: 'margin-left: 27px;' });
           projectChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 2));
+          projectChildren.appendChild(fileRow('import-relative', 'AGENT.md', 'file-text-o', 2));
           projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 2));
           projectChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 2));
           // `.mcp.json` and `.worktreeinclude` live at the project root,
@@ -1523,6 +1546,7 @@
 
     // Files contributing to the merged instruction stream, in read order.
     var INSTRUCTION_REFS = [
+      { id: 'claude-md-org',     label: '/Library/AS/ClaudeCode/CLAUDE.md' },
       { id: 'claude-md-global',  label: '~/.claude/CLAUDE.md' },
       { id: 'claude-md-project', label: './CLAUDE.md' },
       { id: 'claude-local',      label: './CLAUDE.local.md' },
@@ -1621,21 +1645,77 @@
       var body = el('div', { class: 'ce-context-body ce-panel-body-scroll' });
       contextPanel.appendChild(body);
 
-      // 1. Aggregated text -- what enters the system prompt as instructions.
+      // 1. System prompt at session start. Built from several components in
+      // a fixed order, per https://code.claude.com/docs/en/context-window.
+      // Token counts are approximate, taken from the docs.
       var instr = makeSection(
-        'Instructions in context',
-        'Concatenated in this read order. Loaded into the system prompt at session start; the docs note Claude `may pick one arbitrarily` when files conflict.'
+        'System prompt at session start',
+        'Built once, before your first turn, from the components below in this order. Token counts are approximate and sourced from the Claude Code docs (`/context-window`).'
       );
+
+      function staticBlock(label, snippet) {
+        instr.appendChild(el('div', { class: 'ce-context-file-label' }, label));
+        instr.appendChild(el('pre', { class: 'ce-context-snippet' }, snippet));
+      }
+
+      // 1. Anthropic core system prompt. Always loaded, invisible.
+      staticBlock(
+        '1. Core system prompt  ·  ≈4,200 tokens  ·  invisible',
+        '# Anthropic-managed (not shown)\n#\n# Behaviour, tool-use protocol, response formatting,\n# safety rules. Loaded first on every session and\n# never visible in your terminal.'
+      );
+
+      // 2. Auto-memory (MEMORY.md). First 200 lines or 25 KB, whichever first.
+      if (isIncluded('auto-memory') && NODES['auto-memory'] && NODES['auto-memory'].example) {
+        staticBlock(
+          '2. Auto memory  ·  ~/.claude/projects/<project>/memory/MEMORY.md  ·  first 200 lines / 25 KB',
+          NODES['auto-memory'].example
+        );
+      } else {
+        staticBlock(
+          '2. Auto memory  ·  excluded',
+          '# MEMORY.md not loaded. Claude has no carry-over\n# notes from previous sessions in this project.'
+        );
+      }
+
+      // 3. Environment info. Working dir, platform, shell, OS, git status.
+      staticBlock(
+        '3. Environment info  ·  ≈280 tokens',
+        '<env>\n  cwd: /Users/you/your-project\n  platform: darwin (macOS 14.5)\n  shell: /bin/zsh\n  git: branch=main, clean, ahead 0\n</env>'
+      );
+
+      // 4. MCP tool listing. Names only by default; schemas load on demand.
+      if (isIncluded('mcp')) {
+        staticBlock(
+          '4. MCP tool listing  ·  ≈120 tokens  ·  schemas deferred',
+          '# Tool names from .mcp.json servers, e.g.\n#   mcp__github__search_issues\n#   mcp__linear__list_tickets\n#\n# Full schemas load on demand via tool search.\n# Set ENABLE_TOOL_SEARCH=false to load all upfront.'
+        );
+      }
+
+      // 5. Skill descriptions. ~30 tokens per skill; bodies load on use.
+      if (isIncluded('skills')) {
+        staticBlock(
+          '5. Skill descriptions  ·  ≈30 tokens per skill  ·  bodies load on use',
+          '# One-liner per skill (frontmatter `description`), e.g.\n#   /ship    Commit, fast-forward main, push.\n#   /review  Review the pending diff.\n#\n# Bodies load when Claude invokes the skill.\n# Skills with disable-model-invocation: true are\n# absent from this list until you call them.'
+        );
+      }
+
+      // 6+. Instructions files (CLAUDE.md chain + rules). Read in precedence
+      // order: org → global → project → local; rules load alongside.
+      var idx = 6;
       var anyInstr = false;
       INSTRUCTION_REFS.forEach(function(ref) {
+        if (ref.id === 'auto-memory') return; // already shown above as step 2
         if (!isIncluded(ref.id)) return;
         var n = NODES[ref.id];
         if (!n || !n.example) return;
         anyInstr = true;
-        instr.appendChild(el('div', { class: 'ce-context-file-label' }, ref.label));
+        instr.appendChild(el('div', { class: 'ce-context-file-label' }, idx + '. ' + ref.label));
         instr.appendChild(el('pre', { class: 'ce-context-snippet' }, n.example));
+        idx++;
       });
-      if (!anyInstr) instr.appendChild(emptyLine('No instruction files included. Claude starts with the built-in system prompt only.'));
+      if (!anyInstr) {
+        instr.appendChild(emptyLine('No CLAUDE.md/rules files included. Only Anthropic\'s core system prompt, env info, and any MCP/skill listings load.'));
+      }
       body.appendChild(instr);
 
       // 2. Settings -- merged config across included scopes.
@@ -1731,7 +1811,8 @@
           var suggList = el('ul', { class: 'ce-instr-tips' });
           ['<200 lines',
            'Organised sections over dense paragraphs',
-           'Dot points'
+           'Dot points',
+           'Use concrete instructions such as "execute swift test" rather than "Test code"'
           ].forEach(function(s) { suggList.appendChild(el('li', null, s)); });
           body.appendChild(suggList);
 
@@ -1810,11 +1891,6 @@
       hook(layerLink, function() { selectLayer(node.layer); });
       crumb.appendChild(layerLink);
       body.appendChild(crumb);
-
-      body.appendChild(el('div', { class: 'ce-title-row' }, [
-        fa(node.icon),
-        el('h3', null, node.title)
-      ]));
 
       var desc2 = el('p', { class: 'ce-inspector-desc' });
       desc2.appendChild(renderDescription(node.description));
