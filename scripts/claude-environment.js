@@ -148,7 +148,7 @@
       layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
       title: 'CLAUDE.md',
       description: 'Team-level\n* Workflows\n* Architecture',
-      example: '# Acme API\n\n@AGENT.md\n@~/private-instructions.md\n\n## Commands\nnpm run dev\nnpm run test\n\n## Conventions\n- Validate with zod\n- Return { data, error, meta }\n- Never expose stack traces',
+      example: '# Acme API\n\n<!-- maintainer notes: bump @AGENT.md whenever Service boundaries change -->\n\n@AGENT.md\n@~/private-instructions.md\n\n## Commands\nnpm run dev\nnpm run test\n\n## Conventions\n- Validate with zod\n- Return { data, error, meta }\n- Never expose stack traces',
       tokenNote: 'Sum of section tokens below. Sections can be moved to skills to defer loading.',
       sections: [
         { id: 'overview',        label: 'Project header and overview',     tokens:  90, fixed: true,
@@ -199,6 +199,14 @@
       priority: 'Lower priority than ~/.claude/CLAUDE.md; superseded by project-level files',
       tokens: 300,
       tokenNote: 'Loaded for sessions in any project under your home directory.'
+    },
+    'vendor-claude-md': {
+      layer: 'memory', label: 'CLAUDE.md', icon: 'file-text-o',
+      title: './vendor/CLAUDE.md',
+      description: 'Third-party `CLAUDE.md` shipped with a vendored dependency. Often verbose or stale, and the canonical example of a file you want to exclude via `claudeMdExcludes` in `settings.json`.',
+      example: '# vendor-sdk v0.4 (stale)\n- Use callbacks for async\n- Manual error checking; no zod\n- Tests via mocha, not vitest',
+      tokens: 380,
+      tokenNote: 'Loaded by default during the hierarchy walk; skipped when `claudeMdExcludes` matches its path.'
     },
     'import-relative': {
       layer: 'memory', label: 'AGENT.md', icon: 'file-text-o',
@@ -283,8 +291,8 @@
     'settings-project': {
       layer: 'config', label: 'settings.json', icon: 'cog',
       title: 'settings.json (project)',
-      description: 'Team-shared configuration. Permissions, model selection, tool allowlists, attribution settings.',
-      example: '{\n  "permissions": {\n    "allow": ["Bash(npm test:*)", "Read(**)"],\n    "deny": ["Bash(rm:*)"]\n  },\n  "model": "claude-opus-4-7"\n}',
+      description: 'Team-shared configuration. Permissions, model selection, tool allowlists, attribution settings. The `claudeMdExcludes` array lets a team skip specific `CLAUDE.md` files (typically vendored or generated) during the hierarchy walk; managed-policy files cannot be excluded.',
+      example: '{\n  "permissions": {\n    "allow": ["Bash(npm test:*)", "Read(**)"],\n    "deny": ["Bash(rm:*)"]\n  },\n  "claudeMdExcludes": ["**/vendor/**/CLAUDE.md"],\n  "model": "claude-opus-4-7"\n}',
       priority: 'Team-level config',
       tokens: 0,
       tokenNote: 'Settings govern runtime behaviour. They never enter the model context.'
@@ -725,6 +733,9 @@
       '.claudeenv .ce-context-file-label:first-child { margin-top: 0; }',
       '.claudeenv .ce-context-snippet { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
       '.claudeenv .ce-context-empty { font-family: var(--font-text); font-size: var(--size-smd); font-style: italic; color: var(--ink-faint); margin: 0; padding: 6px 0; }',
+      '.claudeenv .ce-context-excluded-label { color: var(--coral); }',
+      '.claudeenv .ce-context-snippet.ce-context-excluded { color: var(--ink-faint); border-style: dashed; }',
+      '.claudeenv .ce-snippet-comment { color: var(--coral); }',
       '.claudeenv .ce-context-tag { font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); }',
 
       /* Portability note -- viz.callout recipe (coral wash + rule). */
@@ -748,7 +759,7 @@
       '.claudeenv .ce-desc-list { margin: 4px 0 8px 0; padding-left: 18px; color: var(--ink-secondary); font-size: var(--size-md); line-height: var(--lh-normal); }',
       '.claudeenv .ce-desc-list li { margin-bottom: 2px; }',
       '.claudeenv .ce-bold { font-weight: 600; }',
-      '.claudeenv .ce-code { font-family: var(--font-mono); font-size: 0.82em; background: var(--paper-inset); color: var(--sx-keyword); border: 1px solid var(--line); padding: 1px 6px; border-radius: 999px; }',
+      '.claudeenv .ce-code { color: var(--ink-primary); background: var(--paper-inset); border: none; border-radius: 5px; font-family: var(--font-mono); font-size: 0.92em; padding: 1px 5px; }',
 
       /* Instruction-layer table (🧬 / 🧠 breakdown) */
       '.claudeenv .ce-instr-table { width: 100%; border-collapse: separate; border-spacing: 0; font-family: var(--font-text); font-size: var(--size-smd); margin-bottom: 14px; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; }',
@@ -1272,6 +1283,7 @@
           // not inside `.claude/`. Indent 2 keeps that hierarchy honest.
           projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'file-text-o', 2));
           projectChildren.appendChild(fileRow('worktreeinclude', '.worktreeinclude', 'file-text-o', 2));
+          projectChildren.appendChild(fileRow('vendor-claude-md', 'vendor/CLAUDE.md', 'file-text-o', 2));
           // .claude/ subdirectory — collapsible, with chevron and connecting line.
           var projectClaudeRoot = el('button', { class: 'ce-tree-root', type: 'button',
             style: 'padding-left: 28px;' }, [
@@ -1548,7 +1560,8 @@
     var INSTRUCTION_REFS = [
       { id: 'claude-md-org',     label: '/Library/AS/ClaudeCode/CLAUDE.md' },
       { id: 'claude-md-global',  label: '~/.claude/CLAUDE.md' },
-      { id: 'claude-md-project', label: './CLAUDE.md' },
+      { id: 'claude-md-project', label: './CLAUDE.md', path: '/Users/me/work/acme/api/CLAUDE.md' },
+      { id: 'vendor-claude-md',  label: './vendor/CLAUDE.md', path: '/Users/me/work/acme/api/vendor/CLAUDE.md' },
       { id: 'claude-local',      label: './CLAUDE.local.md' },
       { id: 'rules',             label: '.claude/rules/' },
       { id: 'auto-memory',       label: '~/.claude/projects/<project>/memory/MEMORY.md' }
@@ -1645,17 +1658,66 @@
       var body = el('div', { class: 'ce-context-body ce-panel-body-scroll' });
       contextPanel.appendChild(body);
 
+      // Compute merged settings up front so the instructions loop below
+      // can honour `claudeMdExcludes`. mergeSettings is a no-op when no
+      // settings files are included, returning an empty object.
+      var ctxIncludedSettings = SETTINGS_REFS.filter(function(r) { return isIncluded(r.id); });
+      var ctxMergedSettings = ctxIncludedSettings.length ? mergeSettings(ctxIncludedSettings) : {};
+      var claudeMdExcludes = Array.isArray(ctxMergedSettings.claudeMdExcludes) ? ctxMergedSettings.claudeMdExcludes : [];
+
+      // Convert a glob like "**/vendor/**/CLAUDE.md" to a RegExp. Supports
+      // `**` (any sequence including slashes) and `*` (anything but slash).
+      function globToRegex(g) {
+        // Use NULL-byte sentinels so the `**` replacements aren't
+        // re-mangled by the subsequent `*` → `[^/]*` step.
+        var re = g.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+                  .replace(/\*\*\//g, ' A')
+                  .replace(/\/\*\*/g, ' B')
+                  .replace(/\*\*/g, ' C')
+                  .replace(/\*/g, '[^/]*')
+                  .replace(/ A/g, '(?:.*/)?')
+                  .replace(/ B/g, '(?:/.*)?')
+                  .replace(/ C/g, '.*');
+        return new RegExp('^' + re + '$');
+      }
+      var excludeRes = claudeMdExcludes.map(globToRegex);
+      function isExcludedByClaudeMd(path) {
+        if (!path) return false;
+        for (var i = 0; i < excludeRes.length; i++) {
+          if (excludeRes[i].test(path)) return true;
+        }
+        return false;
+      }
+
       // 1. System prompt at session start. Built from several components in
       // a fixed order, per https://code.claude.com/docs/en/context-window.
       // Token counts are approximate, taken from the docs.
       var instr = makeSection(
         'System prompt at session start',
-        'Built once, before your first turn, from the components below in this order. Token counts are approximate and sourced from the Claude Code docs (`/context-window`).'
+        'Built once, before your first turn, from the components below in this order. Token counts are approximate and sourced from the Claude Code docs (`/context-window`). Block-level HTML comments (`<!-- ... -->`) inside an instruction file are coloured **coral**: they are maintainer notes for human readers and do not contribute to Claude\'s context.'
       );
 
       function staticBlock(label, snippet) {
         instr.appendChild(el('div', { class: 'ce-context-file-label' }, label));
         instr.appendChild(el('pre', { class: 'ce-context-snippet' }, snippet));
+      }
+
+      // Render a snippet pre that highlights block-level HTML comments
+      // (<!-- ... -->) in coral. The comment text remains in the file but
+      // the colour signals to readers that it is maintainer-only and does
+      // not contribute to context.
+      function instructionSnippet(text) {
+        var pre = el('pre', { class: 'ce-context-snippet' });
+        var parts = text.split(/(<!--[\s\S]*?-->)/);
+        parts.forEach(function(p) {
+          if (!p) return;
+          if (p.indexOf('<!--') === 0 && p.lastIndexOf('-->') === p.length - 3) {
+            pre.appendChild(el('span', { class: 'ce-snippet-comment' }, p));
+          } else {
+            pre.appendChild(document.createTextNode(p));
+          }
+        });
+        return pre;
       }
 
       // 1. Anthropic core system prompt. Always loaded, invisible.
@@ -1701,6 +1763,9 @@
 
       // 6+. Instructions files (CLAUDE.md chain + rules). Read in precedence
       // order: org → global → project → local; rules load alongside.
+      // Files whose path matches `claudeMdExcludes` are skipped during the
+      // hierarchy walk and surfaced as an "excluded" stub so the consequence
+      // of the setting is visible.
       var idx = 6;
       var anyInstr = false;
       INSTRUCTION_REFS.forEach(function(ref) {
@@ -1708,9 +1773,20 @@
         if (!isIncluded(ref.id)) return;
         var n = NODES[ref.id];
         if (!n || !n.example) return;
+        if (isExcludedByClaudeMd(ref.path)) {
+          instr.appendChild(el('div', { class: 'ce-context-file-label ce-context-excluded-label' },
+            idx + '. ' + ref.label + '  ·  skipped by claudeMdExcludes'));
+          instr.appendChild(el('pre', { class: 'ce-context-snippet ce-context-excluded' },
+            '# Skipped during the hierarchy walk.\n# Match: ' +
+            claudeMdExcludes.filter(function(g) { return globToRegex(g).test(ref.path); }).join(', ') +
+            '\n# Source: settings.json → claudeMdExcludes'));
+          idx++;
+          anyInstr = true;
+          return;
+        }
         anyInstr = true;
         instr.appendChild(el('div', { class: 'ce-context-file-label' }, idx + '. ' + ref.label));
-        instr.appendChild(el('pre', { class: 'ce-context-snippet' }, n.example));
+        instr.appendChild(instructionSnippet(n.example));
         idx++;
       });
       if (!anyInstr) {
@@ -1723,19 +1799,15 @@
         'Settings (runtime, not in context)',
         'Arrays like `permissions.allow`/`deny` concatenate and dedupe across scopes; scalars take the highest-precedence value. Governs what Claude can do; never enters the system prompt.'
       );
-      var includedSettings = SETTINGS_REFS.filter(function(r) { return isIncluded(r.id); });
-      if (includedSettings.length === 0) {
+      if (ctxIncludedSettings.length === 0) {
         settings.appendChild(emptyLine('No settings files included. Claude Code falls back to its built-in defaults.'));
+      } else if (Object.keys(ctxMergedSettings).length === 0) {
+        settings.appendChild(emptyLine('Included settings files contain no overrides.'));
       } else {
-        var merged = mergeSettings(includedSettings);
-        if (Object.keys(merged).length === 0) {
-          settings.appendChild(emptyLine('Included settings files contain no overrides.'));
-        } else {
-          settings.appendChild(el('div', { class: 'ce-context-file-label' },
-            'merged from ' + includedSettings.map(function(r) { return r.label; }).join(' + ')));
-          settings.appendChild(el('pre', { class: 'ce-context-snippet' },
-            JSON.stringify(merged, null, 2)));
-        }
+        settings.appendChild(el('div', { class: 'ce-context-file-label' },
+          'merged from ' + ctxIncludedSettings.map(function(r) { return r.label; }).join(' + ')));
+        settings.appendChild(el('pre', { class: 'ce-context-snippet' },
+          JSON.stringify(ctxMergedSettings, null, 2)));
       }
       body.appendChild(settings);
 
@@ -1867,7 +1939,7 @@
         // Aggregation behaviour
         if (layer.aggregation) {
           body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'How files in this layer combine'));
-          var agg = el('div', { class: 'ce-inspector-pill aggregation' });
+          var agg = el('p', { class: 'ce-inspector-desc' });
           agg.appendChild(renderDescription(layer.aggregation));
           body.appendChild(agg);
         }
@@ -1897,7 +1969,9 @@
       body.appendChild(desc2);
 
       if (node.priority) {
-        body.appendChild(el('div', { class: 'ce-inspector-pill' }, node.priority));
+        var pri = el('p', { class: 'ce-inspector-desc' });
+        pri.appendChild(renderDescription(node.priority));
+        body.appendChild(pri);
       }
       if (node.flow) {
         body.appendChild(el('div', { class: 'ce-inspector-pill flow' }, node.flow));
