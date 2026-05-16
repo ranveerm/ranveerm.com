@@ -27,7 +27,8 @@
     // Surfaces
     --paper:          #FAF9F7;   // page canvas, warm cream
     --paper-raised:   #FFFFFF;   // cards, viz frames
-    --paper-inset:    #F3F1EC;   // tags, code chips, quiet fills
+    --paper-inset:    #F3F1EC;   // tags, code chips, panel bars
+    --paper-sunk:     #ECEAE4;   // code blocks, visual canvases (recessed)
 
     // Ink
     --ink-primary:    #1D1D1F;   // titles, primary text
@@ -131,7 +132,8 @@
 @mixin _design-dark-palette {
     --paper:          #26262A;
     --paper-raised:   #2F2F33;
-    --paper-inset:    #36363A;
+    --paper-inset:    #48484F;   // lighter than raised - reads as a raised chip surface
+    --paper-sunk:     #1F1F23;   // darker than raised - recessed surface for code blocks etc.
 
     --ink-primary:    #F5F5F7;
     --ink-secondary:  #D9D9DE;
@@ -456,9 +458,9 @@ html, * {
 
 // code.* -- mono surfaces + syntax marks ------------------------------
 .role-code-block {
-    background: var(--paper-inset);
+    background: var(--paper-sunk);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 12px;
     color: var(--sx-text);
     font-family: var(--font-mono);
     font-size: var(--size-smd);
@@ -487,7 +489,7 @@ code.inline {
 // (precedence chains, layer labels, badge-style identifiers).
 .role-code-chip,
 code.chip {
-    color: var(--sx-keyword);
+    color: var(--ink-primary);
     background: var(--paper-inset);
     border: 1px solid var(--line);
     border-radius: 5px;
@@ -496,7 +498,7 @@ code.chip {
     padding: 4px 10px;
 }
 .role-code-prompt {
-    background: var(--paper-inset);
+    background: var(--paper-sunk);
     border: 1px solid var(--line);
     border-radius: 8px;
     color: var(--sx-text);

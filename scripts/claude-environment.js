@@ -731,7 +731,7 @@
       '.claudeenv .ce-context-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); line-height: var(--lh-normal); margin: 0 0 4px; }',
       '.claudeenv .ce-context-file-label { font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); margin-top: 6px; }',
       '.claudeenv .ce-context-file-label:first-child { margin-top: 0; }',
-      '.claudeenv .ce-context-snippet { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
+      '.claudeenv .ce-context-snippet { background: var(--paper-sunk); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
       '.claudeenv .ce-context-empty { font-family: var(--font-text); font-size: var(--size-smd); font-style: italic; color: var(--ink-faint); margin: 0; padding: 6px 0; }',
       '.claudeenv .ce-context-excluded-label { color: var(--coral); }',
       '.claudeenv .ce-context-snippet.ce-context-excluded { color: var(--ink-faint); border-style: dashed; }',
