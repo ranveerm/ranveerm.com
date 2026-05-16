@@ -545,13 +545,16 @@
 
       /* File tree panel: stretches to match the layer-bands column. */
       /* viz.frame: paper-raised, line border, radius 10. */
-      '.claudeenv .ce-panel { border: 1px solid var(--line); border-radius: 10px; background: var(--paper-raised); margin-bottom: 16px; overflow: hidden; }',
+      '.claudeenv .ce-panel { border: 1px solid var(--line); border-radius: 14px; background: var(--paper-raised); margin-bottom: 16px; overflow: hidden; }',
       '.claudeenv .ce-tree-panel { display: flex; flex-direction: column; height: 100%; margin-bottom: 0; }',
       '.claudeenv .ce-tree-panel .ce-tree { flex: 1; display: flex; flex-direction: column; }',
-      '.claudeenv .ce-panel-head { border-bottom: 1px solid var(--line); padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }',
-      /* viz.eyebrow: ink-faint, mono, sm, eyebrow tracking, upper. */
-      '.claudeenv .ce-panel-head-label { font-family: var(--font-mono); font-size: var(--size-sm); font-weight: 400; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
-      '.claudeenv .ce-panel-head .fa { color: var(--ink-faint); font-size: 0.72rem; }',
+      /* Dropdown · disclosure (Design Language v3). Bar sits on
+         --paper-inset (the lighter raised-chip surface in dark, near
+         paper in light), body inherits the frame's --paper-raised. */
+      '.claudeenv .ce-panel-head { background: var(--paper-inset); border-bottom: 1px solid var(--line); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }',
+      // line-height: var(--lh-snug) ≈ 1.2 overrides Minima's 1.5 default,
+      // giving the bar the tighter height the v3 spec produces.
+      '.claudeenv .ce-panel-head-label { font-family: var(--font-display); font-size: var(--size-lg); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); }',
       '.claudeenv .ce-tree-controls { display: flex; gap: 4px; }',
       /* Border at --ink-faint (not --line) so the 1px edge stays legible
          in dark mode, where --line sits very close to --paper. */
@@ -715,12 +718,18 @@
       /*   - body has a max-height with vertical scroll when content     */
       /*     exceeds it, so neither panel can push the page layout       */
       /*     around as the user clicks through nodes or toggles files    */
-      '.claudeenv .ce-panel-head-toggle { cursor: pointer; user-select: none; transition: background 0.15s; }',
-      '.claudeenv .ce-panel-head-toggle:hover { background: var(--paper-inset); }',
-      '.claudeenv .ce-panel-chevron { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }',
-      '.claudeenv .ce-panel-chevron.open { transform: rotate(90deg); }',
+      '.claudeenv .ce-panel-head-toggle { cursor: pointer; user-select: none; }',
+      '.claudeenv .ce-panel-head-toggle:hover .ce-panel-chevron { color: var(--ink-primary); }',
+      /* SVG chevron: down-pointing path; rotated -90deg when collapsed
+         (so it reads as `>` pointing right), back to 0 when expanded. */
+      '.claudeenv .ce-panel-chevron { color: var(--ink-muted); transform: rotate(-90deg); transition: transform 0.15s; flex-shrink: 0; }',
+      '.claudeenv .ce-panel-chevron.open { transform: rotate(0deg); }',
       '.claudeenv .ce-panel-body-scroll { height: 440px; overflow-y: auto; }',
       '.claudeenv .ce-panel.collapsed .ce-panel-head { border-bottom-color: transparent; }',
+      // Collapsed disclosure: stop the grid from stretching the frame
+      // beyond the bar; otherwise the empty --paper-raised area below
+      // the bar reads as "the panel is still open".
+      '.claudeenv .ce-panel.collapsed { align-self: start; }',
 
       /* Context panel: visualises the impact of the file checkboxes by  */
       /* showing what actually ends up in scope for the next turn.       */
@@ -918,9 +927,10 @@
 
     // Right column: file tree only (now full-height, with checkboxes)
     var treePanel = el('div', { class: 'ce-panel ce-tree-panel' });
-    var treeHead = el('div', { class: 'ce-panel-head' });
-    treeHead.appendChild(el('span', { class: 'ce-panel-head-label' }, 'Filesystem'));
-    treePanel.appendChild(treeHead);
+    // Filesystem reuses the shared panel head for visual parity with
+    // Inspector / Context, but with collapsible: false → no chevron,
+    // no toggle behaviour, always expanded.
+    treePanel.appendChild(renderPanelHead('Filesystem', { collapsible: false }));
 
     var treeBody = el('div', { class: 'ce-tree' });
     treePanel.appendChild(treeBody);
@@ -1639,17 +1649,49 @@
       return el('p', { class: 'ce-context-empty' }, text);
     }
 
+    // Shared panel head: collapsible disclosure ("dropdown") used by
+    // the Inspector and Context panels. The Filesystem panel calls it
+    // with collapsible: false so it renders a matching head without
+    // the chevron and stays permanently expanded.
+    // Inline SVG chevron (v3 dropdown.disclosure spec). The path is a
+    // down-pointing chevron; CSS rotates it to -90deg when collapsed.
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+    function buildChevronSvg(expanded) {
+      var svg = document.createElementNS(SVG_NS, 'svg');
+      svg.setAttribute('width', '14');
+      svg.setAttribute('height', '14');
+      svg.setAttribute('viewBox', '0 0 14 14');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('class', 'ce-panel-chevron' + (expanded ? ' open' : ''));
+      var path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('d', 'M3 5.5 L7 9.5 L11 5.5');
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-width', '1.25');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(path);
+      return svg;
+    }
+
+    function renderPanelHead(label, opts) {
+      opts = opts || {};
+      var collapsible = opts.collapsible !== false;
+      var headClass = 'ce-panel-head' + (collapsible ? ' ce-panel-head-toggle' : '');
+      var head = el('div', { class: headClass });
+      head.appendChild(el('span', { class: 'ce-panel-head-label' }, label));
+      if (collapsible) head.appendChild(buildChevronSvg(opts.expanded));
+      if (collapsible && opts.onToggle) hook(head, opts.onToggle);
+      return head;
+    }
+
     function renderContext() {
       contextPanel.innerHTML = '';
       contextPanel.classList.toggle('collapsed', !state.contextOpen);
 
-      var head = el('div', { class: 'ce-panel-head ce-panel-head-toggle' }, [
-        el('span', { class: 'ce-panel-head-label' }, 'Context'),
-        el('span', { class: 'fa fa-chevron-right ce-panel-chevron' + (state.contextOpen ? ' open' : '') })
-      ]);
-      hook(head, function() {
-        state.contextOpen = !state.contextOpen;
-        rerender();
+      var head = renderPanelHead('Context', {
+        collapsible: true,
+        expanded: state.contextOpen,
+        onToggle: function() { state.contextOpen = !state.contextOpen; rerender(); }
       });
       contextPanel.appendChild(head);
 
@@ -1842,13 +1884,10 @@
       inspectorPanel.innerHTML = '';
       inspectorPanel.classList.toggle('collapsed', !state.inspectorOpen);
 
-      var head = el('div', { class: 'ce-panel-head ce-panel-head-toggle' }, [
-        el('span', { class: 'ce-panel-head-label' }, 'Inspector'),
-        el('span', { class: 'fa fa-chevron-right ce-panel-chevron' + (state.inspectorOpen ? ' open' : '') })
-      ]);
-      hook(head, function() {
-        state.inspectorOpen = !state.inspectorOpen;
-        rerender();
+      var head = renderPanelHead('Inspector', {
+        collapsible: true,
+        expanded: state.inspectorOpen,
+        onToggle: function() { state.inspectorOpen = !state.inspectorOpen; rerender(); }
       });
       inspectorPanel.appendChild(head);
 
@@ -2033,14 +2072,17 @@
         contextPanel.style.height = '';
         return;
       }
-      inspectorPanel.style.height = '0';
-      contextPanel.style.height = '0';
+      // Collapsed panels must shrink to the bar height instead of being
+      // padded out to match the bands/filesystem column. Skip height sync
+      // for any panel currently collapsed.
+      inspectorPanel.style.height = state.inspectorOpen ? '0' : '';
+      contextPanel.style.height = state.contextOpen ? '0' : '';
       // The bands/filesystem cells share grid row 2 with inspector/context.
       // With inspector/context zeroed (and box-sizing: border-box), row 2's
       // height is determined by the bands and filesystem natural heights.
       var h = Math.max(leftCol.offsetHeight, rightCol.offsetHeight);
-      inspectorPanel.style.height = h + 'px';
-      contextPanel.style.height = h + 'px';
+      if (state.inspectorOpen) inspectorPanel.style.height = h + 'px';
+      if (state.contextOpen) contextPanel.style.height = h + 'px';
     }
 
     function rerender() {
