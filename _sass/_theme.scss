@@ -90,6 +90,7 @@
     --size-xl:  19px;   // post.deck, nav.brand
     --size-h2:  24px;
     --size-h2b: 26px;   // post.title-feed
+    --size-h2l: 38px;   // post.section-heading
     --size-h1:  48px;
     --size-h1l: 54px;   // post.title
 
@@ -290,11 +291,29 @@ html, * {
     line-height: var(--lh-tight);
     letter-spacing: var(--track-tight);
 }
-.role-post-title-feed {
+// The h2/h1 compound selectors raise specificity to (0,1,1) so the role
+// wins against Minima's .post-content h2 default when applied to an
+// h-tag. Plain .role-post-title-feed usage is unaffected.
+.role-post-title-feed,
+h1.role-post-title-feed,
+h2.role-post-title-feed {
     color: var(--ink-primary);
     font-family: var(--font-display);
     font-size: var(--size-h2b);
     font-weight: 500;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--track-snug);
+}
+// post.section-heading: the H2 below a section delineator
+// (e.g. "01 . THE MOTIVATION"). Same compound-selector trick to
+// beat Minima's .post-content h2.
+.role-post-section-heading,
+h1.role-post-section-heading,
+h2.role-post-section-heading {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--size-h2l);
+    font-weight: 400;
     line-height: var(--lh-snug);
     letter-spacing: var(--track-snug);
 }
@@ -524,6 +543,26 @@ code.chip {
 .role-code-block-inset {
     background: var(--paper);
     border: none;
+}
+
+// code.block-frame + code.block-header -- optional titled wrapper for
+// a .role-code-block. The frame owns the border, radius, and overflow
+// chrome; the header is a mono strip (file path / context label) that
+// sits above the code area. The nested .role-code-block should drop
+// its own border + radius (use .role-code-block-inset or override) so
+// the frame supplies a single piece of chrome around header + block.
+.role-code-block-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.role-code-block-header {
+    background: var(--paper-inset);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    padding: 8px 14px;
 }
 
 // code.hl-* -- single-line highlight washes inside a code block.

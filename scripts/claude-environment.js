@@ -26,7 +26,7 @@
       sublabel: 'Loaded at the start of every session',
       color: '#0891b2',
       description: 'Markdown files concatenated into the system prompt at session start and carried through every turn that follows, without being re-injected per prompt. Claude reads them as **instructions** whose intent is to steer behaviour, codify conventions, and document the commands available in the project.',
-      aggregation: '**Hierarchy walk**: starting at the filesystem root, Claude walks down to the current working directory. At every level it picks up `CLAUDE.md`, then appends `CLAUDE.local.md` right after. Project-level files load **last**, so their guidance is freshest in context.\nRead order:\n* `/Library/AS/ClaudeCode/CLAUDE.md` (organisation)\n* `~/.claude/CLAUDE.md` (user)\n* `<parent>/CLAUDE.md` + `<parent>/CLAUDE.local.md`, for each parent dir walked\n* `./CLAUDE.md` + `./CLAUDE.local.md` (project, loaded last)\n* `.claude/rules/` alongside (always-on or path-scoped via frontmatter)\n* `MEMORY.md` (auto-memory, loaded early in the system prompt)\nConflicting instructions across these levels result in **non-deterministic behaviour**: Claude may resolve the conflict arbitrarily.',
+      aggregation: '**Hierarchy walk**: starting at the filesystem root, Claude walks down to the current working directory. At every level it picks up `CLAUDE.md`, then appends `CLAUDE.local.md` right after. Project-level files load **last**, so their guidance is freshest in context.\nRead order:\n* `/Library/AS/ClaudeCode/CLAUDE.md` (organisation)\n* `~/.claude/CLAUDE.md` (user)\n* `<parent>/CLAUDE.md` + `<parent>/CLAUDE.local.md`, for each parent dir walked\n* `./CLAUDE.md` + `./CLAUDE.local.md` (project, loaded last)\n* `.claude/rules/` alongside (always-on or path-scoped via frontmatter)\n* `MEMORY.md` (auto-memory index; first 200 lines load early in the system prompt, topic files in the same directory load on demand)\nConflicting instructions across these levels result in **non-deterministic behaviour**: Claude may resolve the conflict arbitrarily.',
       precedenceFiles: ['claude-local', 'claude-md-project', 'claude-md-global'],
       interactionExample:
         '# Hierarchy walk: cwd = /Users/me/work/acme/api\n' +
@@ -118,7 +118,7 @@
       sublabel: 'Session management',
       color: '#64748b',
       description: 'How Claude remembers across sessions and isolates parallel work.',
-      aggregation: 'The only information that persists across sessions by default is what Claude has written to **memory** (MEMORY.md). Session transcripts are on-disk but enter context only when you `--resume`. The exception is forking: a forked session carries the entire ancestor transcript, not just memory.',
+      aggregation: 'The only information that persists across sessions by default is what Claude has written to **memory**: a `MEMORY.md` index plus topic files under `~/.claude/projects/<project>/memory/`. Session transcripts are on-disk but enter context only when you `--resume`. The exception is forking: a forked session carries the entire ancestor transcript, not just memory.',
       nodes: ['sessions', 'worktreeinclude']
     }
   };
@@ -246,7 +246,8 @@
       layer: 'memory', label: 'rules/', icon: 'book',
       title: 'rules/',
       description: "Modular **instruction** files that load alongside CLAUDE.md. The ~200-line threshold is a guideline, not a hard rule, split out when CLAUDE.md becomes unwieldy, or when different team members own different areas. Filenames don't affect behaviour; path-scoping is controlled entirely by frontmatter.",
-      example: '# .claude/rules/api-conventions.md\n---\npaths:\n  - "src/handlers/**/*.ts"\n  - "src/api/**/*.ts"\n---\n# API Development Rules\n- All endpoints must validate with zod\n- Return { data, error } shape\n- Never expose internal error details',
+      exampleHeader: '.claude/rules/api-conventions.md',
+      example: '---\npaths:\n  - "src/handlers/**/*.ts"\n  - "src/api/**/*.ts"\n---\n# API Development Rules\n- All endpoints must validate with zod\n- Return { data, error } shape\n- Never expose internal error details',
       priority: 'Two loading modes depending on frontmatter',
       tokens: 400,
       tokenNote: 'Always-loaded rules count in full. Path-scoped rules only enter context when their globs match - much cheaper.',
@@ -264,20 +265,28 @@
     'auto-memory': {
       layer: 'memory', label: 'MEMORY.md', icon: 'file-text-o',
       title: 'Auto-memory (MEMORY.md)',
-      description: "Claude's own accumulating notes, written and updated automatically across sessions. Lives at `~/.claude/projects/<project>/memory/MEMORY.md`. Loaded every session alongside `CLAUDE.md`. As the index grows, topic files (e.g. `debugging.md`) are split out and loaded on demand.",
-      example: '# MEMORY.md\n\n## user\n- Senior engineer, TypeScript / Go background\n- Prefers terse responses, no trailing summaries\n\n## feedback\n- Don\'t mock the database in tests (prior incident)\n- Bundle related changes into one PR\n\n## project\n- Auth rewrite driven by compliance deadline\n- Merge freeze begins 2026-06-01\n\n## reference\n- Bugs tracked in Linear project "AUTH"',
-      priority: 'Loaded every session; toggle with /memory or disable via autoMemoryEnabled',
+      description: "Claude's own accumulating notes, written and updated automatically across sessions. Lives at `~/.claude/projects/<project>/memory/`, with `MEMORY.md` acting as a concise **index** of one-line pointers to **topic files** in the same directory (`user_role.md`, `feedback_testing.md`, etc.). `MEMORY.md` is loaded every session alongside `CLAUDE.md`; topic files load on demand when their pointer is relevant.",
+      exampleHeader: '~/.claude/projects/<project>/memory/MEMORY.md',
+      example: '- [User role](user_role.md) - Senior engineer, TypeScript / Go background\n- [Test database](feedback_testing.md) - Never mock the DB in integration tests\n- [PR bundling](feedback_pr_bundling.md) - Bundle related changes into one PR\n- [Auth rewrite](project_auth_rewrite.md) - Driven by compliance deadline 2026-06-01\n- [Linear bugs](reference_linear.md) - Bugs tracked in Linear project "AUTH"',
+      additionalExamples: [
+        {
+          header: '~/.claude/projects/<project>/memory/user_role.md',
+          body: '---\nname: User role\ndescription: Engineering background and response preferences\ntype: user\n---\n\nSenior engineer with deep TypeScript and Go expertise. Prefers\nterse responses, no trailing summaries. Frame frontend\nexplanations in terms of backend analogues.'
+        }
+      ],
+      priority: 'Loaded every session; toggle with `/memory`, or disable via `autoMemoryEnabled: false` (settings) / `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` (env)',
       tokens: 800,
       tokenNote: 'First 200 lines of MEMORY.md (capped at 25 KB) load every session alongside CLAUDE.md. Topic files load on demand.',
       extended: {
-        heading: 'Memory categories',
+        heading: 'Memory categories (`type:` frontmatter on each topic file)',
         body: [
           { label: 'user', text: 'Role, preferences, and background. Helps Claude tailor explanations to how you work.' },
           { label: 'project', text: 'Goals, decisions, and constraints for this project. The "why" behind ongoing work.' },
           { label: 'feedback', text: 'Corrections and confirmed approaches from prior sessions. Prevents repeating past mistakes.' },
           { label: 'reference', text: 'Pointers to external systems: Linear boards, dashboards, design docs.' }
         ]
-      }
+      },
+      seeAlso: { nodeId: 'sessions', label: 'Sessions (~/.claude/projects/)' }
     },
     'settings-local': {
       layer: 'config', label: 'settings.local.json', icon: 'cog',
@@ -328,7 +337,8 @@
       layer: 'invocable', label: 'skills/', icon: 'file-code-o',
       title: 'skills/',
       description: "Each skill is a folder containing a `SKILL.md` plus any supporting files it bundles (templates, scripts, reference docs). Both you and Claude can invoke them: typed explicitly as `/skill-name`, or auto-invoked by Claude when your prompt matches the skill's `description` frontmatter. Frontmatter flags (`disable-model-invocation`, `user-invocable`) can lock invocation to one direction. **Not** part of MCP, Claude Code-specific convention.",
-      example: '# .claude/skills/deploy/SKILL.md\n---\nname: deploy\ndescription: Triggered when user says\n  "deploy", "ship it", "push to prod"\nallowed-tools: [Read, Bash]\n---\n1. Run full test suite\n2. Bump version in package.json\n3. Create git tag\n4. Push to main',
+      exampleHeader: '.claude/skills/deploy/SKILL.md',
+      example: '---\nname: deploy\ndescription: Triggered when user says\n  "deploy", "ship it", "push to prod"\nallowed-tools: [Read, Bash]\n---\n1. Run full test suite\n2. Bump version in package.json\n3. Create git tag\n4. Push to main',
       priority: 'User-invoked via /name, or auto-invoked when description matches',
       tokens: 0,
       tokenNote: 'Each skill\'s description (~30 tokens) is in context so Claude can match. Bodies load on demand only when triggered.'
@@ -337,7 +347,8 @@
       layer: 'invocable', label: 'commands/', icon: 'bolt',
       title: 'commands/',
       description: 'Single-file equivalents of skills. A file at `commands/deploy.md` creates `/deploy` the same way a skill at `skills/deploy/SKILL.md` does, and both can be auto-invoked by Claude. Skills are now the recommended form because they bundle supporting files alongside the prompt; commands remain supported. If a skill and a command share a name, the skill wins.',
-      example: '# .claude/commands/review.md\n---\ndescription: Review current branch\n---\n## Diff\n!`git diff main...HEAD`\n\nReview for security issues and missing tests.',
+      exampleHeader: '.claude/commands/review.md',
+      example: '---\ndescription: Review current branch\n---\n## Diff\n!`git diff main...HEAD`\n\nReview for security issues and missing tests.',
       priority: 'User-invoked via /name, or auto-invoked when description matches',
       tokens: 0,
       tokenNote: 'Loaded into context only when invoked.'
@@ -346,7 +357,8 @@
       layer: 'delegation', label: 'agents/', icon: 'android',
       title: 'agents/ (subagents)',
       description: 'Specialised subagents that run in their own **fresh context windows**. They have their own system prompt, restricted tool access, and optional model choice. The parent conversation receives only the subagent’s final summary, not the files it read, tools it called, or intermediate reasoning.',
-      example: '# .claude/agents/security-auditor.md\n---\nname: security-auditor\ndescription: Use PROACTIVELY after code\n  changes to check for security issues.\ntools: [Read, Grep, Glob]\nmodel: inherit\n---\nYou are a senior security specialist.\nFocus only on auth, input validation,\nand data exposure risks.\nReport findings with severity ratings.',
+      exampleHeader: '.claude/agents/security-auditor.md',
+      example: '---\nname: security-auditor\ndescription: Use PROACTIVELY after code\n  changes to check for security issues.\ntools: [Read, Grep, Glob]\nmodel: inherit\n---\nYou are a senior security specialist.\nFocus only on auth, input validation,\nand data exposure risks.\nReport findings with severity ratings.',
       priority: 'Invoked by description match, `@agent-name`, or via /agents',
       tokens: 0,
       tokenNote: 'Each agent description (~40 tokens) is in the parent context so Claude can dispatch. The agent\'s own system prompt and reads stay isolated in its fresh window.',
@@ -612,7 +624,9 @@
 
       /* Inspector */
       '.claudeenv .ce-inspector { }',
-      '.claudeenv .ce-inspector-body { padding: 8px 16px 16px; }',
+      // v3 dropdown.disclosure body: padding 16/18, paperRaised inherited
+      // from the frame. Matches the inspector + tab body in the spec.
+      '.claudeenv .ce-inspector-body { padding: 16px 18px; }',
       '.claudeenv .ce-inspector-layer-crumb { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }',
       '.claudeenv .ce-inspector-layer-dot { width: 8px; height: 8px; border-radius: 50%; }',
       /* Inspector crumb -- back-link to the parent layer (system.faint). */
@@ -622,7 +636,10 @@
       '.claudeenv .ce-inspector .ce-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }',
       '.claudeenv .ce-inspector .ce-title-row .fa { color: var(--coral); font-size: 0.95rem; }',
       /* post.body-style description: ink-secondary, display, ~14px, body lh. */
-      '.claudeenv .ce-inspector-desc { font-family: var(--font-display); color: var(--ink-secondary); font-size: var(--size-md); line-height: var(--lh-normal); margin: 0 0 10px; }',
+      // v3 dropdown.disclosure body prose: serif (display), 15px, lh 1.65,
+      // ink-secondary, margin 0. 15px isn't a token; it sits intentionally
+      // between --size-md (14) and --size-lg (16) for in-widget prose.
+      '.claudeenv .ce-inspector-desc { font-family: var(--font-display); color: var(--ink-secondary); font-size: 15px; line-height: 1.65; margin: 0 0 10px; }',
       /* Generic pill (legacy) */
       '.claudeenv .ce-inspector-pill { background: var(--paper-inset); border-left: 3px solid var(--coral); padding: 8px 14px; margin-bottom: 10px; font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); line-height: var(--lh-normal); border-radius: 0 6px 6px 0; }',
       '.claudeenv .ce-inspector-pill.flow { border-left-color: var(--coral-strong); background: var(--coral-wash); }',
@@ -636,7 +653,11 @@
       /* Token pill (only when section editor is active, see viz.callout). */
       '.claudeenv .ce-inspector-pill.token { border-left-color: var(--coral-strong); background: var(--coral-wash); color: var(--ink-secondary); line-height: var(--lh-normal); font-family: var(--font-display); font-size: var(--size-md); }',
       /* viz.section-label: ink-faint, mono, xs, eyebrow tracking, upper. */
-      '.claudeenv .ce-inspector-section-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; margin-top: 4px; }',
+      // In-body section title — mirrors the .role-post-title-feed recipe
+      // (display, size-h2b 26px, weight 500, ink-primary, lh-snug, snug
+      // tracking). Same recipe as feed post titles, repurposed for the
+      // section headings inside dropdown.disclosure bodies.
+      '.claudeenv .ce-inspector-section-label { font-family: var(--font-display); font-size: var(--size-h2b); font-weight: 500; color: var(--ink-primary); line-height: var(--lh-snug); letter-spacing: var(--track-snug); margin: 18px 0 8px; }',
       '.claudeenv .ce-inspector-extended-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 12px; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; }',
       '.claudeenv .ce-inspector-extended-table tr { background: transparent; }',
       '.claudeenv .ce-inspector-extended-table tr:nth-child(even) { background: transparent; }',
@@ -646,6 +667,13 @@
       '.claudeenv .ce-inspector-extended-table td.ce-inspector-extended-item-text { font-family: var(--font-text); font-size: var(--size-md); color: var(--ink-secondary); }',
       /* code.block: paper-inset bg, line border, sx-text, mono, smd. */
       '.claudeenv .ce-inspector-example { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
+      /* code.block-frame + code.block-header (design language): titled
+         wrapper around .ce-inspector-example, so the file path shows in
+         its own mono strip above the code instead of pretending to be a
+         markdown heading inside the block. */
+      '.claudeenv .ce-inspector-example-wrap { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 0; }',
+      '.claudeenv .ce-inspector-example-header { background: var(--paper-inset); border-bottom: 1px solid var(--line); color: var(--ink-muted); font-family: var(--font-mono); font-size: var(--size-xs); padding: 8px 14px; }',
+      '.claudeenv .ce-inspector-example-wrap > .ce-inspector-example { background: var(--paper); border: none; border-radius: 0; }',
 
       /* Layer detail: pyramid list */
       '.claudeenv .ce-pyramid { display: flex; flex-direction: column; gap: 6px; }',
@@ -734,10 +762,10 @@
       /* Context panel: visualises the impact of the file checkboxes by  */
       /* showing what actually ends up in scope for the next turn.       */
       '.claudeenv .ce-context { }',
-      '.claudeenv .ce-context-body { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 14px; }',
+      '.claudeenv .ce-context-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }',
       '.claudeenv .ce-context-section { display: flex; flex-direction: column; gap: 6px; }',
       '.claudeenv .ce-context-section-head { display: flex; align-items: baseline; gap: 8px; }',
-      '.claudeenv .ce-context-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); line-height: var(--lh-normal); margin: 0 0 4px; }',
+      '.claudeenv .ce-context-hint { font-family: var(--font-display); font-size: 15px; color: var(--ink-secondary); line-height: 1.65; margin: 0 0 4px; }',
       '.claudeenv .ce-context-file-label { font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); margin-top: 6px; }',
       '.claudeenv .ce-context-file-label:first-child { margin-top: 0; }',
       '.claudeenv .ce-context-snippet { background: var(--paper-sunk); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
@@ -812,6 +840,7 @@
       expandedOrgClaude: true,
       expandedHome: true,
       expandedUser: true,
+      expandedUserProjects: true,
       expandedProject: true,
       expandedProjectClaude: true,
       // included[id] = false → file is excluded from environment.
@@ -1159,6 +1188,22 @@
       treeBody.innerHTML = '';
       var hi = highlightedNodes();
 
+      // Static directory row for nesting purposes only (no node binding,
+      // no checkbox, no selection). Spacer keeps the label aligned with
+      // file rows that carry checkboxes at the same indent.
+      function staticDirRow(label, indent) {
+        return el('div', {
+          class: 'ce-tree-row ce-tree-row-static',
+          style: 'padding-left: ' + (indent * 14) + 'px;'
+        }, [
+          el('span', { class: 'ce-tree-check-spacer' }),
+          el('div', { class: 'ce-tree-node dir non-interactive' }, [
+            el('span', { class: 'ce-fs-emoji ce-folder' }, '🗂️'),
+            el('span', { class: 'ce-label' }, label)
+          ])
+        ]);
+      }
+
       function fileRow(id, label, iconName, indent, isDir) {
         var node = NODES[id];
         var highlighted = hi.indexOf(id) !== -1;
@@ -1267,7 +1312,30 @@
           if (state.clientFilter !== 'gui') {
             userChildren.appendChild(fileRow('keybindings', 'keybindings.json', 'keyboard-o', 2));
           }
-          userChildren.appendChild(fileRow('sessions', 'Projects', 'sitemap', 2, true));
+          // ~/.claude/projects/ — collapsible root. Holds session history
+          // and per-project auto-memory directories.
+          var userProjectsRoot = el('button', { class: 'ce-tree-root', type: 'button',
+            style: 'padding-left: ' + (2 * 14) + 'px;' }, [
+            el('span', { class: 'fa fa-chevron-right ce-chevron' + (state.expandedUserProjects ? ' open' : '') }),
+            el('span', { class: 'ce-fs-emoji ce-folder' }, '🗂️'),
+            el('span', { class: 'ce-label' }, 'projects/')
+          ]);
+          hook(userProjectsRoot, function() { state.expandedUserProjects = !state.expandedUserProjects; rerender(); });
+          userChildren.appendChild(userProjectsRoot);
+
+          if (state.expandedUserProjects) {
+            // Sub-container provides the vertical connecting line for the
+            // children of projects/. margin-left aligns border-left under
+            // the chevron centre (28px indent + 5px half-width).
+            var userProjectsChildren = el('div', { class: 'ce-tree-children', style: 'margin-left: 33px;' });
+            // Auto-memory lives at ~/.claude/projects/<your-project>/memory/MEMORY.md.
+            // Render the intermediate <your-project>/ and memory/ dirs as static
+            // folder rows so the nesting is visible without binding them to nodes.
+            userProjectsChildren.appendChild(staticDirRow('<your-project>/', 0));
+            userProjectsChildren.appendChild(staticDirRow('memory/', 1));
+            userProjectsChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 2));
+            userChildren.appendChild(userProjectsChildren);
+          }
           homeChildren.appendChild(userChildren);
         }
 
@@ -1288,7 +1356,6 @@
           projectChildren.appendChild(fileRow('claude-md-project', 'CLAUDE.md', 'file-text-o', 2));
           projectChildren.appendChild(fileRow('import-relative', 'AGENT.md', 'file-text-o', 2));
           projectChildren.appendChild(fileRow('claude-local', 'CLAUDE.local.md', 'file-text-o', 2));
-          projectChildren.appendChild(fileRow('auto-memory', 'MEMORY.md', 'file-text-o', 2));
           // `.mcp.json` and `.worktreeinclude` live at the project root,
           // not inside `.claude/`. Indent 2 keeps that hierarchy honest.
           projectChildren.appendChild(fileRow('mcp', '.mcp.json', 'file-text-o', 2));
@@ -1923,8 +1990,14 @@
           ['<200 lines',
            'Organised sections over dense paragraphs',
            'Dot points',
-           'Use concrete instructions such as "execute swift test" rather than "Test code"'
-          ].forEach(function(s) { suggList.appendChild(el('li', null, s)); });
+           'Use concrete instructions such as "execute swift test" rather than "Test code"',
+           'Use emphasis such as all caps to increase adherence',
+           'Explore `/memory` slash command to manage MEMORY.md'
+          ].forEach(function(s) {
+            var li = el('li', null);
+            li.appendChild(renderInline(s));
+            suggList.appendChild(li);
+          });
           body.appendChild(suggList);
 
           // "Instructions can be viewed as" styled like a description paragraph
@@ -2047,7 +2120,22 @@
       }
       if (node.example) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'Example'));
-        body.appendChild(el('pre', { class: 'ce-inspector-example' }, node.example));
+        if (node.exampleHeader) {
+          var exWrap = el('div', { class: 'ce-inspector-example-wrap' });
+          exWrap.appendChild(el('div', { class: 'ce-inspector-example-header' }, node.exampleHeader));
+          exWrap.appendChild(el('pre', { class: 'ce-inspector-example' }, node.example));
+          body.appendChild(exWrap);
+        } else {
+          body.appendChild(el('pre', { class: 'ce-inspector-example' }, node.example));
+        }
+        if (node.additionalExamples) {
+          node.additionalExamples.forEach(function(ex) {
+            var w = el('div', { class: 'ce-inspector-example-wrap', style: 'margin-top: 8px;' });
+            if (ex.header) w.appendChild(el('div', { class: 'ce-inspector-example-header' }, ex.header));
+            w.appendChild(el('pre', { class: 'ce-inspector-example' }, ex.body));
+            body.appendChild(w);
+          });
+        }
       }
       if (node.seeAlso) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'See also'));
