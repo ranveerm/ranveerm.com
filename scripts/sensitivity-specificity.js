@@ -71,10 +71,9 @@
       '.sensspec-slider-row { display: flex; justify-content: space-between; margin-bottom: 6px; }',
       '.sensspec-slider-label { font-family: var(--font-display); font-size: var(--size-md); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
       '.sensspec-slider-value { font-family: var(--font-mono); font-size: var(--size-md); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
-      '.sensspec-slider input[type=range] { width: 100%; height: 5px; border-radius: 3px; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; }',
-      /* Thumb border picks up the per-slider track colour via --thumb-color (set in setSliderFill). */
-      '.sensspec-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--paper-raised); border: 2px solid var(--thumb-color, var(--coral)); cursor: pointer; }',
-      '.sensspec-slider input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--paper-raised); border: 2px solid var(--thumb-color, var(--coral)); cursor: pointer; }',
+      /* Neutral slider styling that matches the MCP post: native accent-color
+         routed through --ink-muted, no per-slider categorical hues. */
+      '.sensspec-slider input[type=range] { width: 100%; accent-color: var(--ink-muted); cursor: pointer; }',
 
       /* Confusion matrix -- viz.section-label for headers / row labels. */
       '.sensspec-matrix-header { display: grid; grid-template-columns: 100px 1fr 1fr; gap: 4px; margin-bottom: 4px; }',
@@ -86,20 +85,27 @@
       '.sensspec-matrix-cell-count { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
       '.sensspec-matrix-cell-label { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-xs); margin-top: 2px; }',
 
-      /* Metrics -- viz.row recipe per cell, code.text for formulas. */
+      /* Metric cells -- default visual matches the confusion-matrix cells.
+         Highlight states adopt the LAYER ROWS recipe from the Claude Code
+         Environment widget (viz.row-hover and viz.row-selected): the
+         preview lifts the background to paper-inset, and the locked
+         selection adds a coral inset rail on the left edge. */
       '.sensspec-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; grid-auto-rows: 1fr; align-items: stretch; }',
-      '.sensspec-metric { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; transition: background 0.25s ease, border-color 0.25s ease; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }',
-      '.sensspec-metric-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }',
-      '.sensspec-metric-label { font-family: var(--font-display); font-size: var(--size-md); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
-      '.sensspec-metric-value { font-family: var(--font-mono); font-size: var(--size-lg); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
-      '.sensspec-metric-bar { height: 4px; border-radius: 2px; background: var(--paper-inset); overflow: hidden; margin-bottom: 5px; }',
-      '.sensspec-metric-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }',
-      '.sensspec-metric-formula { color: var(--sx-text); font-family: var(--font-mono); font-size: var(--size-xs); }',
+      '.sensspec-metric-cell { background: var(--paper-raised); border: 2px solid var(--ink-faint); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; justify-content: center; }',
+      '.sensspec-metric-cell.is-previewed { background: var(--paper-inset); border-color: var(--ink-faint); }',
+      '.sensspec-metric-cell.is-selected { background: var(--paper-inset); border-color: var(--ink-muted); box-shadow: inset 3px 0 0 var(--coral); }',
+      '.sensspec-metric-value { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
+      '.sensspec-metric-label { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-xs); margin-top: 2px; }',
 
-      /* Explanation -- post.body inside a viz.frame. */
-      '.sensspec-notes { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); color: var(--ink-secondary); background: var(--paper-raised); }',
-      '.sensspec-notes p { margin: 0 0 8px; }',
-      '.sensspec-notes p:last-child { margin-bottom: 0; }',
+      /* Notes panel -- single live entry, driven by the active metric cell.
+         Title matches the inspector section-label recipe (e.g. the "Intent"
+         heading inside the Claude Code Environment widget's layer 1
+         inspector view): display, size-h2b, weight 500, lh-snug, track-snug,
+         ink-primary. Body uses post.body. Empty state shows a muted hint. */
+      '.sensspec-notes { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; background: var(--paper-raised); min-height: 84px; }',
+      '.sensspec-notes-title { font-family: var(--font-display); font-size: var(--size-h2b); font-weight: 500; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); margin: 0 0 8px; }',
+      '.sensspec-notes-body { font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); color: var(--ink-secondary); margin: 0; }',
+      '.sensspec-notes-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-faint); margin: 0; font-style: italic; }',
 
       /* Dot-grid SVG */
       '.sensspec-popgrid { width: 100%; max-width: 460px; height: auto; }',
@@ -153,11 +159,36 @@
     root.classList.add('sensspec');
 
     // ------------------------------- state -----------------------------
+    // `hovered`   - active confusion-matrix cell (drives population-grid dimming).
+    // `selected`  - locked metric cell (persists until clicked again).
+    // `previewed` - transient metric cell under the cursor (overrides selected
+    //               for the notes panel, reverts on mouseleave).
     var state = {
       prevalence: 0.3,
       sensitivity: 0.85,
       specificity: 0.9,
-      hovered: null
+      hovered: null,
+      selected: null,
+      previewed: null
+    };
+
+    var METRIC_NOTES = {
+      sensitivity: {
+        title: 'Sensitivity',
+        body: 'Of all truly positive cases, what fraction does the classifier correctly flag?'
+      },
+      specificity: {
+        title: 'Specificity',
+        body: 'Of all truly negative cases, what fraction does the classifier correctly leave alone?'
+      },
+      ppv: {
+        title: 'PPV (Positive Predictive Value)',
+        body: 'When the classifier flags a case, what is the chance it is truly positive?'
+      },
+      npv: {
+        title: 'NPV (Negative Predictive Value)',
+        body: 'When the classifier leaves a case alone, what is the chance it is truly negative?'
+      }
     };
 
     // --------------------------- legend --------------------------------
@@ -188,8 +219,10 @@
     root.appendChild(grid);
 
     // ------ sliders ------
-    function buildSlider(key, label, color, min, max) {
-      var valueSpan = el('span', { class: 'sensspec-slider-value', style: 'color:' + color }, '');
+    // Neutral styling now: no per-slider hue. The track uses the browser's
+    // native rendering with accent-color: var(--ink-muted) applied via CSS.
+    function buildSlider(key, label, min, max) {
+      var valueSpan = el('span', { class: 'sensspec-slider-value' }, '');
       var input = el('input', {
         type: 'range', min: String(min), max: String(max), step: '0.01',
         value: String(state[key])
@@ -205,12 +238,12 @@
         ]),
         input
       ]);
-      return { wrap: wrap, input: input, value: valueSpan, color: color, min: min, max: max };
+      return { wrap: wrap, input: input, value: valueSpan, min: min, max: max };
     }
 
-    var prevalenceSlider  = buildSlider('prevalence',  'Prevalence',  COLORS.accent, 0.05, 0.95);
-    var sensitivitySlider = buildSlider('sensitivity', 'Sensitivity', COLORS.tp,     0,    1);
-    var specificitySlider = buildSlider('specificity', 'Specificity', COLORS.tn,     0,    1);
+    var prevalenceSlider  = buildSlider('prevalence',  'Prevalence',  0.05, 0.95);
+    var sensitivitySlider = buildSlider('sensitivity', 'Sensitivity', 0,    1);
+    var specificitySlider = buildSlider('specificity', 'Specificity', 0,    1);
 
     var slidersCard = el('div', { class: 'sensspec-card sliders' }, [
       prevalenceSlider.wrap, sensitivitySlider.wrap, specificitySlider.wrap
@@ -250,26 +283,37 @@
 
     var matrixCard = el('div', { class: 'sensspec-card matrix' }, matrixContainer);
 
-    // ------ metrics ------
-    function buildMetric(label, formula, color) {
-      var valueEl = el('span', { class: 'sensspec-metric-value', style: 'color:' + color }, '-');
-      var barFill = el('div', { class: 'sensspec-metric-bar-fill', style: 'background:' + color + '; width: 0%' });
-      var metric = el('div', { class: 'sensspec-metric' }, [
-        el('div', { class: 'sensspec-metric-row' }, [
-          el('span', { class: 'sensspec-metric-label' }, label),
-          valueEl
-        ]),
-        el('div', { class: 'sensspec-metric-bar' }, barFill),
-        el('div', { class: 'sensspec-metric-formula' }, formula)
-      ]);
-      return { el: metric, value: valueEl, bar: barFill, color: color };
+    // ------ metric cells ------
+    // Mirrors the confusion-matrix cell shape (paper-raised + ink-faint border,
+    // mono value, muted label). Click toggles a sticky selection; hover sets
+    // a transient preview that overrides the selection for the notes panel.
+    function buildMetricCell(key, label) {
+      var valueEl = el('div', { class: 'sensspec-metric-value' }, '-');
+      var labelEl = el('div', { class: 'sensspec-metric-label' }, label);
+      var cell = el('div', { class: 'sensspec-metric-cell' }, [valueEl, labelEl]);
+      cell.addEventListener('mouseenter', function() {
+        state.previewed = key;
+        renderNotes();
+        renderMetricStates();
+      });
+      cell.addEventListener('mouseleave', function() {
+        state.previewed = null;
+        renderNotes();
+        renderMetricStates();
+      });
+      cell.addEventListener('click', function() {
+        state.selected = (state.selected === key) ? null : key;
+        renderNotes();
+        renderMetricStates();
+      });
+      return { el: cell, value: valueEl, key: key };
     }
 
     var metrics = {
-      sensitivity: buildMetric('Sensitivity', 'TP / (TP + FN)', COLORS.tp),
-      specificity: buildMetric('Specificity', 'TN / (TN + FP)', COLORS.tn),
-      ppv:         buildMetric('PPV',         'TP / (TP + FP)', '#d4a017'),
-      npv:         buildMetric('NPV',         'TN / (TN + FN)', '#0899a9')
+      sensitivity: buildMetricCell('sensitivity', 'Sensitivity'),
+      specificity: buildMetricCell('specificity', 'Specificity'),
+      ppv:         buildMetricCell('ppv',         'PPV'),
+      npv:         buildMetricCell('npv',         'NPV')
     };
 
     var metricsGrid = el('div', { class: 'sensspec-metrics' }, [
@@ -283,33 +327,21 @@
     grid.appendChild(metricsGrid);
 
     // ------ explanation (spans full width below the two-column grid) ------
-    root.appendChild(el('div', { class: 'sensspec-notes' }, [
-      buildNote(COLORS.tp, 'Sensitivity',
-        ' - Of all truly positive cases, what fraction does the classifier correctly flag?'),
-      buildNote(COLORS.tn, 'Specificity',
-        ' - Of all truly negative cases, what fraction does the classifier correctly leave alone?'),
-      buildNote('#d4a017', 'PPV (Positive Predictive Value)',
-        ' - When the classifier flags a case, what is the chance it is truly positive?'),
-      buildNote('#0899a9', 'NPV (Negative Predictive Value)',
-        ' - When the classifier leaves a case alone, what is the chance it is truly negative?')
-    ]));
-
-    function buildNote(color, name, rest) {
-      return el('p', null, [
-        el('strong', { style: 'color:' + color }, name),
-        rest
-      ]);
-    }
+    // Single live note: shows the previewed metric (if hovering) else the
+    // selected metric (if locked) else a muted placeholder hint.
+    var notesTitleEl = el('p', { class: 'sensspec-notes-title' }, '');
+    var notesBodyEl  = el('p', { class: 'sensspec-notes-body' }, '');
+    var notesHintEl  = el('p', { class: 'sensspec-notes-hint' },
+      'Click a metric to lock its definition; hover to preview.');
+    var notesPanel = el('div', { class: 'sensspec-notes' }, [
+      notesTitleEl, notesBodyEl, notesHintEl
+    ]);
+    root.appendChild(notesPanel);
 
     // ----------------------------- rendering ---------------------------
+    // Sliders are styled natively (accent-color), so the renderer only
+    // needs to keep the trailing % readout in sync with the input value.
     function setSliderFill(s) {
-      var pct = ((s.input.value - s.min) / (s.max - s.min)) * 100;
-      s.input.style.background =
-        'linear-gradient(to right, ' + s.color + ' ' + pct + '%, ' + COLORS.hairline + ' ' + pct + '%)';
-      // Hand the per-slider track colour to the ::thumb pseudo-element
-      // via a CSS custom property -- pseudo-elements can't be styled
-      // inline, but they can read variables from their host.
-      s.input.style.setProperty('--thumb-color', s.color);
       s.value.textContent = Math.round(parseFloat(s.input.value) * 100) + '%';
     }
 
@@ -371,12 +403,13 @@
       var ppv  = pop.tp + pop.fp > 0 ? pop.tp / (pop.tp + pop.fp) : NaN;
       var npv  = pop.tn + pop.fn > 0 ? pop.tn / (pop.tn + pop.fn) : NaN;
 
-      setMetric(metrics.sensitivity, sens,
-        state.hovered === 'tp' || state.hovered === 'fn');
-      setMetric(metrics.specificity, spec,
-        state.hovered === 'fp' || state.hovered === 'tn');
-      setMetric(metrics.ppv, ppv, false);
-      setMetric(metrics.npv, npv, false);
+      setMetricValue(metrics.sensitivity, sens);
+      setMetricValue(metrics.specificity, spec);
+      setMetricValue(metrics.ppv, ppv);
+      setMetricValue(metrics.npv, npv);
+
+      renderMetricStates();
+      renderNotes();
 
       renderPopulationGrid(pop, state.hovered);
 
@@ -386,11 +419,37 @@
       });
     }
 
-    function setMetric(m, v, highlight) {
+    function setMetricValue(m, v) {
       m.value.textContent = isNaN(v) ? '-' : (v * 100).toFixed(1) + '%';
-      m.bar.style.width   = (isNaN(v) ? 0 : v * 100) + '%';
-      m.el.style.background  = highlight ? m.color + '14' : COLORS.card;
-      m.el.style.borderColor = highlight ? m.color + '66' : COLORS.cardBorder;
+    }
+
+    // Apply preview/selected class state to each metric cell. Kept separate
+    // from setMetricValue so cell hover/click handlers can repaint the
+    // selection without recomputing the underlying population numbers.
+    function renderMetricStates() {
+      Object.keys(metrics).forEach(function(key) {
+        var cell = metrics[key].el;
+        cell.classList.toggle('is-selected', state.selected === key);
+        cell.classList.toggle('is-previewed',
+          state.previewed === key && state.selected !== key);
+      });
+    }
+
+    // Notes panel content reflects the active metric: hover preview wins
+    // over a locked selection; when neither is set, show the muted hint.
+    function renderNotes() {
+      var active = state.previewed || state.selected;
+      if (active && METRIC_NOTES[active]) {
+        notesTitleEl.textContent = METRIC_NOTES[active].title;
+        notesBodyEl.textContent  = METRIC_NOTES[active].body;
+        notesTitleEl.style.display = '';
+        notesBodyEl.style.display  = '';
+        notesHintEl.style.display  = 'none';
+      } else {
+        notesTitleEl.style.display = 'none';
+        notesBodyEl.style.display  = 'none';
+        notesHintEl.style.display  = '';
+      }
     }
 
     function setHovered(key) {
