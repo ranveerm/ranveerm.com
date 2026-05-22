@@ -1,6 +1,6 @@
 // Interactive sensitivity & specificity widget.
 // Vanilla JS port of the original React component. Renders a draggable-
-// slider demo over a simulated population of 200 people, showing how
+// slider demo over a simulated population of 100 people, showing how
 // prevalence / sensitivity / specificity translate to the confusion
 // matrix and to PPV / NPV.
 //
@@ -8,17 +8,17 @@
 //         <script>createSensitivitySpecificity('sensspec-demo');</script>
 
 (function() {
-  var TOTAL = 200;
+  var TOTAL = 100;
 
   // Categorical hues for the four outcome groups (kept from the original
   // -- they carry information). Chrome colours route through the design
   // language tokens declared in _sass/_theme.scss so dark-mode and any
   // future palette retune happens at the foundation layer.
   var COLORS = {
-    tp: '#22c55e',  // green   - true positive
-    fn: '#f97316',  // orange  - false negative
-    fp: '#ef4444',  // red     - false positive
-    tn: '#3b82f6',  // blue    - true negative
+    tp: '#22c55e',  // green  - true positive
+    fn: '#ef4444',  // red    - false negative
+    fp: '#a855f7',  // purple - false positive
+    tn: '#3b82f6',  // blue   - true negative
     card:       'var(--paper-raised)',
     cardBorder: 'var(--line)',
     hairline:   'var(--line)',
@@ -104,8 +104,13 @@
          ink-primary. Body uses post.body. Empty state shows a muted hint. */
       '.sensspec-notes { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; background: var(--paper-raised); min-height: 84px; }',
       '.sensspec-notes-title { font-family: var(--font-display); font-size: var(--size-h2b); font-weight: 500; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); margin: 0 0 8px; }',
+      /* Formula code block: uses the design language's .role-code-block class
+         for surface, border, radius, colour, font, and line-height. Only
+         padding, white-space, tabular-nums, and margin are added here since
+         .role-code-block does not specify them. */
+      '.sensspec-notes-formula { padding: 12px 14px; white-space: pre; font-variant-numeric: tabular-nums; margin: 0 0 12px; }',
       '.sensspec-notes-body { font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); color: var(--ink-secondary); margin: 0; }',
-      '.sensspec-notes-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-faint); margin: 0; font-style: italic; }',
+      '.sensspec-notes-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); margin: 0; }',
 
       /* Dot-grid SVG */
       '.sensspec-popgrid { width: 100%; max-width: 460px; height: auto; }',
@@ -169,7 +174,43 @@
       specificity: 0.9,
       hovered: null,
       selected: null,
-      previewed: null
+      previewed: null,
+      pop: null    // last computed population; read by renderNotes() for live calculations
+    };
+
+    // Builds a 3-line calculation block for each metric:
+    //   line 1 — abstract formula     TP / (TP + FN)
+    //   line 2 — values substituted   72 / (72 + 13)
+    //   line 3 — result               = 85.0%
+    var METRIC_CALC = {
+      sensitivity: function(p) {
+        var num = p.tp, den = p.tp + p.fn;
+        var pct = den > 0 ? (num / den * 100).toFixed(1) : '–';
+        return 'TP / (TP + FN)\n' +
+               p.tp + ' / (' + p.tp + ' + ' + p.fn + ')\n' +
+               '= ' + pct + '%';
+      },
+      specificity: function(p) {
+        var num = p.tn, den = p.tn + p.fp;
+        var pct = den > 0 ? (num / den * 100).toFixed(1) : '–';
+        return 'TN / (TN + FP)\n' +
+               p.tn + ' / (' + p.tn + ' + ' + p.fp + ')\n' +
+               '= ' + pct + '%';
+      },
+      ppv: function(p) {
+        var num = p.tp, den = p.tp + p.fp;
+        var pct = den > 0 ? (num / den * 100).toFixed(1) : '–';
+        return 'TP / (TP + FP)\n' +
+               p.tp + ' / (' + p.tp + ' + ' + p.fp + ')\n' +
+               '= ' + pct + '%';
+      },
+      npv: function(p) {
+        var num = p.tn, den = p.tn + p.fn;
+        var pct = den > 0 ? (num / den * 100).toFixed(1) : '–';
+        return 'TN / (TN + FN)\n' +
+               p.tn + ' / (' + p.tn + ' + ' + p.fn + ')\n' +
+               '= ' + pct + '%';
+      }
     };
 
     var METRIC_NOTES = {
@@ -329,12 +370,13 @@
     // ------ explanation (spans full width below the two-column grid) ------
     // Single live note: shows the previewed metric (if hovering) else the
     // selected metric (if locked) else a muted placeholder hint.
-    var notesTitleEl = el('p', { class: 'sensspec-notes-title' }, '');
-    var notesBodyEl  = el('p', { class: 'sensspec-notes-body' }, '');
-    var notesHintEl  = el('p', { class: 'sensspec-notes-hint' },
+    var notesTitleEl   = el('p', { class: 'sensspec-notes-title' }, '');
+    var notesFormulaEl = el('pre', { class: 'role-code-block sensspec-notes-formula' }, '');
+    var notesBodyEl    = el('p', { class: 'sensspec-notes-body' }, '');
+    var notesHintEl    = el('p', { class: 'sensspec-notes-hint' },
       'Click a metric to lock its definition; hover to preview.');
     var notesPanel = el('div', { class: 'sensspec-notes' }, [
-      notesTitleEl, notesBodyEl, notesHintEl
+      notesTitleEl, notesFormulaEl, notesBodyEl, notesHintEl
     ]);
     root.appendChild(notesPanel);
 
@@ -347,7 +389,7 @@
 
     function renderPopulationGrid(pop, hovered) {
       while (popSvg.firstChild) popSvg.removeChild(popSvg.firstChild);
-      var cols = 20, gap = 22, dotSize = 14;
+      var cols = 10, gap = 32, dotSize = 17;
       var total = pop.tp + pop.fn + pop.fp + pop.tn;
       var rows = Math.ceil(total / cols);
       popSvg.setAttribute('viewBox', '-4 -4 ' + (cols * gap + 8) + ' ' + (rows * gap + 8));
@@ -385,6 +427,7 @@
       setSliderFill(specificitySlider);
 
       var pop = generatePopulation(state.prevalence, state.sensitivity, state.specificity);
+      state.pop = pop; // persist so renderNotes() can read live counts
 
       ['tp', 'fn', 'fp', 'tn'].forEach(function(key) {
         matrixCells[key].count.textContent = pop[key];
@@ -440,15 +483,18 @@
     function renderNotes() {
       var active = state.previewed || state.selected;
       if (active && METRIC_NOTES[active]) {
-        notesTitleEl.textContent = METRIC_NOTES[active].title;
-        notesBodyEl.textContent  = METRIC_NOTES[active].body;
-        notesTitleEl.style.display = '';
-        notesBodyEl.style.display  = '';
-        notesHintEl.style.display  = 'none';
+        notesTitleEl.textContent   = METRIC_NOTES[active].title;
+        notesFormulaEl.textContent = state.pop ? METRIC_CALC[active](state.pop) : '';
+        notesBodyEl.textContent    = METRIC_NOTES[active].body;
+        notesTitleEl.style.display   = '';
+        notesFormulaEl.style.display = '';
+        notesBodyEl.style.display    = '';
+        notesHintEl.style.display    = 'none';
       } else {
-        notesTitleEl.style.display = 'none';
-        notesBodyEl.style.display  = 'none';
-        notesHintEl.style.display  = '';
+        notesTitleEl.style.display   = 'none';
+        notesFormulaEl.style.display = 'none';
+        notesBodyEl.style.display    = 'none';
+        notesHintEl.style.display    = '';
       }
     }
 
