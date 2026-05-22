@@ -286,6 +286,9 @@
           { label: 'reference', text: 'Pointers to external systems: Linear boards, dashboards, design docs.' }
         ]
       },
+      resources: [
+        '[Auto-memory and auto-dream: how Claude Code learns and consolidates its memory](https://antoniocortes.com/en/2026/03/30/auto-memory-and-auto-dream-how-claude-code-learns-and-consolidates-its-memory/)'
+      ],
       seeAlso: { nodeId: 'sessions', label: 'Sessions (~/.claude/projects/)' }
     },
     'settings-local': {
@@ -443,16 +446,25 @@
     return el('i', { class: 'fa fa-' + name + (extraClass ? ' ' + extraClass : ''), 'aria-hidden': 'true' });
   }
 
-  // Lightweight inline-markdown renderer: **bold**, `code`.
+  // Lightweight inline-markdown renderer: **bold**, `code`, [text](url).
   function renderInline(text) {
     var frag = document.createDocumentFragment();
-    var parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/);
+    var parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/);
     parts.forEach(function(part) {
       if (!part) return;
       if (part.substr(0, 2) === '**' && part.substr(-2) === '**') {
         frag.appendChild(el('strong', { class: 'ce-bold' }, part.slice(2, -2)));
       } else if (part.charAt(0) === '`' && part.charAt(part.length - 1) === '`') {
         frag.appendChild(el('code', { class: 'ce-code' }, part.slice(1, -1)));
+      } else if (part.charAt(0) === '[') {
+        var m = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (m) {
+          frag.appendChild(el('a', {
+            href: m[2], target: '_blank', rel: 'noopener noreferrer'
+          }, m[1]));
+        } else {
+          frag.appendChild(document.createTextNode(part));
+        }
       } else {
         frag.appendChild(document.createTextNode(part));
       }
@@ -563,10 +575,10 @@
       /* Dropdown · disclosure (Design Language v3). Bar sits on
          --paper-inset (the lighter raised-chip surface in dark, near
          paper in light), body inherits the frame's --paper-raised. */
-      '.claudeenv .ce-panel-head { background: var(--paper-inset); border-bottom: 1px solid var(--line); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }',
+      '.claudeenv .ce-panel-head { background: var(--paper-inset); border-bottom: 1px solid var(--line); padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: border-bottom-color 0.2s ease; }',
       // line-height: var(--lh-snug) ≈ 1.2 overrides Minima's 1.5 default,
       // giving the bar the tighter height the v3 spec produces.
-      '.claudeenv .ce-panel-head-label { font-family: var(--font-display); font-size: var(--size-lg); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); }',
+      '.claudeenv .ce-panel-head-label { font-family: var(--font-display); font-size: 18px; font-weight: 500; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); }',
       '.claudeenv .ce-tree-controls { display: flex; gap: 4px; }',
       /* Border at --ink-faint (not --line) so the 1px edge stays legible
          in dark mode, where --line sits very close to --paper. */
@@ -665,13 +677,14 @@
       '.claudeenv .ce-inspector-extended-table tr:first-child td { border-top: none; }',
       '.claudeenv .ce-inspector-extended-table td.ce-inspector-extended-item-label { font-family: var(--font-text); font-size: var(--size-smd); font-weight: 600; letter-spacing: var(--track-snug); color: var(--ink-primary); white-space: nowrap; width: 1%; border-right: 1px solid var(--table-line); }',
       '.claudeenv .ce-inspector-extended-table td.ce-inspector-extended-item-text { font-family: var(--font-text); font-size: var(--size-md); color: var(--ink-secondary); }',
-      /* code.block: paper-inset bg, line border, sx-text, mono, smd. */
-      '.claudeenv .ce-inspector-example { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
+      /* code.block: paper-sunk bg, line border, 12px radius — matches .role-code-block. */
+      '.claudeenv .ce-inspector-example { background: var(--paper-sunk); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-family: var(--font-mono); font-size: var(--size-smd); color: var(--sx-text); white-space: pre; overflow-x: auto; line-height: 1.55; margin: 0; }',
+      '.claudeenv .ce-inspector-prose-example { font-family: var(--font-display); color: var(--ink-secondary); font-size: 15px; line-height: 1.65; white-space: pre-wrap; margin: 0; }',
       /* code.block-frame + code.block-header (design language): titled
          wrapper around .ce-inspector-example, so the file path shows in
          its own mono strip above the code instead of pretending to be a
          markdown heading inside the block. */
-      '.claudeenv .ce-inspector-example-wrap { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 0; }',
+      '.claudeenv .ce-inspector-example-wrap { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin: 0; }',
       '.claudeenv .ce-inspector-example-header { background: var(--paper-inset); border-bottom: 1px solid var(--line); color: var(--ink-muted); font-family: var(--font-mono); font-size: var(--size-xs); padding: 8px 14px; }',
       '.claudeenv .ce-inspector-example-wrap > .ce-inspector-example { background: var(--paper); border: none; border-radius: 0; }',
 
@@ -752,7 +765,16 @@
          (so it reads as `>` pointing right), back to 0 when expanded. */
       '.claudeenv .ce-panel-chevron { color: var(--ink-muted); transform: rotate(-90deg); transition: transform 0.15s; flex-shrink: 0; }',
       '.claudeenv .ce-panel-chevron.open { transform: rotate(0deg); }',
+      // Default body height (non-wide layout). In wide layout (≥1600px),
+      // a later media query swaps this for flex:1 so the body stretches to
+      // fill the synced panel height. JS togglePanel() animates between
+      // these natural heights and 0 by inlining height/padding/opacity for
+      // the duration of the transition.
       '.claudeenv .ce-panel-body-scroll { height: 440px; overflow-y: auto; }',
+      // Static collapsed state (applies on a fresh rerender while the
+      // panel is closed). flex:none cancels the wide-layout flex:1 so the
+      // 0 height actually wins.
+      '.claudeenv .ce-panel.collapsed .ce-panel-body-scroll { height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; flex: none; opacity: 0; }',
       '.claudeenv .ce-panel.collapsed .ce-panel-head { border-bottom-color: transparent; }',
       // Collapsed disclosure: stop the grid from stretching the frame
       // beyond the bar; otherwise the empty --paper-raised area below
@@ -1751,6 +1773,91 @@
       return head;
     }
 
+    // Imperative toggle with a measured slide animation. Avoids a full
+    // rerender (which would replace the body element and skip the
+    // transition). Measures the body's natural height in its target
+    // layout, then animates inline height/padding/opacity between that
+    // value and zero. After the transition, inline styles are cleared
+    // and the static CSS (height:440px or wide-layout flex:1, or the
+    // .collapsed rule) takes back over.
+    var TRANSITION_MS = 280;
+    var TRANSITION_CSS = 'height ' + (TRANSITION_MS / 1000) + 's cubic-bezier(0.4, 0, 0.2, 1), padding-top ' + (TRANSITION_MS / 1000) + 's cubic-bezier(0.4, 0, 0.2, 1), padding-bottom ' + (TRANSITION_MS / 1000) + 's cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease';
+    function togglePanel(panel, stateKey) {
+      var open = !state[stateKey];
+      state[stateKey] = open;
+      var body = panel.querySelector('.ce-panel-body-scroll');
+      var chevron = panel.querySelector('.ce-panel-chevron');
+      if (chevron) chevron.classList.toggle('open', open);
+      if (!body) {
+        panel.classList.toggle('collapsed', !open);
+        setTimeout(syncWideHeights, TRANSITION_MS + 20);
+        return;
+      }
+      // In wide layout (≥1600px) the body has flex: 1 1 0% which makes
+      // flex-grow override an inline `height: 0`, so the animation never
+      // actually shrinks. We have to inline `flex: none` for the duration
+      // of the slide so our height value wins, then clear it afterwards
+      // to let the media-query flex re-stretch the body.
+      if (open) {
+        panel.classList.remove('collapsed');
+        body.style.transition = 'none';
+        body.style.flex = '';
+        body.style.height = '';
+        body.style.paddingTop = '';
+        body.style.paddingBottom = '';
+        body.style.overflow = '';
+        body.style.opacity = '';
+        var target = body.offsetHeight;
+        body.style.flex = 'none';
+        body.style.height = '0px';
+        body.style.paddingTop = '0px';
+        body.style.paddingBottom = '0px';
+        body.style.overflow = 'hidden';
+        body.style.opacity = '0';
+        body.offsetHeight;
+        body.style.transition = TRANSITION_CSS;
+        body.style.height = target + 'px';
+        body.style.paddingTop = '';
+        body.style.paddingBottom = '';
+        body.style.opacity = '1';
+        setTimeout(function() {
+          body.style.transition = '';
+          body.style.flex = '';
+          body.style.height = '';
+          body.style.overflow = '';
+          body.style.opacity = '';
+          syncWideHeights();
+        }, TRANSITION_MS + 20);
+      } else {
+        var current = body.offsetHeight;
+        body.style.transition = 'none';
+        body.style.flex = 'none';
+        body.style.height = current + 'px';
+        body.style.overflow = 'hidden';
+        body.style.opacity = '1';
+        body.offsetHeight;
+        body.style.transition = TRANSITION_CSS;
+        body.style.height = '0px';
+        body.style.paddingTop = '0px';
+        body.style.paddingBottom = '0px';
+        body.style.opacity = '0';
+        panel.classList.add('collapsed');
+        setTimeout(function() {
+          // Clear inline so the static .collapsed CSS (height:0, flex:none,
+          // padding:0, opacity:0) takes over. A subsequent expand reads its
+          // target by removing .collapsed and remeasuring.
+          body.style.transition = '';
+          body.style.flex = '';
+          body.style.height = '';
+          body.style.paddingTop = '';
+          body.style.paddingBottom = '';
+          body.style.overflow = '';
+          body.style.opacity = '';
+          syncWideHeights();
+        }, TRANSITION_MS + 20);
+      }
+    }
+
     function renderContext() {
       contextPanel.innerHTML = '';
       contextPanel.classList.toggle('collapsed', !state.contextOpen);
@@ -1758,11 +1865,9 @@
       var head = renderPanelHead('Context', {
         collapsible: true,
         expanded: state.contextOpen,
-        onToggle: function() { state.contextOpen = !state.contextOpen; rerender(); }
+        onToggle: function() { togglePanel(contextPanel, 'contextOpen'); }
       });
       contextPanel.appendChild(head);
-
-      if (!state.contextOpen) return;
 
       var body = el('div', { class: 'ce-context-body ce-panel-body-scroll' });
       contextPanel.appendChild(body);
@@ -1954,11 +2059,9 @@
       var head = renderPanelHead('Inspector', {
         collapsible: true,
         expanded: state.inspectorOpen,
-        onToggle: function() { state.inspectorOpen = !state.inspectorOpen; rerender(); }
+        onToggle: function() { togglePanel(inspectorPanel, 'inspectorOpen'); }
       });
       inspectorPanel.appendChild(head);
-
-      if (!state.inspectorOpen) return;
 
       var body = el('div', { class: 'ce-inspector-body ce-panel-body-scroll' });
       inspectorPanel.appendChild(body);
@@ -1999,6 +2102,17 @@
             suggList.appendChild(li);
           });
           body.appendChild(suggList);
+
+          body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Resources'));
+          var resList = el('ul', { class: 'ce-instr-tips' });
+          [
+            '[Auto-memory and auto-dream: how Claude Code learns and consolidates its memory](https://antoniocortes.com/en/2026/03/30/auto-memory-and-auto-dream-how-claude-code-learns-and-consolidates-its-memory/)'
+          ].forEach(function(r) {
+            var li = el('li', null);
+            li.appendChild(renderInline(r));
+            resList.appendChild(li);
+          });
+          body.appendChild(resList);
 
           // "Instructions can be viewed as" styled like a description paragraph
           var intro = el('p', { class: 'ce-inspector-desc' }, 'Instructions can be viewed as');
@@ -2059,7 +2173,11 @@
         // Concrete interaction example (aggregation + override demonstration)
         if (layer.interactionExample) {
           body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Worked example'));
-          body.appendChild(el('pre', { class: 'ce-inspector-example' }, layer.interactionExample));
+          if (state.selectedLayer === 'memory') {
+            body.appendChild(el('div', { class: 'ce-inspector-prose-example' }, layer.interactionExample));
+          } else {
+            body.appendChild(el('pre', { class: 'ce-inspector-example' }, layer.interactionExample));
+          }
         }
 
 
@@ -2117,6 +2235,16 @@
         });
         extTable.appendChild(extTbody);
         body.appendChild(extTable);
+      }
+      if (node.resources && node.resources.length) {
+        body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'Resources'));
+        var nodeResList = el('ul', { class: 'ce-instr-tips' });
+        node.resources.forEach(function(r) {
+          var li = el('li', null);
+          li.appendChild(renderInline(r));
+          nodeResList.appendChild(li);
+        });
+        body.appendChild(nodeResList);
       }
       if (node.example) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'Example'));
