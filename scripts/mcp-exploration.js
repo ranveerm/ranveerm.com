@@ -994,19 +994,7 @@
     transSpan.appendChild(t(': ', 'var(--ink-faint)'));
     transSpan.appendChild(t('"http://localhost:7331/mcp"', 'var(--sx-string)'));
 
-    pre.appendChild(t('{\n  "mcpServers": {\n    ', 'var(--ink-faint)'));
-    pre.appendChild(nameSpan);
-    pre.appendChild(t(': {\n      ', 'var(--ink-faint)'));
-    pre.appendChild(cmdSpan);
-    pre.appendChild(t(',\n      ', 'var(--ink-faint)'));
-    pre.appendChild(argsSpan);
-    pre.appendChild(t(',\n      ', 'var(--ink-faint)'));
-    pre.appendChild(envSpan);
-    pre.appendChild(t('\n    },\n    ', 'var(--ink-faint)'));
-    pre.appendChild(t('"web-preview"', 'var(--coral)'));
-    pre.appendChild(t(': {\n      ', 'var(--ink-faint)'));
-    pre.appendChild(transSpan);
-    pre.appendChild(t('\n    }\n  }\n}', 'var(--ink-faint)'));
+    pre.appendChild(t('// TODO', 'var(--ink-muted)'));
 
     codePanel.appendChild(pre);
     grid.appendChild(codePanel);

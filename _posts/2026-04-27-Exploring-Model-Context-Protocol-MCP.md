@@ -6,7 +6,7 @@ categories: jekyll update
 tags: [LLM]
 ---
 
-<div class="role-code-prompt" style="display:flex;gap:8px;padding:16px 18px;max-width:640px;margin:0 0 22px;">
+<div class="role-code-prompt" style="display:flex;gap:8px;padding:16px 18px;margin:0 0 22px;">
   <span class="role-code-prompt-glyph" style="user-select:none">claude&gt;</span>
   <span class="mcp-typed-text"></span>
 </div>

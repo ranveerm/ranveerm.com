@@ -41,7 +41,9 @@
       '.gm-section { margin-bottom: 64px; }',
       '.gm-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }',
       '.gm-eyebrow .role-post-section-rule { flex: 1; }',
-      '.gm-section-title { font-family: var(--font-display); font-size: var(--size-h2); color: var(--ink-primary); font-weight: 400; letter-spacing: var(--track-snug); line-height: var(--lh-snug); margin: 0 0 14px; }',
+      // Typography comes from .role-post-title-feed (added alongside on
+      // the same <h2>); .gm-section-title only carries the layout margin.
+      '.gm-section-title { margin: 0 0 14px; }',
       '.gm-body { color: var(--ink-secondary); font-family: var(--font-display); font-size: 18px; font-weight: 400; line-height: var(--lh-loose); margin-bottom: 22px; }',
       '.gm-panel + .gm-body, .gm-panel + .gm-table-wrap { margin-top: 36px; }',
       '.gm-table-wrap + .gm-body, .gm-table-wrap + .gm-table-wrap { margin-top: 20px; }',
@@ -265,7 +267,7 @@
         '<span class="role-post-section-index">' + String(num).padStart(2, '0') + '</span>' +
         '<div class="role-post-section-rule"></div>' +
       '</div>' +
-      '<h2 class="gm-section-title">' + title + '</h2>';
+      '<h2 class="role-post-section-heading gm-section-title">' + title + '</h2>';
     return wrap;
   }
 

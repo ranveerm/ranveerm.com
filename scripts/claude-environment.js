@@ -170,18 +170,8 @@
     'claude-json': {
       layer: 'config', label: '~/.claude.json', icon: 'file-text-o',
       title: '~/.claude.json',
-      description: 'User-owned state file. Holds everything that must stay personal and out of version control: OAuth session, MCP server configs, per-project trust grants, and machine-level preferences. Never committed.',
-      priority: 'Not part of the settings.json precedence chain; managed separately',
+      description: '`// TODO`',
       tokens: 0,
-      tokenNote: 'Does not enter the model context.',
-      extended: {
-        heading: 'What lives here (and why not in settings.json)',
-        body: [
-          { label: '/config interface', text: 'The `/config` command is the interactive interface for both files. Behavioural settings (permissions, model) write to `settings.json`. MCP server management, OAuth auth flow, and machine preferences write here.' },
-          { label: 'vs settings.json', text: '`settings.json` is structured and shareable; it can live at project scope and be committed. This file holds user-specific state that must never reach a repo: the OAuth session, per-project tool-trust grants, caches, and machine preferences like `autoConnectIde`.' },
-          { label: 'Personal MCP vs .mcp.json', text: '`.mcp.json` is committed to git and shared with the team. Personal servers (private API keys, home-machine utilities) and local-scope servers that apply only to one project but carry credentials belong here instead.' }
-        ]
-      }
     },
     keybindings: {
       layer: 'config', label: 'keybindings.json', icon: 'keyboard-o',
