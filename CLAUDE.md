@@ -90,6 +90,40 @@ do not introduce fresh ad-hoc colours or sizes. Categorical hues that
 carry information (e.g. the green/orange/red/blue outcome classes in
 the sensitivity widget) are the only acceptable exception.
 
+### Where widget styles live
+
+**Every widget rule belongs in `_sass/_theme.scss`. No exceptions.** JS
+files in `/scripts/` may apply class names to DOM elements; they must
+not inject `<style>` blocks, set `style.cssText` for typography, or
+otherwise paint colour, size, font, border, or background properties
+at runtime. Inline `style.X = Y` is acceptable only for genuinely
+runtime values (layout/animation, dynamic colours computed from data,
+positioning).
+
+When adding a new widget script:
+
+1. Apply existing `.role-*` classes from the upstream design language
+   first. Most patterns (panels, tabs, code blocks, pills, eyebrows,
+   metadata key/value pairs, etc.) already have a role.
+2. For patterns the upstream design language does not cover yet, add a
+   `.role-*` definition under the `// PROPOSED ROLES (pending upstream
+   Design Language v3 acceptance)` section in `_sass/_theme.scss` and
+   record it in `.claude/upstream-design-additions.md` so the proposal
+   can be put to the upstream author.
+3. For genuinely page-scoped rules that should not become shared roles
+   (SVG selectors, animation keyframes, one-off layout primitives), add
+   a `// Widget specifics: <name>` block at the bottom of
+   `_sass/_theme.scss` with the original widget prefix retained (e.g.
+   `.mcp-arch-desc`, `.gm-table`, `.sensspec-popgrid`).
+4. The JS file should reference class names only. If you find yourself
+   writing `el.style.color = 'var(--coral)'` or `el.style.cssText =
+   'font-family:...; font-size:...'`, that is a regression: those
+   values belong in the SCSS recipe.
+
+A historical exception: `.claude/skills/sync-design` may still find
+small stragglers of inline type-painting in scripts authored before
+the consolidation. Replace them when touched; do not add new ones.
+
 Design revisions arrive as new `Design Language.html` bundle URLs
 (`https://api.anthropic.com/v1/design/h/<id>?open_file=Design+Language.html`).
 On update, diff the new bundle's `FOUNDATION` map against the current
