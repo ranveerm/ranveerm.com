@@ -34,93 +34,7 @@
     tn: 'True Negative'
   };
 
-  var stylesInjected = false;
-  function injectStyles() {
-    if (stylesInjected) return;
-    stylesInjected = true;
-    var css = [
-      /* Widget root -- inherits font-text from the design language. */
-      '.sensspec { max-width: 960px; margin: 0 auto; padding: 8px 0 24px; color: var(--ink-primary); font-family: var(--font-text); }',
-      /* post.body baseline for the intro paragraph. */
-      '.sensspec .sensspec-intro { text-align: center; color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); max-width: 60ch; margin: 0 auto 22px; line-height: var(--lh-normal); }',
-      '.sensspec .sensspec-legend { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }',
-      '.sensspec .sensspec-legend-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); transition: opacity 0.25s ease; }',
-      '.sensspec .sensspec-legend-swatch { width: 12px; height: 12px; }',
-      '.sensspec .sensspec-legend-swatch.square { border-radius: 2px; }',
-      '.sensspec .sensspec-legend-swatch.circle { border-radius: 50%; }',
-      '.sensspec .sensspec-legend-shapes { width: 100%; text-align: center; font-family: var(--font-text); font-size: var(--size-xs); color: var(--ink-faint); letter-spacing: var(--track-eyebrow); text-transform: uppercase; }',
-      /* 2x2 layout. align-items: stretch lets each row pull both cells
-         to the taller side\'s height so the left-hand and right-hand cards
-         line up. */
-      '.sensspec .sensspec-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(0, auto); gap: 18px 22px; align-items: stretch; }',
-      '@media (max-width: 720px) { .sensspec .sensspec-grid { grid-template-columns: 1fr; } }',
-      /* viz.frame: paper-raised, line border, radius 10. */
-      '.sensspec .sensspec-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; }',
-      /* Sliders card: spread vertically so extra height stretches the
-         gaps between sliders rather than leaving an empty block below. */
-      '.sensspec .sensspec-card.sliders { justify-content: space-around; }',
-      /* Population grid card: centre the SVG both axes so stretched height
-         doesn\'t leave the dots floating at the top. */
-      '.sensspec .sensspec-card.center { justify-content: center; align-items: center; }',
-      /* Confusion-matrix card: centre vertically too, same reason. */
-      '.sensspec .sensspec-card.matrix { justify-content: center; }',
-
-      /* Slider -- viz.row-title for the label, mono for the value. */
-      '.sensspec-slider { margin-bottom: 18px; }',
-      '.sensspec-slider:last-child { margin-bottom: 0; }',
-      '.sensspec-slider-row { display: flex; justify-content: space-between; margin-bottom: 6px; }',
-      '.sensspec-slider-label { font-family: var(--font-display); font-size: var(--size-md); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
-      '.sensspec-slider-value { font-family: var(--font-mono); font-size: var(--size-md); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
-      /* Neutral slider styling that matches the MCP post: native accent-color
-         routed through --ink-muted, no per-slider categorical hues. */
-      '.sensspec-slider input[type=range] { width: 100%; accent-color: var(--ink-muted); cursor: pointer; }',
-
-      /* Confusion matrix -- viz.section-label for headers / row labels. */
-      '.sensspec-matrix-header { display: grid; grid-template-columns: 100px 1fr 1fr; gap: 4px; margin-bottom: 4px; }',
-      '.sensspec-matrix-header > div { text-align: center; color: var(--ink-faint); font-family: var(--font-mono); font-size: var(--size-xs); text-transform: uppercase; letter-spacing: var(--track-eyebrow); padding: 6px 0; }',
-      '.sensspec-matrix-row { display: grid; grid-template-columns: 100px 1fr 1fr; gap: 4px; margin-bottom: 4px; }',
-      '.sensspec-matrix-rowlabel { display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-family: var(--font-mono); font-size: var(--size-xs); text-transform: uppercase; letter-spacing: var(--track-eyebrow); text-align: center; }',
-      /* Higher-contrast border (--ink-faint) so the cells don\'t fade into the card on cooler graphite. */
-      '.sensspec-matrix-cell { background: var(--paper-raised); border: 2px solid var(--ink-faint); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }',
-      '.sensspec-matrix-cell-count { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
-      '.sensspec-matrix-cell-label { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-xs); margin-top: 2px; }',
-
-      /* Metric cells -- default visual matches the confusion-matrix cells.
-         Highlight states adopt the LAYER ROWS recipe from the Claude Code
-         Environment widget (viz.row-hover and viz.row-selected): the
-         preview lifts the background to paper-inset, and the locked
-         selection adds a coral inset rail on the left edge. */
-      '.sensspec-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; grid-auto-rows: 1fr; align-items: stretch; }',
-      '.sensspec-metric-cell { background: var(--paper-raised); border: 2px solid var(--ink-faint); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; justify-content: center; }',
-      '.sensspec-metric-cell.is-previewed { background: var(--paper-inset); border-color: var(--ink-faint); }',
-      '.sensspec-metric-cell.is-selected { background: var(--paper-inset); border-color: var(--ink-muted); box-shadow: inset 3px 0 0 var(--coral); }',
-      '.sensspec-metric-value { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-primary); }',
-      '.sensspec-metric-label { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-xs); margin-top: 2px; }',
-
-      /* Notes panel -- single live entry, driven by the active metric cell.
-         Title matches the inspector section-label recipe (e.g. the "Intent"
-         heading inside the Claude Code Environment widget's layer 1
-         inspector view): display, size-h2b, weight 500, lh-snug, track-snug,
-         ink-primary. Body uses post.body. Empty state shows a muted hint. */
-      '.sensspec-notes { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; background: var(--paper-raised); min-height: 84px; }',
-      '.sensspec-notes-title { font-family: var(--font-display); font-size: var(--size-h2b); font-weight: 500; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); margin: 0 0 8px; }',
-      /* Formula code block: uses the design language's .role-code-block class
-         for surface, border, radius, colour, font, and line-height. Only
-         padding, white-space, tabular-nums, and margin are added here since
-         .role-code-block does not specify them. */
-      '.sensspec-notes-formula { padding: 12px 14px; white-space: pre; font-variant-numeric: tabular-nums; margin: 0 0 12px; }',
-      '.sensspec-notes-body { font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); color: var(--ink-secondary); margin: 0; }',
-      '.sensspec-notes-hint { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); margin: 0; }',
-
-      /* Dot-grid SVG */
-      '.sensspec-popgrid { width: 100%; max-width: 460px; height: auto; }',
-      '.sensspec-popgrid .sensspec-dot { transition: opacity 0.3s ease; }'
-    ].join('\n');
-
-    var style = document.createElement('style');
-    style.textContent = css;
-    document.head.appendChild(style);
-  }
+  // Styles now live in _sass/_theme.scss under "Widget specifics: Sensitivity & Specificity".
 
   function generatePopulation(prev, sens, spec) {
     var sick = Math.round(TOTAL * prev);
@@ -158,7 +72,6 @@
   }
 
   window.createSensitivitySpecificity = function(containerId) {
-    injectStyles();
     var root = document.getElementById(containerId);
     if (!root) return;
     root.classList.add('sensspec');

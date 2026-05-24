@@ -8,128 +8,10 @@
 (function () {
 
   // ------------------------------------------------------------------
-  // Styles, injected once
+  // Styles live in _sass/_theme.scss. Class names map mcp-foo -> role-foo-bar.
+  // See the "Widget specifics: MCP" section there for the small set of rules
+  // that remain page-scoped (SVG selectors, the .mcp-section margin, etc.).
   // ------------------------------------------------------------------
-  var stylesInjected = false;
-  function injectStyles() {
-    if (stylesInjected) return;
-    stylesInjected = true;
-    var css = [
-      '.mcp { font-family: var(--font-text); color: var(--ink-primary); padding: 8px 0 40px; }',
-
-      /* Section headers */
-      '.mcp-section { margin-bottom: 64px; }',
-      '.mcp-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }',
-      '.mcp-eyebrow .role-post-section-rule { flex: 1; }',
-      '.mcp-section-title { font-family: var(--font-display); font-size: var(--size-h2); color: var(--ink-primary); font-weight: 400; letter-spacing: var(--track-snug); line-height: var(--lh-snug); margin: 0 0 14px; }',
-      '.mcp-body { color: var(--ink-secondary); font-family: var(--font-display); font-size: 18px; font-weight: 400; line-height: var(--lh-loose); margin-bottom: 22px; }',
-
-      /* Panel */
-      '.mcp-panel { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }',
-
-      /* Toggle bar */
-      '.mcp-toggle-bar { display: flex; border-bottom: 1px solid var(--line); }',
-      '.mcp-toggle-btn { flex: 1; padding: 12px 16px; background: transparent; border: none; cursor: pointer; font-family: var(--font-mono); font-size: var(--size-sm); color: var(--ink-muted); display: flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 2px solid transparent; transition: color .15s, background .15s; }',
-      '.mcp-toggle-btn:first-child { border-right: 1px solid var(--line); }',
-      '.mcp-toggle-btn.active { color: var(--ink-primary); background: var(--paper-inset); border-bottom-color: var(--coral); }',
-
-      /* Pill */
-      '.mcp-pill { display: inline-block; font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; letter-spacing: var(--track-loose); text-transform: uppercase; font-weight: 500; white-space: nowrap; }',
-
-      /* Stats bar */
-      '.mcp-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--line); }',
-      '.mcp-stat { padding: 16px; text-align: center; border-right: 1px solid var(--line); }',
-      '.mcp-stat:last-child { border-right: none; }',
-      '.mcp-stat-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); color: var(--ink-faint); text-transform: uppercase; margin-bottom: 6px; }',
-      '.mcp-stat-value { font-family: var(--font-display); font-size: 28px; font-weight: 400; }',
-
-      /* Tabs, desktop: horizontal bar with coral 2px bottom indicator.
-         Mobile (≤640px): vertical segmented list with 3px coral left bar
-         on the active row. !important is required on the mobile active rule
-         because §03/§08 apply borderBottomColor as an inline style. */
-      '.mcp-tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }',
-      '.mcp-tab { padding: 14px 18px; background: transparent; border: none; border-right: 1px solid var(--line); cursor: pointer; font-family: var(--font-display); font-size: var(--size-lg); color: var(--ink-muted); border-bottom: 2px solid transparent; transition: color .15s, background .15s; white-space: nowrap; flex: 1; min-width: 90px; letter-spacing: var(--track-snug); }',
-      '.mcp-tab:last-child { border-right: none; }',
-      '.mcp-tab.active { color: var(--ink-primary); background: var(--paper-inset); border-bottom-color: var(--coral); }',
-      '@media (max-width: 640px) {' +
-        '.mcp-tabs { flex-direction: column; border-bottom: none; overflow-x: visible; }' +
-        '.mcp-tab { border-right: none; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; text-align: left; padding: 14px 18px 14px 17px; }' +
-        '.mcp-tab:last-child { border-bottom: none; }' +
-        '.mcp-tab.active { border-bottom-color: var(--line) !important; border-left-color: var(--coral) !important; }' +
-      '}',
-
-      /* Code */
-      '.mcp-code-header { padding: 8px 14px; background: var(--paper-inset); border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-muted); display: flex; align-items: center; gap: 8px; }',
-      '.mcp-code { margin: 0; padding: 16px; background: var(--paper); font-family: var(--font-mono); font-size: var(--size-smd); color: var(--ink-secondary); line-height: 1.6; overflow: auto; border: none; }',
-      '.mcp-code-wrap { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }',
-
-      /* Architecture */
-      '.mcp-arch-desc { border-top: 1px solid var(--line); padding: 20px; background: var(--paper-raised); }',
-      '.mcp-arch-node-btns { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); flex-wrap: wrap; }',
-      '.mcp-arch-btn { padding: 6px 12px; background: transparent; border: 1px solid var(--line); border-radius: 4px; font-family: var(--font-mono); font-size: var(--size-xs); cursor: pointer; color: var(--ink-muted); transition: all .2s; }',
-
-      /* Flow controls */
-      '.mcp-flow-controls { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); gap: 8px; background: var(--paper-inset); flex-wrap: wrap; }',
-      '.mcp-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: transparent; border: 1px solid var(--line); border-radius: 4px; font-family: var(--font-mono); font-size: var(--size-xs); cursor: pointer; color: var(--ink-muted); transition: all .15s; }',
-      '.mcp-btn:disabled { opacity: 0.35; cursor: default; }',
-      '.mcp-btn.accent { border-color: var(--coral); color: var(--coral); }',
-      '.mcp-swimlane { display: grid; grid-template-columns: repeat(5, 1fr); border-bottom: 1px solid var(--line); }',
-      '.mcp-lane { padding: 14px 8px; border-right: 1px solid var(--line); text-align: center; transition: background .25s; min-height: 64px; display: flex; flex-direction: column; align-items: center; gap: 8px; }',
-      '.mcp-lane:last-child { border-right: none; }',
-      '.mcp-lane-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: var(--track-eyebrow); text-transform: uppercase; }',
-      '.mcp-lane-dot { width: 8px; height: 8px; border-radius: 999px; animation: mcp-pulse 1.4s infinite; }',
-      '.mcp-step-strip { display: flex; border-top: 1px solid var(--line); background: var(--paper-inset); }',
-      '.mcp-step-btn { flex: 1; padding: 10px 4px; background: transparent; border: none; border-right: 1px solid var(--line); cursor: pointer; font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); transition: all .2s; }',
-      '.mcp-step-btn:last-child { border-right: none; }',
-      '.mcp-step-btn.active { color: var(--ink-primary); }',
-
-      /* Config hover annotations */
-      '.mcp-config-grid { display: grid; grid-template-columns: 1fr 260px; gap: 14px; align-items: start; }',
-      '@media (max-width: 700px) { .mcp-config-grid { grid-template-columns: 1fr; } }',
-      '.mcp-annotated { cursor: pointer; border-radius: 2px; padding: 0 2px; outline: 1px solid transparent; transition: all .15s; }',
-      '.mcp-annotated:hover { background: color-mix(in srgb, var(--coral) 12%, transparent); outline-color: color-mix(in srgb, var(--coral) 40%, transparent); }',
-      '.mcp-annot-panel { padding: 16px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; position: sticky; top: 100px; transition: background .2s; }',
-      '.mcp-annot-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); color: var(--ink-faint); margin-bottom: 8px; }',
-      '.mcp-annot-title { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--ink-primary); margin-bottom: 8px; }',
-      '.mcp-annot-body { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-muted); line-height: var(--lh-normal); }',
-
-      /* Multi-server timeline */
-      '.mcp-server-pills { display: flex; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--line); }',
-      '.mcp-server-pill { padding: 6px 12px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--font-mono); font-size: var(--size-xs); color: var(--ink-faint); display: flex; align-items: center; gap: 6px; transition: all .25s; }',
-      '.mcp-timeline-item { display: grid; grid-template-columns: 32px 1fr; gap: 14px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px dashed var(--line); cursor: pointer; transition: opacity .25s; }',
-      '.mcp-timeline-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }',
-      '.mcp-timeline-num { width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 600; flex-shrink: 0; }',
-
-      /* Startup steps */
-      '.mcp-steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }',
-      '@media (max-width: 700px) { .mcp-steps-grid { grid-template-columns: repeat(2, 1fr); } }',
-      '.mcp-step-card { padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; }',
-
-      /* Recap */
-      '.mcp-recap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }',
-      '@media (max-width: 600px) { .mcp-recap-grid { grid-template-columns: 1fr; } }',
-      '.mcp-recap-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }',
-
-      /* Callout */
-      '.mcp-callout { margin-top: 16px; padding: 16px 18px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; }',
-      '.mcp-callout-label { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }',
-      '.mcp-callout-body { font-family: var(--font-text); font-size: var(--size-md); color: var(--ink-muted); line-height: var(--lh-body); }',
-
-      /* Footnote */
-      '.mcp-footnote { margin-top: 14px; font-family: var(--font-text); font-size: var(--size-md); color: var(--ink-muted); line-height: var(--lh-body); font-style: italic; }',
-
-      /* TOC hover: mirror role-toc-row-flash visual treatment. */
-      '.mcp-toc-row { transition: background 0.15s, color 0.15s; }',
-      '.mcp-toc-row:hover { background: var(--paper-inset); }',
-      '.mcp-toc-row:hover .role-toc-title,',
-      '.mcp-toc-row:hover .role-toc-row { color: var(--ink-primary); }',
-
-      '@keyframes mcp-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.3)} }',
-    ].join('\n');
-    var s = document.createElement('style');
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
 
   // ------------------------------------------------------------------
   // Helpers
@@ -145,12 +27,12 @@
     var wrap = div('');
     var id = 'sec-' + String(num).padStart(2, '0');
     wrap.innerHTML =
-      '<div class="mcp-eyebrow" id="' + id + '">' +
+      '<div class="role-widget-section-eyebrow" id="' + id + '">' +
         '<span class="role-post-section-index">' + String(num).padStart(2, '0') + '</span>' +
         '<div class="role-post-section-rule"></div>' +
         '<span class="role-post-section-name">' + kicker + '</span>' +
       '</div>' +
-      '<h2 class="mcp-section-title">' + title + '</h2>';
+      '<h2 class="role-widget-section-heading">' + title + '</h2>';
     return wrap;
   }
 
@@ -205,7 +87,7 @@
       var nn = String(e.num).padStart(2, '0');
       var pp = String(i + 2).padStart(2, '0');
       var row = document.createElement('a');
-      row.className = 'role-toc-row mcp-toc-row';
+      row.className = 'role-toc-row role-toc-row';
       row.href = '#sec-' + nn;
       row.style.cssText = 'display: flex; align-items: baseline; gap: 12px; text-decoration: none; padding: 6px 8px; border-radius: 6px; transition: background 0.15s, color 0.15s;';
       row.innerHTML =
@@ -221,7 +103,7 @@
     root.appendChild(sec);
 
     // Click flash: temporarily apply role-toc-row-flash, then revert.
-    list.querySelectorAll('.mcp-toc-row').forEach(function (row) {
+    list.querySelectorAll('.role-toc-row').forEach(function (row) {
       row.addEventListener('click', function () {
         row.classList.remove('role-toc-row');
         row.classList.add('role-toc-row-flash');
@@ -244,16 +126,16 @@
     sec.appendChild(sectionHeader(1, 'The motivation', 'The integration problem MCP exists to solve'));
 
     // ─────── Top visualisation: topology toggle (Without / With MCP) ───────
-    var topPanel = div('mcp-panel');
+    var topPanel = div('role-panel-frame');
     var withMCP = false;
 
-    var toggleBar = div('mcp-toggle-bar');
+    var toggleBar = div('role-section-tab-bar');
     var btn1 = document.createElement('button');
-    btn1.className = 'mcp-toggle-btn active';
-    btn1.innerHTML = 'Without MCP &nbsp;<span class="mcp-pill" style="color:var(--ink-muted)">M × N integrations</span>';
+    btn1.className = 'role-section-tab active';
+    btn1.innerHTML = 'Without MCP &nbsp;<code class="inline">M × N integrations</code>';
     var btn2 = document.createElement('button');
-    btn2.className = 'mcp-toggle-btn';
-    btn2.innerHTML = 'With MCP &nbsp;<span class="mcp-pill" style="color:var(--coral)">M + N integrations</span>';
+    btn2.className = 'role-section-tab';
+    btn2.innerHTML = 'With MCP &nbsp;<code class="inline">M + N integrations</code>';
     toggleBar.appendChild(btn1);
     toggleBar.appendChild(btn2);
     topPanel.appendChild(toggleBar);
@@ -309,21 +191,21 @@
 
     function setMCP(val) {
       withMCP = val;
-      btn1.className = 'mcp-toggle-btn' + (val ? '' : ' active');
-      btn2.className = 'mcp-toggle-btn' + (val ? ' active' : '');
+      btn1.className = 'role-section-tab' + (val ? '' : ' active');
+      btn2.className = 'role-section-tab' + (val ? ' active' : '');
       svgCont.innerHTML = makeSVG();
     }
     btn1.onclick = function () { setMCP(false); };
     btn2.onclick = function () { setMCP(true); };
 
     // ─────── Body paragraph ───────
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.style.marginTop = '24px';
     body.innerHTML = 'Any LLM application that aspires to be useful needs access to context (files, services, APIs, and so on). In the absence of a shared standard, each application is more or less obliged to build bespoke integrations against every system it wishes to interact with. This is, at its core, an <code class="inline">M × N</code> problem. A common protocol changes its shape fundamentally: each side implements the protocol once and benefits from every other implementation that adopts it.';
     sec.appendChild(body);
 
     // ─────── Bottom visualisation: M & N sliders showing M×N vs M+N ───────
-    var bottomPanel = div('mcp-panel');
+    var bottomPanel = div('role-panel-frame');
     bottomPanel.style.padding = '20px 22px';
 
     var sliderM = 4, sliderN = 4, sliderMin = 1, sliderMax = 20;
@@ -332,8 +214,10 @@
       var row = div('');
       row.style.cssText = 'display:grid;grid-template-columns:140px 1fr 40px;align-items:center;gap:14px;margin-bottom:14px';
 
-      var label = div('');
-      label.style.cssText = 'font-family:var(--font-mono);font-size:var(--size-xs);letter-spacing:var(--track-eyebrow);text-transform:uppercase;color:var(--ink-muted)';
+      // Slider row eyebrow: role-meta-label recipe with an ink-muted override
+      // (the role default is ink-faint; slider labels read a touch heavier).
+      var label = div('role-meta-label');
+      label.style.color = 'var(--ink-muted)';
       label.textContent = labelText;
       row.appendChild(label);
 
@@ -364,8 +248,10 @@
     function makeReadoutCell(labelText, color) {
       var cell = div('');
       cell.style.cssText = 'padding:14px 16px;background:var(--paper-inset);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:8px';
-      var lbl = div('');
-      lbl.style.cssText = 'font-family:var(--font-mono);font-size:var(--size-xs);letter-spacing:var(--track-eyebrow);text-transform:uppercase;color:var(--ink-muted)';
+      // Readout cell eyebrow: role-meta-label recipe + ink-muted override
+      // (slightly heavier than the role default ink-faint).
+      var lbl = div('role-meta-label');
+      lbl.style.color = 'var(--ink-muted)';
       lbl.textContent = labelText;
       cell.appendChild(lbl);
       var num = div('');
@@ -426,23 +312,33 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(2, 'The decision', 'When should you deploy MCP?'));
 
-    var intro = div('mcp-body');
+    var intro = div('role-post-body');
     intro.innerHTML = "The M+N argument is the canonical motivation, but it isn’t the only one worth internalising. There are two more specific signals that suggest MCP is the right layer to reach for.";
     sec.appendChild(intro);
 
-    var panel = div('mcp-panel');
+    var panel = div('role-panel-frame');
 
     SIGNALS.forEach(function (s, i) {
       var row = div('');
       row.style.cssText = 'padding: 20px 22px;' + (i > 0 ? 'border-top: 1px solid var(--line);' : '');
 
-      var labelEl = div('');
-      labelEl.style.cssText = 'font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--coral); margin-bottom: 10px;';
-      labelEl.textContent = String(i + 1).padStart(2, '0') + '  ' + s.label;
-      row.appendChild(labelEl);
+      // Signal header reuses the canonical post.section-index +
+      // post.section-name pattern from upstream Design Language v3, so
+      // signals read as numbered sub-sections of the parent section. No
+      // locally-invented eyebrow role required.
+      var header = div('');
+      header.style.cssText = 'display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;';
+      var idx  = document.createElement('span');
+      idx.className = 'role-post-section-index';
+      idx.textContent = String(i + 1).padStart(2, '0');
+      var name = document.createElement('span');
+      name.className = 'role-post-section-name';
+      name.textContent = s.label;
+      header.appendChild(idx);
+      header.appendChild(name);
+      row.appendChild(header);
 
-      var bodyEl = div('');
-      bodyEl.style.cssText = 'font-family: var(--font-text); font-size: 15px; color: var(--ink-secondary); line-height: var(--lh-body);';
+      var bodyEl = div('role-system-secondary');
       bodyEl.textContent = s.body;
       row.appendChild(bodyEl);
 
@@ -472,17 +368,17 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(3, 'The architecture', 'Host, Client and Server'));
 
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.innerHTML = 'MCP defines 3 components: host, client and server. Unlike the client-server model, the <code class="inline">client</code> isn’t the user-facing application. Each client is, more or less, a single open phone line to one server- an in-process object inside the host that holds the JSON-RPC session for that one connection. A host with three servers configured ends up with three of these lines open simultaneously.';
     sec.appendChild(body);
 
-    var panel = div('mcp-panel');
+    var panel = div('role-panel-frame');
     var active = 'host';
 
     // Component selector tabs, sit at the very top of the panel so the
     // user can pick host / client / server without scrolling past the
     // visualisation first.
-    var btnsBar = div('mcp-tabs');
+    var btnsBar = div('role-section-tab-bar');
     panel.appendChild(btnsBar);
 
     var svgBg = div('');
@@ -641,7 +537,7 @@
       btnsBar.innerHTML = '';
       NODES.forEach(function (n) {
         var btn = document.createElement('button');
-        btn.className = 'mcp-tab' + (n.id === active ? ' active' : '');
+        btn.className = 'role-section-tab' + (n.id === active ? ' active' : '');
         btn.textContent = n.label;
         btn.onclick = function () { setActive(n.id); };
         btnsBar.appendChild(btn);
@@ -649,15 +545,17 @@
     }
 
     function renderDesc() {
+      // Heading and body typography come from .mcp-arch-desc h3 / p in
+      // _sass/_theme.scss (Widget specifics: MCP).
       var node = NODES.find(function (n) { return n.id === active; });
       descArea.innerHTML =
-        '<h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;color:var(--ink-primary);margin:0 0 10px">' + node.label + '</h3>' +
-        '<p style="font-family:var(--font-text);font-size:15px;color:var(--ink-muted);line-height:var(--lh-body);margin:0">' + node.description + '</p>';
+        '<h3>' + node.label + '</h3>' +
+        '<p>' + node.description + '</p>';
     }
 
     panel.appendChild(descArea);
 
-    var wireBody = div('mcp-body');
+    var wireBody = div('role-post-body');
     wireBody.style.marginTop = '20px';
     wireBody.innerHTML =
       'Between client and server, every message takes the form of <a href="https://www.jsonrpc.org/specification" target="_blank" rel="noopener">JSON-RPC 2.0</a>. The underlying transport (i.e. how those messages actually travel) is interchangeable. Local servers typically use <code class="inline">stdio</code>, where the host spawns the server as a subprocess and pipes messages over stdin/stdout. Remote servers use a <a href="https://modelcontextprotocol.io/docs/concepts/transports" target="_blank" rel="noopener">streaming HTTP transport</a> instead.';
@@ -753,19 +651,18 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(4, 'The components', 'MCP Primitives'));
 
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.innerHTML = 'The protocol is intentionally small. The host learns which servers exist from a configuration file (<a href="#sec-07">covered below</a>). How and when those connections are formed is left to the host. Some hosts spawn or open every configured server at startup and keep it alive for the session, which sidesteps the per-invocation startup cost. Others take an ephemeral approach, spawning the server only when one of its tools is required and tearing it down afterwards, which keeps the resource footprint minimal. Either way, every fresh connection is preceded by the same brief <strong>handshake</strong>- the host sends an <code class="inline">initialize</code> request that names the protocol version it speaks and the capabilities it can act as a client for. The server replies with the protocol version it has settled on along with the primitives it supports, and the host closes the loop with an <code class="inline">initialized</code> notification. Only then does it begin enumerating and using whatever the server has on offer. Different primitives are controlled by different entities.';
     sec.appendChild(body);
 
-    var panel = div('mcp-panel');
+    var panel = div('role-panel-frame');
     var active = 'tools';
 
-    var tabsEl = div('mcp-tabs');
+    var tabsEl = div('role-section-tab-bar');
     PRIMS.forEach(function (p) {
       var tab = document.createElement('button');
-      tab.className = 'mcp-tab' + (p.id === active ? ' active' : '');
+      tab.className = 'role-section-tab' + (p.id === active ? ' active' : '');
       tab.textContent = p.name;
-      if (p.id === active) { tab.style.color = p.colorLit; tab.style.borderBottomColor = p.colorLit; }
       tab.onclick = function () { setActive(p.id); };
       tabsEl.appendChild(tab);
     });
@@ -776,35 +673,40 @@
 
     function renderContent() {
       var p = PRIMS.find(function (x) { return x.id === active; });
+      // Subject is either a clickable accent or a static accent label. Both
+      // borrow the upstream meta.label recipe (mono xs uppercase eyebrow
+      // tracking) and override the colour to coral inline; the clickable
+      // case additionally adds cursor + underline (interaction-only inline,
+      // not a typography decision).
       var subjectAttrs = p.controlledByTarget
-        ? ' class="mcp-prim-subject" data-target="' + p.controlledByTarget + '" style="font-family:var(--font-mono);font-size:var(--size-xs);letter-spacing:var(--track-eyebrow);text-transform:uppercase;color:var(--coral);font-weight:500;cursor:pointer;text-decoration:underline;text-underline-offset:3px"'
-        : ' style="font-family:var(--font-mono);font-size:var(--size-xs);letter-spacing:var(--track-eyebrow);text-transform:uppercase;color:var(--coral);font-weight:500"';
-      var labelStyle = 'font-family:var(--font-mono);font-size:var(--size-xs);letter-spacing:var(--track-eyebrow);text-transform:uppercase;color:var(--ink-faint)';
-      var valueStyle = 'font-family:var(--font-mono);font-size:var(--size-sm);color:var(--ink-secondary)';
+        ? ' class="role-meta-label" data-target="' + p.controlledByTarget + '" style="color: var(--coral); cursor: pointer; text-decoration: underline; text-underline-offset: 3px"'
+        : ' class="role-meta-label" style="color: var(--coral)"';
       var meta =
         '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">' +
           '<div>' +
-            '<span style="' + labelStyle + '">controlled by </span>' +
+            '<span class="role-meta-label">controlled by </span>' +
             '<span' + subjectAttrs + '>' + (p.controlledByIcon || '') + p.controlledBy + '</span>' +
           '</div>' +
           '<div>' +
-            '<span style="' + labelStyle + '">example </span>' +
-            '<span style="' + valueStyle + '">' + p.example + '</span>' +
+            '<span class="role-meta-label">example </span>' +
+            '<span class="role-meta-value">' + p.example + '</span>' +
           '</div>' +
           '<div>' +
-            '<span style="' + labelStyle + '">json-rpc method </span>' +
-            '<span style="' + valueStyle + '">' + p.rpcMethod + '</span>' +
+            '<span class="role-meta-label">json-rpc method </span>' +
+            '<span class="role-meta-value">' + p.rpcMethod + '</span>' +
           '</div>' +
         '</div>';
       content.innerHTML =
         meta +
-        '<p style="font-family:var(--font-text);font-size:15px;color:var(--ink-secondary);line-height:var(--lh-body);margin:0 0 20px">' + p.summary + '</p>' +
-        '<div class="mcp-code-wrap">' +
-          '<div class="mcp-code-header">' + p.codeTitle + '</div>' +
-          '<pre class="mcp-code">' + p.code + '</pre>' +
+        '<p class="role-system-secondary" style="margin:0 0 20px">' + p.summary + '</p>' +
+        '<div class="role-code-block-frame">' +
+          '<div class="role-code-block-header">' + p.codeTitle + '</div>' +
+          '<pre class="role-code-block role-code-block-inset">' + p.code + '</pre>' +
         '</div>';
 
-      var subject = content.querySelector('.mcp-prim-subject');
+      // The clickable subject is the one carrying data-target. Selector
+      // matches that attribute directly rather than relying on a class.
+      var subject = content.querySelector('span[data-target]');
       if (subject) {
         subject.onclick = function () {
           var t = subject.dataset.target;
@@ -820,10 +722,9 @@
 
     function setActive(id) {
       active = id;
-      tabsEl.querySelectorAll('.mcp-tab').forEach(function (tab, i) {
+      tabsEl.querySelectorAll('.role-section-tab').forEach(function (tab, i) {
         var p = PRIMS[i];
-        if (p.id === active) { tab.className = 'mcp-tab active'; tab.style.color = p.colorLit; tab.style.borderBottomColor = p.colorLit; }
-        else                 { tab.className = 'mcp-tab'; tab.style.color = ''; tab.style.borderBottomColor = ''; }
+        tab.className = 'role-section-tab' + (p.id === active ? ' active' : '');
       });
       renderContent();
     }
@@ -838,11 +739,11 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(5, 'The distinction', "MCP vs. Claude’s native Tool use"));
 
-    var body1 = div('mcp-body');
+    var body1 = div('role-post-body');
     body1.innerHTML = 'LLM applications such as <a href="/jekyll/update/2026/04/22/The-Claude-Code-Environment.html">Claude Code</a> themselves contain a tool layer. A tool is, in effect, a function-like abstraction: a named operation with typed inputs that the model can invoke when it judges the moment appropriate. Both approaches end up offering the model functions to call, but the difference is where the functions live, who defines them, and how they travel between applications. Under the hood, MCP tools are surfaced to the model as Claude tools (so the model itself is essentially unaware of the difference).';
     sec.appendChild(body1);
 
-    var body2 = div('mcp-body');
+    var body2 = div('role-post-body');
     body2.innerHTML = 'Native tool use is, in essence, <strong>application-defined</strong>- a function is described in the prompt, the model selects one, and the application’s code executes it. MCP, by contrast, is <strong>environment-defined</strong>- tools arrive from external servers configured at the host level, and the host quietly translates them into the tool-call format the model already understands. Whilst the two arrive at the same destination, the path is rather different.';
     sec.appendChild(body2);
 
@@ -868,35 +769,35 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(6, 'A worked example', '”Convert the typeface on my landing page”'));
 
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.textContent = 'The walkthrough below traces a single prompt from the user, through the host and down to the MCP servers it ends up exercising, and then back again.';
     sec.appendChild(body);
 
-    var panel = div('mcp-panel');
+    var panel = div('role-panel-frame');
     var step = 0, playing = false, playTimer = null;
 
     // Controls
-    var controls = div('mcp-flow-controls');
-    var resetBtn = document.createElement('button'); resetBtn.className = 'mcp-btn'; resetBtn.textContent = '↺ reset';
-    var playBtn  = document.createElement('button'); playBtn.className  = 'mcp-btn accent'; playBtn.textContent = '▶ play';
-    var prevBtn  = document.createElement('button'); prevBtn.className  = 'mcp-btn'; prevBtn.innerHTML = '← prev';
-    var nextBtn  = document.createElement('button'); nextBtn.className  = 'mcp-btn accent'; nextBtn.innerHTML = 'next →';
+    var controls = div('role-control-bar');
+    var resetBtn = document.createElement('button'); resetBtn.className = 'role-control-btn'; resetBtn.textContent = '↺ reset';
+    var playBtn  = document.createElement('button'); playBtn.className  = 'role-control-btn accent'; playBtn.textContent = '▶ play';
+    var prevBtn  = document.createElement('button'); prevBtn.className  = 'role-control-btn'; prevBtn.innerHTML = '← prev';
+    var nextBtn  = document.createElement('button'); nextBtn.className  = 'role-control-btn accent'; nextBtn.innerHTML = 'next →';
     var spacer   = div(''); spacer.style.flex = '1';
     var counter  = div(''); counter.style.cssText = 'font-family:var(--font-mono);font-size:var(--size-xs);color:var(--ink-muted)';
     controls.append(resetBtn, playBtn, prevBtn, nextBtn, spacer, counter);
     panel.appendChild(controls);
 
-    var swimlane = div('mcp-swimlane');
+    var swimlane = div('role-swimlane');
     panel.appendChild(swimlane);
 
     var detail = div('');
     detail.style.padding = '20px';
     panel.appendChild(detail);
 
-    var stepStrip = div('mcp-step-strip');
+    var stepStrip = div('role-step-strip');
     STEPS.forEach(function (_, i) {
       var btn = document.createElement('button');
-      btn.className = 'mcp-step-btn';
+      btn.className = 'role-step-btn';
       btn.textContent = String(i + 1).padStart(2, '0');
       btn.onclick = function () { setStep(i); };
       stepStrip.appendChild(btn);
@@ -915,9 +816,9 @@
       swimlane.innerHTML = LANES.map(function (lane) {
         var isActive = s.actor === lane.id || (s.actor === 'model' && lane.id === 'host');
         var lc = ACTOR_COLORS[lane.id] || 'var(--ink-faint)';
-        return '<div class="mcp-lane" style="background:' + (isActive ? lc + '18' : 'transparent') + '">' +
-          '<div class="mcp-lane-label" style="color:' + (isActive ? lc : 'var(--ink-faint)') + '">' + lane.label + '</div>' +
-          (isActive ? '<div class="mcp-lane-dot" style="background:' + lc + ';box-shadow:0 0 8px ' + lc + '"></div>' : '') +
+        return '<div class="role-swimlane-lane" style="background:' + (isActive ? lc + '18' : 'transparent') + '">' +
+          '<div class="role-swimlane-label" style="color:' + (isActive ? lc : 'var(--ink-faint)') + '">' + lane.label + '</div>' +
+          (isActive ? '<div class="role-swimlane-dot" style="background:' + lc + ';box-shadow:0 0 8px ' + lc + '"></div>' : '') +
           '</div>';
       }).join('');
 
@@ -931,19 +832,19 @@
             '<p style="font-family:var(--font-text);font-size:14px;color:var(--ink-muted);line-height:var(--lh-body);margin:0">' + s.detail + '</p>' +
           '</div>' +
         '</div>' +
-        '<div class="mcp-code-wrap">' +
-          '<div class="mcp-code-header"><span style="color:' + ac + '">●</span> ' + kindLabel + '</div>' +
-          '<pre class="mcp-code">' + s.payload + '</pre>' +
+        '<div class="role-code-block-frame">' +
+          '<div class="role-code-block-header"><span style="color:' + ac + '">●</span> ' + kindLabel + '</div>' +
+          '<pre class="role-code-block role-code-block-inset">' + s.payload + '</pre>' +
         '</div>';
 
-      stepStrip.querySelectorAll('.mcp-step-btn').forEach(function (btn, i) {
-        btn.className = 'mcp-step-btn' + (i === step ? ' active' : '');
+      stepStrip.querySelectorAll('.role-step-btn').forEach(function (btn, i) {
+        btn.className = 'role-step-btn' + (i === step ? ' active' : '');
         btn.style.background = i === step ? ac + '22' : '';
       });
     }
 
     function setStep(n) { step = n; renderStep(); }
-    function stopPlay()  { playing = false; clearTimeout(playTimer); playBtn.textContent = '▶ play'; playBtn.className = 'mcp-btn accent'; }
+    function stopPlay()  { playing = false; clearTimeout(playTimer); playBtn.textContent = '▶ play'; playBtn.className = 'role-control-btn accent'; }
     function tick() {
       playTimer = setTimeout(function () {
         if (!playing) return;
@@ -951,7 +852,7 @@
         else { stopPlay(); }
       }, 2200);
     }
-    function startPlay() { playing = true; playBtn.textContent = '⏸ pause'; playBtn.className = 'mcp-btn'; tick(); }
+    function startPlay() { playing = true; playBtn.textContent = '⏸ pause'; playBtn.className = 'role-control-btn'; tick(); }
 
     resetBtn.onclick = function () { stopPlay(); setStep(0); };
     playBtn.onclick  = function () { if (playing) stopPlay(); else startPlay(); };
@@ -976,20 +877,20 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(7, 'Inputs', 'How a server is configured and launched'));
 
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.innerHTML = 'For local stdio servers in particular, configuration reduces to little more than <em>“how to start this process.”</em> The host reads a config file, spawns each server in turn, and pipes JSON-RPC over stdin/stdout (the simplicity here is, arguably, deliberate). Hovering over any of the highlighted fields below should clarify its specific role.';
     sec.appendChild(body);
 
-    var grid = div('mcp-config-grid');
+    var grid = div('role-config-grid');
 
     // Code panel
-    var codePanel = div('mcp-panel');
-    var codeHeader = div('mcp-code-header');
+    var codePanel = div('role-panel-frame');
+    var codeHeader = div('role-code-block-header');
     codeHeader.innerHTML = '<span style="color:var(--coral)">◈</span> ~/.claude.json <span style="color:var(--ink-faint);margin-left:4px">(or .mcp.json in project root)</span>';
     codePanel.appendChild(codeHeader);
 
     var pre = document.createElement('pre');
-    pre.className = 'mcp-code';
+    pre.className = 'role-code-block role-code-block-inset';
     pre.style.cssText = 'padding:18px;font-size:13px;line-height:1.75;background:var(--paper)';
 
     function t(text, color) {
@@ -1000,7 +901,7 @@
     }
     function ann(key) {
       var s = document.createElement('span');
-      s.className = 'mcp-annotated';
+      s.className = 'role-annotated';
       s.dataset.key = key;
       return s;
     }
@@ -1046,11 +947,11 @@
     grid.appendChild(codePanel);
 
     // Annotation side panel
-    var annotPanel = div('mcp-annot-panel');
+    var annotPanel = div('role-annotation-panel');
     function showEmpty() {
       annotPanel.innerHTML =
-        '<div class="mcp-annot-label">Hover a field</div>' +
-        '<div class="mcp-annot-body" style="color:var(--ink-faint);font-style:italic">Hover any highlighted segment in the config to see what it does.</div>';
+        '<div class="role-meta-label">Hover a field</div>' +
+        '<div class="role-annotation-body" style="color:var(--ink-faint);font-style:italic">Hover any highlighted segment in the config to see what it does.</div>';
     }
     showEmpty();
     grid.appendChild(annotPanel);
@@ -1061,26 +962,26 @@
       span.addEventListener('mouseenter', function () {
         var info = ANNOTATIONS[key];
         annotPanel.innerHTML =
-          '<div class="mcp-annot-label" style="color:var(--coral)">Annotation</div>' +
-          '<div class="mcp-annot-title">' + info.title + '</div>' +
-          '<div class="mcp-annot-body">' + info.desc + '</div>';
+          '<div class="role-meta-label" style="color:var(--coral)">Annotation</div>' +
+          '<div class="role-annotation-title">' + info.title + '</div>' +
+          '<div class="role-annotation-body">' + info.desc + '</div>';
         annotPanel.style.background = 'var(--paper-inset)';
       });
       span.addEventListener('mouseleave', function () { showEmpty(); annotPanel.style.background = 'var(--paper-raised)'; });
     });
 
     // Startup sequence
-    var startupCallout = div('mcp-callout');
+    var startupCallout = div('role-info-panel');
     startupCallout.innerHTML =
-      '<div class="mcp-callout-label">Startup Sequence</div>' +
-      '<div class="mcp-steps-grid">' +
+      '<div class="role-info-label">Startup Sequence</div>' +
+      '<div class="role-steps-grid">' +
         [
           { i: '01', label: 'Read config',       desc: 'Host parses mcpServers' },
           { i: '02', label: 'Spawn / connect',   desc: 'stdio: fork + exec. http: open session.' },
           { i: '03', label: 'Initialise',         desc: 'Capability handshake (JSON-RPC)' },
           { i: '04', label: 'List capabilities', desc: 'Pull tools/resources/prompts' },
         ].map(function (s) {
-          return '<div class="mcp-step-card">' +
+          return '<div class="role-step-card">' +
             '<div style="font-family:var(--font-mono);font-size:10px;color:var(--coral);margin-bottom:4px">' + s.i + '</div>' +
             '<div style="font-family:var(--font-text);font-size:13px;font-weight:500;color:var(--ink-primary);margin-bottom:4px">' + s.label + '</div>' +
             '<div style="font-family:var(--font-text);font-size:11px;color:var(--ink-muted);line-height:1.5">' + s.desc + '</div>' +
@@ -1109,7 +1010,7 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(8, 'Composition', 'Many servers, one conversation'));
 
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.innerHTML = "It’s perhaps worth being explicit here: MCP does not define server-to-server pipelines, and there is no built-in chaining mechanism. Instead, the <em>model</em> takes on the role of orchestrator, calling any connected server’s tools across a single turn and weaving the outputs of one into the inputs of another.";
     sec.appendChild(body);
 
@@ -1118,17 +1019,17 @@
     note.textContent = "It’s reasonable to read this as a feature rather than an omission. Each server stays small and independent (which keeps the surface area of any individual implementation manageable), with the coordination work delegated to the host and model.";
     sec.appendChild(note);
 
-    var panel = div('mcp-panel');
+    var panel = div('role-panel-frame');
     var active = 0;
 
     var scenHeader = div('');
     scenHeader.style.cssText = 'padding:16px 18px;border-bottom:1px solid var(--line);background:var(--paper-inset)';
     scenHeader.innerHTML =
-      '<span class="mcp-pill" style="color:var(--ink-muted)">scenario</span>' +
+      '<span class="role-pill" style="color:var(--ink-muted)">scenario</span>' +
       '<p style="font-family:var(--font-display);font-size:17px;color:var(--ink-primary);margin:10px 0 0;line-height:1.4;font-style:italic">“Find recently reported auth bugs, check the codebase and the login error logs, ship a fix, open a PR, and tell the team.”</p>';
     panel.appendChild(scenHeader);
 
-    var pillsWrap = div('mcp-server-pills');
+    var pillsWrap = div('role-pill-row');
     panel.appendChild(pillsWrap);
 
     var timeline = div('');
@@ -1137,19 +1038,19 @@
 
     var navRow = div('');
     navRow.style.cssText = 'display:flex;gap:8px;padding:0 20px 18px';
-    var prevBtn = document.createElement('button'); prevBtn.className = 'mcp-btn'; prevBtn.textContent = '← prev';
-    var nextBtn = document.createElement('button'); nextBtn.className = 'mcp-btn accent'; nextBtn.textContent = 'next call →';
+    var prevBtn = document.createElement('button'); prevBtn.className = 'role-control-btn'; prevBtn.textContent = '← prev';
+    var nextBtn = document.createElement('button'); nextBtn.className = 'role-control-btn accent'; nextBtn.textContent = 'next call →';
     var sp = div(''); sp.style.flex = '1';
-    var rstBtn = document.createElement('button'); rstBtn.className = 'mcp-btn'; rstBtn.textContent = '↺ reset';
+    var rstBtn = document.createElement('button'); rstBtn.className = 'role-control-btn'; rstBtn.textContent = '↺ reset';
     navRow.append(prevBtn, nextBtn, sp, rstBtn);
     panel.appendChild(navRow);
 
     sec.appendChild(panel);
 
-    var callout = div('mcp-callout');
+    var callout = div('role-info-panel');
     callout.innerHTML =
-      '<div class="mcp-callout-label">Note on “Chaining”</div>' +
-      '<div class="mcp-callout-body">A fairly common question is whether MCP servers can call each other directly. They can’t, and arguably shouldn’t: the protocol takes pains to keep each server a clean, self-contained unit of capability. The closest official mechanism is <code class="inline">sampling</code>, by which a server asks <em>the host</em> to run an LLM call on its behalf (which, in turn, may end up invoking other servers). Composition is therefore always mediated by the model, never server-to-server, and this is presumably by design.</div>';
+      '<div class="role-info-label">Note on “Chaining”</div>' +
+      '<div class="role-info-body">A fairly common question is whether MCP servers can call each other directly. They can’t, and arguably shouldn’t: the protocol takes pains to keep each server a clean, self-contained unit of capability. The closest official mechanism is <code class="inline">sampling</code>, by which a server asks <em>the host</em> to run an LLM call on its behalf (which, in turn, may end up invoking other servers). Composition is therefore always mediated by the model, never server-to-server, and this is presumably by design.</div>';
     sec.appendChild(callout);
     root.appendChild(sec);
 
@@ -1162,7 +1063,7 @@
       pillsWrap.innerHTML = SERVERS.map(function (s) {
         var used = MOVES.slice(0, active + 1).some(function (m) { return m.server === s; });
         var c = colorOf(s);
-        return '<div class="mcp-server-pill" style="border-color:' + (used ? c : 'var(--line)') + ';color:' + (used ? c : 'var(--ink-faint)') + ';background:' + (used ? c + '18' : 'transparent') + '">' +
+        return '<div class="role-pill-mono" style="border-color:' + (used ? c : 'var(--line)') + ';color:' + (used ? c : 'var(--ink-faint)') + ';background:' + (used ? c + '18' : 'transparent') + '">' +
           '▪ ' + s + (used ? ' ✓' : '') +
           '</div>';
       }).join('');
@@ -1170,19 +1071,19 @@
       timeline.innerHTML = MOVES.map(function (m, i) {
         var c = colorOf(m.server);
         var isA = i === active;
-        return '<div class="mcp-timeline-item" style="opacity:' + (i <= active ? 1 : 0.3) + '" data-step="' + i + '">' +
-          '<div class="mcp-timeline-num" style="background:' + (isA ? c : c + '20') + ';color:' + (isA ? 'var(--paper)' : c) + '">' + String(i + 1).padStart(2, '0') + '</div>' +
+        return '<div class="role-timeline-step" style="opacity:' + (i <= active ? 1 : 0.3) + '" data-step="' + i + '">' +
+          '<div class="role-timeline-num" style="background:' + (isA ? c : c + '20') + ';color:' + (isA ? 'var(--paper)' : c) + '">' + String(i + 1).padStart(2, '0') + '</div>' +
           '<div>' +
             '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px">' +
               '<code style="font-family:var(--font-mono);font-size:13px;color:' + c + '">' + m.tool + '()</code>' +
-              '<span class="mcp-pill" style="color:' + c + '">' + m.server + '</span>' +
+              '<span class="role-pill" style="color:' + c + '">' + m.server + '</span>' +
             '</div>' +
             '<div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-muted)">' + m.out + '</div>' +
           '</div>' +
           '</div>';
       }).join('');
 
-      timeline.querySelectorAll('.mcp-timeline-item').forEach(function (item) {
+      timeline.querySelectorAll('.role-timeline-step').forEach(function (item) {
         item.onclick = function () { setActive(parseInt(item.dataset.step)); };
       });
     }
@@ -1212,19 +1113,18 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(9, 'Portability', 'Same server. Same protocol. Any host'));
 
-    var body = div('mcp-body');
+    var body = div('role-post-body');
     body.innerHTML = "This is, more or less, the whole point of an open protocol: a server author writes one thing, and every host that speaks MCP is able to make use of it. Config <em>files</em> do differ slightly between hosts (each one having its own preferred way to express what is fundamentally the same launch command), but the server binary, the protocol it speaks, and the tools it exposes are otherwise identical.";
     sec.appendChild(body);
 
-    var panel = div('mcp-panel');
+    var panel = div('role-panel-frame');
     var active = 'claude-code';
 
-    var tabsEl = div('mcp-tabs');
+    var tabsEl = div('role-section-tab-bar');
     CLIENTS.forEach(function (c) {
       var tab = document.createElement('button');
-      tab.className = 'mcp-tab' + (c.id === active ? ' active' : '');
+      tab.className = 'role-section-tab' + (c.id === active ? ' active' : '');
       tab.textContent = c.name;
-      if (c.id === active) { tab.style.color = c.colorLit; tab.style.borderBottomColor = c.colorLit; }
       tab.onclick = function () { setActive(c.id); };
       tabsEl.appendChild(tab);
     });
@@ -1235,11 +1135,11 @@
     function renderCode() {
       var c = CLIENTS.find(function (x) { return x.id === active; });
       codeArea.innerHTML =
-        '<div class="mcp-code-header">' +
+        '<div class="role-code-block-header">' +
           '<span style="color:' + c.colorLit + '">◈</span> ' + c.file +
           ' <span style="color:var(--line)">·</span> <span style="color:' + c.colorLit + '">' + c.name + '</span>' +
         '</div>' +
-        '<pre class="mcp-code" style="font-size:13px;padding:18px">' + c.config + '</pre>';
+        '<pre class="role-code-block role-code-block-inset" style="font-size:13px;padding:18px">' + c.config + '</pre>';
     }
 
     panel.appendChild(codeArea);
@@ -1266,19 +1166,18 @@
     panel.appendChild(comparison);
     sec.appendChild(panel);
 
-    var callout = div('mcp-callout');
+    var callout = div('role-info-panel');
     callout.innerHTML =
-      '<div class="mcp-callout-label">The Open-Protocol Bet</div>' +
-      '<div class="mcp-callout-body">Whilst MCP was introduced by Anthropic, the specification itself is open and the implementations are decentralised, which is presumably the more important property in the long run. The same characteristic that allows a filesystem server to work in Claude Code and Cursor today is, in effect, what allows it to work in whatever new host happens to arrive next year. For a builder, this means writing the server once; for a user, it means a toolbelt that follows them across applications.</div>';
+      '<div class="role-info-label">The Open-Protocol Bet</div>' +
+      '<div class="role-info-body">Whilst MCP was introduced by Anthropic, the specification itself is open and the implementations are decentralised, which is presumably the more important property in the long run. The same characteristic that allows a filesystem server to work in Claude Code and Cursor today is, in effect, what allows it to work in whatever new host happens to arrive next year. For a builder, this means writing the server once; for a user, it means a toolbelt that follows them across applications.</div>';
     sec.appendChild(callout);
     root.appendChild(sec);
 
     function setActive(id) {
       active = id;
-      tabsEl.querySelectorAll('.mcp-tab').forEach(function (tab, i) {
+      tabsEl.querySelectorAll('.role-section-tab').forEach(function (tab, i) {
         var c = CLIENTS[i];
-        if (c.id === active) { tab.className = 'mcp-tab active'; tab.style.color = c.colorLit; tab.style.borderBottomColor = c.colorLit; }
-        else                 { tab.className = 'mcp-tab'; tab.style.color = ''; tab.style.borderBottomColor = ''; }
+        tab.className = 'role-section-tab' + (c.id === active ? ' active' : '');
       });
       renderCode();
     }
@@ -1302,9 +1201,9 @@
     var sec = div('mcp-section');
     sec.appendChild(sectionHeader(10, 'Recap', 'What you now have a model of'));
 
-    var grid = div('mcp-recap-grid');
+    var grid = div('role-summary-grid');
     ITEMS.forEach(function (item, i) {
-      var card = div('mcp-recap-card');
+      var card = div('role-summary-card');
       card.innerHTML =
         '<div style="font-family:var(--font-mono);font-size:10px;letter-spacing:var(--track-eyebrow);color:' + item.c + ';margin-bottom:8px">#' + String(i + 1).padStart(2, '0') + '</div>' +
         '<div style="font-family:var(--font-display);font-size:17px;font-weight:400;color:var(--ink-primary);margin-bottom:8px">' + item.q + '</div>' +
@@ -1329,7 +1228,6 @@
     var container = document.getElementById(containerId);
     if (!container) return;
     container.className = 'mcp';
-    injectStyles();
     startTypewriter();
     buildTOC(container);
     buildProblem(container);

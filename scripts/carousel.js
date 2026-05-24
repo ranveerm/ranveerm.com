@@ -5,134 +5,9 @@
 // with the caption below - no scroll track, no progress indicator.
 
 (function() {
-  var stylesInjected = false;
-
-  function injectStyles() {
-    if (stylesInjected) return;
-    stylesInjected = true;
-    var style = document.createElement('style');
-    style.textContent = [
-      '.carousel-wrapper { margin: 30px 0; }',
-      '.carousel-track {',
-      '  display: flex;',
-      '  overflow-x: auto;',
-      '  scroll-snap-type: x mandatory;',
-      '  -webkit-overflow-scrolling: touch;',
-      '  scroll-behavior: smooth;',
-      '  overscroll-behavior-x: contain;',
-      '  gap: 40px;',
-      '  padding: 50px 0;',
-      '  scrollbar-width: none;',
-      '  will-change: scroll-position;',
-      '}',
-      '.carousel-track::-webkit-scrollbar { display: none; }',
-      '.carousel-item {',
-      '  flex: 0 0 240px;',
-      '  height: 280px;',
-      '  scroll-snap-align: center;',
-      '  transform-origin: center center;',
-      '  display: flex;',
-      '  align-items: center;',
-      '  justify-content: center;',
-      '  transform: scale(0.7);',
-      '  opacity: 0.55;',
-      '  will-change: transform, opacity;',
-      '}',
-      '.carousel-item:first-child { margin-left: calc(50% - 120px); }',
-      '.carousel-item:last-child { margin-right: calc(50% - 120px); }',
-      '.carousel-item img {',
-      '  max-width: 100%;',
-      '  max-height: 100%;',
-      '  object-fit: contain;',
-      '  border-radius: 10px;',
-      '  display: block;',
-      '  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);',
-      '  user-select: none;',
-      '  -webkit-user-drag: none;',
-      '}',
-      '.carousel-text {',
-      '  text-align: center;',
-      '  padding: 0 20px;',
-      '  max-width: 600px;',
-      '  margin: 0 auto 20px;',
-      /* A small floor so very short entries don\'t look cramped. The
-         actual height is JS-animated between entries - see changeText. */
-      '  min-height: 40px;',
-      '  overflow: hidden;',
-      '  transition: opacity 0.25s ease,',
-      '              transform 0.25s ease,',
-      '              height 0.32s cubic-bezier(0.4, 0, 0.2, 1);',
-      '}',
-      '.carousel-text.out-left {',
-      '  opacity: 0;',
-      '  transform: translateX(-20px);',
-      '}',
-      '.carousel-text.out-right {',
-      '  opacity: 0;',
-      '  transform: translateX(20px);',
-      '}',
-      /* carousel-text -- post.title-feed (smaller) for the title, post.body */
-      /* for the description, system.muted italic for the subtitle.          */
-      '.carousel-text .carousel-title { margin: 0 0 6px; font-family: var(--font-display); font-size: var(--size-xl); font-weight: 500; color: var(--ink-primary); letter-spacing: var(--track-snug); }',
-      '.carousel-text .carousel-subtitle { color: var(--ink-muted); font-family: var(--font-display); font-size: var(--size-md); margin: 0 0 10px; font-style: italic; }',
-      '.carousel-text .carousel-description { margin: 0; font-family: var(--font-display); font-size: var(--size-md); color: var(--ink-secondary); line-height: var(--lh-normal); }',
-      '.carousel-text .carousel-subtitle:empty,',
-      '.carousel-text .carousel-description:empty { display: none; }',
-      '.carousel-indicator {',
-      '  display: flex;',
-      '  align-items: center;',
-      '  justify-content: center;',
-      '  gap: 12px;',
-      '  margin: 0 auto 10px;',
-      '  max-width: 400px;',
-      '  font-family: var(--font-text);',
-      '  font-size: var(--size-smd);',
-      '  color: var(--ink-muted);',
-      '}',
-      '.carousel-progress {',
-      '  flex: 1;',
-      '  height: 3px;',
-      '  background: var(--paper-inset);',
-      '  border-radius: 2px;',
-      '  overflow: hidden;',
-      '}',
-      '.carousel-progress-bar {',
-      '  height: 100%;',
-      '  background: var(--coral);',
-      '  border-radius: 2px;',
-      '  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);',
-      '  width: 0%;',
-      '}',
-      '.carousel-count {',
-      '  font-variant-numeric: tabular-nums;',
-      '  white-space: nowrap;',
-      '}',
-      /* Single-item layout - no scroll track, just a centred image + caption.
-         Min-height and bottom margin are relaxed vs. the multi-item carousel
-         because there's no transition buffer to reserve. */
-      '.carousel-single {',
-      '  display: flex;',
-      '  flex-direction: column;',
-      '  align-items: center;',
-      '  justify-content: center;',
-      '  gap: 12px;',
-      '  padding: 20px 0;',
-      '}',
-      '.carousel-single .carousel-text {',
-      '  min-height: 0;',
-      '  margin-bottom: 0;',
-      '}',
-      '.carousel-single .carousel-single-image {',
-      '  max-width: 280px;',
-      '  max-height: 320px;',
-      '  object-fit: contain;',
-      '  border-radius: 10px;',
-      '  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);',
-      '  display: block;',
-      '}'
-    ].join('\n');
-    document.head.appendChild(style);
-  }
+  // Styles live in _sass/_theme.scss under "Widget specifics: Carousel".
+  // The class names are widget-scoped (animation, scroll-snap, single-vs-
+  // multi variants) and don't promote to shared .role-* roles.
 
   function buildSingleItem(container, imageDir, entry) {
     container.classList.add('carousel-wrapper');
@@ -162,8 +37,6 @@
   }
 
   window.createCarousel = function(imageDir, data, containerId) {
-    injectStyles();
-
     var container = document.getElementById(containerId);
     if (!container) return;
 

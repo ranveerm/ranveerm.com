@@ -2,7 +2,7 @@
 //
 // Vanilla JS. Builds the post body so each section reuses the same
 // recipe as the MCP exploration widget, including the role-toc-* TOC
-// frame and the .mcp-tabs / .mcp-arch-desc panel pattern.
+// frame and the .role-section-tab-bar / .mcp-arch-desc panel pattern.
 //
 // All visual styling comes from foundation tokens declared in
 // _sass/_theme.scss (--paper-*, --ink-*, --line, --coral*, --font-*).
@@ -30,223 +30,7 @@
   // here so the widget is self-contained on pages that do not load the
   // MCP script.
   // ------------------------------------------------------------------
-  var stylesInjected = false;
-  function injectStyles() {
-    if (stylesInjected) return;
-    stylesInjected = true;
-    var css = [
-      '.gm { font-family: var(--font-text); color: var(--ink-primary); padding: 8px 0 40px; }',
-
-      /* Section header (mirrors mcp-eyebrow recipe). */
-      '.gm-section { margin-bottom: 64px; }',
-      '.gm-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }',
-      '.gm-eyebrow .role-post-section-rule { flex: 1; }',
-      // Typography comes from .role-post-title-feed (added alongside on
-      // the same <h2>); .gm-section-title only carries the layout margin.
-      '.gm-section-title { margin: 0 0 14px; }',
-      '.gm-body { color: var(--ink-secondary); font-family: var(--font-display); font-size: 18px; font-weight: 400; line-height: var(--lh-loose); margin-bottom: 22px; }',
-      '.gm-panel + .gm-body, .gm-panel + .gm-table-wrap { margin-top: 36px; }',
-      '.gm-table-wrap + .gm-body, .gm-table-wrap + .gm-table-wrap { margin-top: 20px; }',
-      '.gm-body em { color: var(--ink-primary); font-style: italic; }',
-      '.gm-body strong { color: var(--ink-primary); font-weight: 500; }',
-
-      /* Panel + frame (figure surface). */
-      '.gm-panel { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }',
-      '.gm-frame { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 6px; padding: 24px 18px; display: flex; justify-content: center; align-items: center; margin: 4px 0 16px; }',
-      '.gm-frame svg, .gm-svg-bg svg { width: 100%; height: auto; max-width: 640px; display: block; }',
-
-      /* Tabs (reuses .mcp-tabs / .mcp-tab classes). Self-contained
-         redeclaration so the widget works without mcp-exploration.js. */
-      '.mcp-tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }',
-      '.mcp-tab { padding: 14px 18px; background: transparent; border: none; border-right: 1px solid var(--line); cursor: pointer; font-family: var(--font-display); font-size: var(--size-lg); color: var(--ink-muted); border-bottom: 2px solid transparent; transition: color .15s, background .15s; white-space: nowrap; flex: 1; min-width: 90px; letter-spacing: var(--track-snug); }',
-      '.mcp-tab:last-child { border-right: none; }',
-      '.mcp-tab.active { color: var(--ink-primary); background: var(--paper-inset); border-bottom-color: var(--coral); }',
-      '@media (max-width: 640px) {' +
-        '.mcp-tabs { flex-direction: column; border-bottom: none; overflow-x: visible; }' +
-        '.mcp-tab { border-right: none; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; text-align: left; padding: 14px 18px 14px 17px; }' +
-        '.mcp-tab:last-child { border-bottom: none; }' +
-        '.mcp-tab.active { border-bottom-color: var(--line) !important; border-left-color: var(--coral) !important; }' +
-      '}',
-
-      /* SVG background inside a panel (paper-inset, mirrors §02 of MCP). */
-      '.gm-svg-bg { padding: 22px 18px 14px; background: var(--paper-inset); display: flex; justify-content: center; }',
-
-      /* Description area below tabs (paper-raised, top hairline,
-         mirrors .mcp-arch-desc). */
-      '.gm-arch-desc { border-top: 1px solid var(--line); padding: 20px; background: var(--paper-raised); }',
-      '.gm-arch-desc h3 { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--ink-primary); margin: 0 0 10px; letter-spacing: var(--track-snug); }',
-      '.gm-arch-desc p { font-family: var(--font-text); font-size: 15px; color: var(--ink-muted); line-height: var(--lh-body); margin: 0 0 10px; }',
-      '.gm-arch-desc p:last-child { margin-bottom: 0; }',
-      '.gm-arch-desc strong { color: var(--ink-primary); font-weight: 500; }',
-      '.gm-arch-desc em { color: var(--ink-primary); font-style: italic; }',
-      '.gm-arch-desc pre.role-code-block { margin: 8px 0 12px; font-size: 12.5px; }',
-
-      /* Tables. Recipe mirrors .ce-instr-table from claude-environment.js
-         so both posts read with the same surface: paper-table-body
-         background, paper-table-head thead, rounded outer frame, inner
-         hairline grid via per-cell top/right borders. The first block
-         below neutralises minima's element-level defaults (zebra
-         striping, header backgrounds) which bleed through in dark mode. */
-      '.gm-table-wrap { margin: 16px 0; }',
-      '.gm-table-wrap .role-table-frame { width: 100%; border: none; padding: 0; background: transparent; }',
-      /* table-layout: fixed lets each <pre>\'s overflow-x: auto take effect
-         per-cell instead of the longest line forcing the whole table to
-         exceed the post width (which previously clipped "Theirs"). */
-      '.gm-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 0; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; color: inherit; table-layout: fixed; font-family: var(--font-text); font-size: var(--size-smd); }',
-      '.gm-table thead { background: var(--table-head); }',
-      '.gm-table th { font-family: var(--font-text); font-size: var(--size-smd); font-weight: 600; letter-spacing: var(--track-snug); color: var(--ink-primary); padding: 14px 20px; text-align: left; vertical-align: top; border: none; border-right: 1px solid var(--table-line); border-bottom: 1px solid var(--table-line); background: transparent; }',
-      '.gm-table th:last-child { border-right: none; }',
-      '.gm-table tbody tr { background: transparent; }',
-      '.gm-table td { padding: 16px 20px; color: var(--ink-secondary); border: none; border-top: 1px solid var(--table-line); border-right: 1px solid var(--table-line); vertical-align: top; line-height: var(--lh-normal); font-size: var(--size-md); background: transparent; min-width: 0; }',
-      '.gm-table td:last-child { border-right: none; }',
-      '.gm-table tr:first-child td { border-top: none; }',
-      /* Cells that house a <pre> code block (sec 3 file-version table)
-         drop their padding so the code block fills the cell flush.
-         Cell carries the paper code-surface (matching the MCP
-         Primitives recipe), and the pre is transparent + height 100%
-         so the cell\'s background fills the row uniformly even when a
-         column has fewer lines than the others. */
-      '.gm-table td.gm-cell-pre { padding: 0; background: var(--paper); }',
-      '.gm-table td.gm-cell-pre pre.role-code-block { background: transparent; border: none; border-radius: 0; height: 100%; box-sizing: border-box; }',
-      '.gm-table tr:nth-child(even) { background: transparent; }',
-      '.gm-table code { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
-      '.gm-table strong { color: var(--ink-primary); font-weight: 500; }',
-      /* Subtitle inside a header cell (e.g. "(c3)" beside "Merge Base"). */
-      '.gm-table .gm-vershead-sub { color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; font-weight: 400; margin-left: 4px; }',
-      /* Code block inside a cell. Uses .role-code-block from the design
-         language for the surface; we just zero the margin and add padding
-         so it sits flush inside the table cell. Each line is rendered as
-         a .line block-span so newlines come from the layout, not from raw
-         "\n" characters that would compound with display:block.
-         white-space: pre-wrap lets a long line wrap onto a second visual
-         row when the cell is narrow, so we never need a horizontal
-         scrollbar (which previously appeared even when not strictly
-         needed due to subpixel rounding). */
-      '.gm .gm-table pre.role-code-block { margin: 0; padding: 12px 14px; white-space: pre-wrap; overflow-wrap: break-word; overflow: hidden; line-height: 1.55; }',
-      '.gm .gm-table pre.role-code-block .line { display: block; }',
-      /* Conflict-line highlights inside the file-version table follow
-         the same red/green semantic as the conflict block: the Ours
-         column gets the del wash + rule, the Theirs column gets the
-         add wash + rule. The padding compensates 14px to leave room
-         for the 3px stem (-14 + 3 = -11 visual padding-left). */
-      '.gm .gm-table td[data-gm-col="ours"]   pre.role-code-block .line.hl { background: var(--hl-del-bg); box-shadow: inset 3px 0 0 var(--hl-del-rule); margin: 0 -14px; padding: 0 14px 0 17px; color: var(--ink-primary); }',
-      '.gm .gm-table td[data-gm-col="theirs"] pre.role-code-block .line.hl { background: var(--hl-add-bg); box-shadow: inset 3px 0 0 var(--hl-add-rule); margin: 0 -14px; padding: 0 14px 0 17px; color: var(--ink-primary); }',
-      /* Fallback for any other .line.hl occurrence (e.g. base column
-         if a future change introduces one). */
-      '.gm .gm-table pre.role-code-block .line.hl { background: var(--hl-info-bg); box-shadow: inset 3px 0 0 var(--hl-info-rule); margin: 0 -14px; padding: 0 14px 0 17px; color: var(--ink-primary); }',
-
-      /* Note callout */
-      '.gm-note { background: var(--paper-raised); border: 1px solid var(--line); border-left: 3px solid var(--coral); border-radius: 4px; padding: 12px 16px; color: var(--ink-secondary); font-family: var(--font-text); font-size: var(--size-md); line-height: var(--lh-body); margin: 12px 0; }',
-      '.gm-note + .gm-note { margin-top: 8px; }',
-
-      /* Inline mono chip. */
-      '.gm code, .gm-mono { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
-
-      /* Block code listing. Type / colour come straight from the
-         design-language .role-code-block recipe; we only set the
-         margin / padding / line-height here. Per Design Language v3,
-         the surface treatment depends on context:
-
-           - Code that sits directly on the page background keeps the
-             default .role-code-block (paper-inset bg + hairline).
-           - Code that lives inside a panel (.gm-panel) gets the boxed
-             variant: paper bg + no border, reading as an "inset hole"
-             in the surrounding panel.body. This is implemented as a
-             contextual override matching .role-code-block-inset. */
-      '.gm pre.role-code-block { margin: 0 0 16px; padding: 14px 16px; line-height: 1.7; overflow: auto; }',
-      '.gm-panel pre.role-code-block, .gm-table pre.role-code-block { background: var(--paper); border: none; }',
-      '.gm pre.role-code-block .prompt { color: var(--coral); user-select: none; font-weight: 600; }',
-      '.gm pre.role-code-block .cmd { color: var(--ink-primary); }',
-      '.gm pre.role-code-block .cmt { color: var(--sx-comment); font-style: italic; }',
-
-      /* Conflict marker block (§03 + §06). Body uses .role-code-block
-         with block-display .line spans (no raw "\n", so highlighted
-         lines do not introduce an extra newline). The .line / .gm-cm /
-         .gm-cmt / .gm-ours / .gm-theirs helpers live at the widget root
-         so they work inside any role-code-block: §03\'s table cells, §03\'s
-         conflict block, §04\'s commit panel, §06\'s rebase-conflict panel. */
-      '.gm-conflict-wrap { margin: 0 0 14px; }',
-      '.gm-conflict-block { margin: 0; padding: 14px 16px; overflow-x: auto; }',
-      '.gm pre.role-code-block .line { display: block; }',
-      '.gm pre.role-code-block .gm-cm { color: var(--coral); font-weight: 600; }',
-      '.gm pre.role-code-block .gm-cmt { color: var(--sx-comment); font-style: italic; }',
-      /* Conflict halves use the v3 line-highlight roles: ours sits on
-         the del wash (red, the "kept-or-lost" side), theirs on the
-         add wash (green, the incoming change). Each carries the role\'s
-         3px leading rule via inset box-shadow. The negative horizontal
-         margin / padding lets the wash bleed to the block edges. */
-      '.gm pre.role-code-block .gm-ours { background: var(--hl-del-bg); box-shadow: inset 3px 0 0 var(--hl-del-rule); margin: 0 -16px; padding: 0 16px 0 19px; color: var(--ink-primary); }',
-      '.gm pre.role-code-block .gm-theirs { background: var(--hl-add-bg); box-shadow: inset 3px 0 0 var(--hl-add-rule); margin: 0 -16px; padding: 0 16px 0 19px; color: var(--ink-primary); }',
-      '.gm-conflict-foot { color: var(--ink-muted); font-family: var(--font-text); font-size: var(--size-md); line-height: var(--lh-body); margin: 10px 0 0; }',
-      /* Syntax helpers reusing the design language\'s sx-* tokens. */
-      '.gm-kw { color: var(--sx-keyword); font-weight: 500; }',
-      '.gm-str { color: var(--sx-string); }',
-
-      /* Merge-commit variants (§04). Tabbed code block with a fixed
-         min-height so the panel doesn\'t jump as the user switches
-         tabs. The wrapper carries the paper code-surface itself
-         (matching .mcp-code from the MCP Primitives recipe), so the
-         tabs sit on the paper-raised panel above and the commit log
-         reads as a darker "inset" beneath. The inner pre is
-         transparent so the wrapper\'s background fills uniformly. */
-      '.gm-commit-area { background: var(--paper); padding: 14px 16px; min-height: 270px; box-sizing: border-box; }',
-      '.gm-commit-area pre { margin: 0; overflow-x: auto; background: transparent; border: none; border-radius: 0; padding: 0; }',
-      '.gm-commit-area .line { display: block; }',
-      '.gm-commit-area .gm-cmt { color: var(--sx-comment); font-style: italic; }',
-      '.gm-commit-area .gm-key { color: var(--ink-faint); }',
-      '.gm-commit-area .gm-add { color: var(--hl-add-rule); }',
-      '.gm-commit-area .gm-msg { color: var(--ink-primary); }',
-
-      /* Key points list (§05). Plain <ul> with default markers, sized
-         so it sits in the post\'s body type rhythm. */
-      '.gm-keys { color: var(--ink-secondary); font-family: var(--font-text); font-size: var(--size-md); line-height: var(--lh-body); margin: 14px 0 14px 22px; padding: 0; }',
-      '.gm-keys li + li { margin-top: 6px; }',
-      '.gm-keys code { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-inset); border: 1px solid var(--line); color: var(--ink-primary); padding: 1px 6px; border-radius: 3px; }',
-      '.gm-keys em { color: var(--ink-primary); font-style: italic; }',
-
-      /* TOC hover (mirrors mcp-exploration.js). */
-      '.gm-toc-row { transition: background 0.15s, color 0.15s; }',
-      '.gm-toc-row:hover { background: var(--paper-inset); }',
-      '.gm-toc-row:hover .role-toc-title,',
-      '.gm-toc-row:hover .role-toc-row { color: var(--ink-primary); }',
-
-      /* Internal link: prose anchor that triggers a widget-local effect
-         (highlight, pulse). Solid underline in the surrounding text
-         colour so it follows the site\'s link convention rather than
-         competing with it. */
-      '.gm-ilink { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; cursor: pointer; }',
-      '.gm-ilink:hover { color: var(--coral); }',
-
-      /* Radial pulse (§01 merge-base highlight). The ping circle scales
-         outward from the commit centre and fades. Using transform:scale()
-         with transform-box:fill-box keeps the geometric centre fixed
-         across all browsers (animating SVG r in keyframes is not
-         supported on iOS Safari). */
-      '@keyframes gm-radial-ping { 0% { transform: scale(1); opacity: 0.85; } 100% { transform: scale(3.5); opacity: 0; } }',
-      '.gm-radial-pulse { animation: gm-radial-ping 1.2s ease-out 2; opacity: 0; transform-box: fill-box; transform-origin: center; }',
-
-      /* Pulse animation (§04 parent-pointer highlight). */
-      '@keyframes gm-pulse { 0% { stroke-width: 1.5; } 25% { stroke: var(--coral-strong); stroke-width: 3.5; } 50% { stroke-width: 1.5; } 75% { stroke: var(--coral-strong); stroke-width: 3.5; } 100% { stroke-width: 1.5; } }',
-      '.gm-pulse { animation: gm-pulse 1.6s ease-in-out 2; }',
-
-      /* Parent-SHA inline highlight: a coral wash with a brief flash
-         used by the §04 "parent pointers" / "Parents" internal links. */
-      '.gm-parent-sha { color: var(--ink-faint); padding: 1px 3px; border-radius: 3px; transition: background 0.2s, color 0.2s; }',
-      '@keyframes gm-sha-pulse { 0% { background: transparent; color: var(--ink-faint); } 20% { background: var(--coral); color: var(--paper-raised); } 50% { background: transparent; color: var(--ink-faint); } 70% { background: var(--coral); color: var(--paper-raised); } 100% { background: transparent; color: var(--ink-faint); } }',
-      '.gm-parent-sha.gm-sha-pulse { animation: gm-sha-pulse 1.6s ease-in-out forwards; }',
-
-      /* Line highlight (§02 "line 1 vs line 3" reveal). Consumes the
-         v3 info wash + rule (the same colours used wherever blue is
-         needed across the design language) and pulses on once via the
-         hold-step in the keyframes. The 17px left padding clears the
-         3px stem applied through box-shadow during the lit phases. */
-      '@keyframes gm-line-flash { 0% { background: transparent; box-shadow: none; } 15%, 70% { background: var(--hl-info-bg); box-shadow: inset 3px 0 0 var(--hl-info-rule); } 100% { background: transparent; box-shadow: none; } }',
-      '.gm pre.role-code-block .line.gm-line-flash { animation: gm-line-flash 1.8s ease-in-out forwards; margin: 0 -14px; padding: 0 14px 0 17px; }'
-    ].join('\n');
-    var s = document.createElement('style');
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
+  // Styles now live in _sass/_theme.scss under "Widget specifics: Git Merge".
 
   // ------------------------------------------------------------------
   // Helpers
@@ -263,7 +47,7 @@
     var wrap = div('');
     var id = 'sec-' + String(num).padStart(2, '0');
     wrap.innerHTML =
-      '<div class="gm-eyebrow" id="' + id + '">' +
+      '<div class="role-widget-section-eyebrow" id="' + id + '">' +
         '<span class="role-post-section-index">' + String(num).padStart(2, '0') + '</span>' +
         '<div class="role-post-section-rule"></div>' +
       '</div>' +
@@ -432,7 +216,7 @@
     ENTRIES.forEach(function (e) {
       var nn = String(e.num).padStart(2, '0');
       var row = document.createElement('a');
-      row.className = 'role-toc-row gm-toc-row';
+      row.className = 'role-toc-row role-toc-row';
       row.href = '#sec-' + nn;
       row.style.cssText = 'display: flex; align-items: baseline; gap: 12px; text-decoration: none; padding: 6px 8px; border-radius: 6px; transition: background 0.15s, color 0.15s;';
       row.innerHTML =
@@ -446,7 +230,7 @@
     sec.appendChild(frame);
     root.appendChild(sec);
 
-    list.querySelectorAll('.gm-toc-row').forEach(function (row) {
+    list.querySelectorAll('.role-toc-row').forEach(function (row) {
       row.addEventListener('click', function () {
         row.classList.remove('role-toc-row');
         row.classList.add('role-toc-row-flash');
@@ -481,8 +265,8 @@
     ];
     var active = 'three';
 
-    var panel = div('gm-panel');
-    var tabsBar = div('mcp-tabs');
+    var panel = div('role-panel-frame');
+    var tabsBar = div('role-section-tab-bar');
     panel.appendChild(tabsBar);
     var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
@@ -547,7 +331,7 @@
       tabsBar.innerHTML = '';
       OPTIONS.forEach(function (o) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (o.id === active ? ' active' : '');
+        b.className = 'role-section-tab' + (o.id === active ? ' active' : '');
         b.type = 'button';
         b.textContent = o.label;
         b.onclick = function () { active = o.id; render(); };
@@ -642,8 +426,8 @@
     ];
 
     var active = 'merge';
-    var panel = div('gm-panel');
-    var tabsBar = div('mcp-tabs');
+    var panel = div('role-panel-frame');
+    var tabsBar = div('role-section-tab-bar');
     panel.appendChild(tabsBar);
     var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
@@ -694,7 +478,7 @@
       tabsBar.innerHTML = '';
       OPTIONS.forEach(function (o) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (o.id === active ? ' active' : '');
+        b.className = 'role-section-tab' + (o.id === active ? ' active' : '');
         b.type = 'button';
         b.textContent = o.label;
         b.onclick = function () { active = o.id; render(); };
@@ -743,8 +527,8 @@
     ];
     var active = 'three';
 
-    var panel = div('gm-panel');
-    var tabsBar = div('mcp-tabs');
+    var panel = div('role-panel-frame');
+    var tabsBar = div('role-section-tab-bar');
     panel.appendChild(tabsBar);
     var contentArea = div('');
     panel.appendChild(contentArea);
@@ -863,7 +647,7 @@
       tabsBar.innerHTML = '';
       OPTS.forEach(function (o) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (o.id === active ? ' active' : '');
+        b.className = 'role-section-tab' + (o.id === active ? ' active' : '');
         b.type = 'button';
         b.textContent = o.label;
         b.onclick = function () { active = o.id; render(); };
@@ -992,8 +776,8 @@
     ];
 
     var cActive = 'conflict';
-    var commitPanel = div('gm-panel');
-    var commitTabs  = div('mcp-tabs');
+    var commitPanel = div('role-panel-frame');
+    var commitTabs  = div('role-section-tab-bar');
     var commitArea  = div('gm-commit-area');
     commitPanel.appendChild(commitTabs);
     commitPanel.appendChild(commitArea);
@@ -1002,7 +786,7 @@
       commitTabs.innerHTML = '';
       COMMIT_VARIANTS.forEach(function (v) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (v.id === cActive ? ' active' : '');
+        b.className = 'role-section-tab' + (v.id === cActive ? ' active' : '');
         b.type = 'button';
         b.textContent = v.label;
         b.onclick = function () { cActive = v.id; renderCommitVariant(); };
@@ -1291,8 +1075,8 @@
     ];
 
     var sActive = 'revert';
-    var sPanel = div('gm-panel');
-    var sTabs = div('mcp-tabs');
+    var sPanel = div('role-panel-frame');
+    var sTabs = div('role-section-tab-bar');
     var sSvgBg = div('gm-svg-bg');
     var sDesc = div('gm-arch-desc');
     sPanel.appendChild(sTabs);
@@ -1303,7 +1087,7 @@
       sTabs.innerHTML = '';
       SCENARIOS.forEach(function (s) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (s.id === sActive ? ' active' : '');
+        b.className = 'role-section-tab' + (s.id === sActive ? ' active' : '');
         b.type = 'button';
         b.textContent = s.label;
         b.onclick = function () { sActive = s.id; renderScenarios(); };
@@ -1381,9 +1165,9 @@
       '</svg>';
 
     // Mirror §01's panel recipe: visual on top (svg-bg), description /
-    // bullets in arch-desc beneath, all inside a single gm-panel so the
+    // bullets in arch-desc beneath, all inside a single role-panel-frame so the
     // dot points read as part of the figure rather than floating prose.
-    var panel = div('gm-panel');
+    var panel = div('role-panel-frame');
     panel.appendChild(div('gm-svg-bg', svg));
     var desc = div('gm-arch-desc');
     desc.innerHTML =
@@ -1427,8 +1211,8 @@
     ];
 
     var rActive = 'before';
-    var panel = div('gm-panel');
-    var tabs = div('mcp-tabs');
+    var panel = div('role-panel-frame');
+    var tabs = div('role-section-tab-bar');
     panel.appendChild(tabs);
     var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
@@ -1475,7 +1259,7 @@
       tabs.innerHTML = '';
       STATES.forEach(function (s) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (s.id === rActive ? ' active' : '');
+        b.className = 'role-section-tab' + (s.id === rActive ? ' active' : '');
         b.type = 'button';
         b.textContent = s.label;
         b.onclick = function () { rActive = s.id; render(); };
@@ -1540,8 +1324,8 @@
     ];
     var rcActive = 'paused';
 
-    var rcPanel = div('gm-panel');
-    var rcTabs = div('mcp-tabs');
+    var rcPanel = div('role-panel-frame');
+    var rcTabs = div('role-section-tab-bar');
     rcPanel.appendChild(rcTabs);
     var rcSvgBg = div('gm-svg-bg');
     rcPanel.appendChild(rcSvgBg);
@@ -1621,7 +1405,7 @@
       rcTabs.innerHTML = '';
       CONFLICT_STATES.forEach(function (s) {
         var b = document.createElement('button');
-        b.className = 'mcp-tab' + (s.id === rcActive ? ' active' : '');
+        b.className = 'role-section-tab' + (s.id === rcActive ? ' active' : '');
         b.type = 'button';
         b.textContent = s.label;
         b.onclick = function () { rcActive = s.id; renderRc(); };
@@ -1664,7 +1448,6 @@
   // Public factory
   // ------------------------------------------------------------------
   window.createGitMergeExploration = function (rootId) {
-    injectStyles();
     var root = document.getElementById(rootId);
     if (!root) return;
     root.className = 'gm';

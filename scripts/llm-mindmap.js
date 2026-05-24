@@ -184,70 +184,7 @@
   // .role-meta-* for key/value text, .role-pill for the legend chips,
   // and .role-tab style hover affordances on the connected pills.
   // ------------------------------------------------------------------
-  var stylesInjected = false;
-  function injectStyles() {
-    if (stylesInjected) return;
-    stylesInjected = true;
-    var css = [
-      // Root
-      '.llmmap { font-family: var(--font-text); color: var(--ink-primary); padding: 8px 0 24px; }',
-
-      // Cluster filter tabs. These reuse the site-wide .mcp-tabs / .mcp-tab
-      // recipe. The styles are also defined here so the widget is self-contained
-      // on pages that do not load mcp-exploration.js.
-      '.mcp-tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }',
-      '.mcp-tab { padding: 14px 18px; background: transparent; border: none; border-right: 1px solid var(--line); cursor: pointer; font-family: var(--font-display); font-size: var(--size-lg); color: var(--ink-muted); border-bottom: 2px solid transparent; transition: color .15s, background .15s; white-space: nowrap; flex: 1; min-width: 90px; letter-spacing: var(--track-snug); }',
-      '.mcp-tab:last-child { border-right: none; }',
-      '.mcp-tab.active { color: var(--ink-primary); background: var(--paper-inset); border-bottom-color: var(--coral); }',
-      '@media (max-width: 640px) {' +
-        '.mcp-tabs { flex-direction: column; border-bottom: none; overflow-x: visible; }' +
-        '.mcp-tab { border-right: none; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; text-align: left; padding: 14px 18px 14px 17px; }' +
-        '.mcp-tab:last-child { border-bottom: none; }' +
-        '.mcp-tab.active { border-bottom-color: var(--line) !important; border-left-color: var(--coral) !important; }' +
-      '}',
-      // Outer panel (mirrors .mcp-panel from §02 of the MCP exploration).
-      // Tabs sit at the top; the canvas section uses --paper-inset for visual
-      // separation; the detail section sits below on --paper-raised, divided
-      // by a hairline. The whole thing reads as a single rounded surface.
-      '.llmmap-panel { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }',
-
-      // Canvas section (paper-inset, mirroring the SVG area in MCP §02)
-      '.llmmap-canvas { background: var(--paper-inset); padding: 20px 18px 12px; }',
-      '.llmmap-canvas svg { width: 100%; height: auto; display: block; }',
-
-      // SVG element transitions
-      '.llmmap-edge { transition: stroke 200ms ease, stroke-width 200ms ease, opacity 200ms ease; }',
-      '.llmmap-node-g { cursor: pointer; }',
-      '.llmmap-node-g rect { transition: fill 180ms ease, stroke 180ms ease, stroke-width 180ms ease; }',
-
-      // Detail section (mirrors .mcp-arch-desc: top hairline, paper-raised bg)
-      '.llmmap-detail { border-top: 1px solid var(--line); background: var(--paper-raised); padding: 20px; }',
-
-      // Detail header
-      '.llmmap-detail-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }',
-      '.llmmap-detail-cluster { font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 500; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--coral); }',
-      '.llmmap-detail-session { font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
-
-      // Detail title
-      '.llmmap-detail-title { font-family: var(--font-display); font-size: var(--size-h2); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--track-snug); color: var(--ink-primary); margin: 4px 0 12px; }',
-
-      // Detail summary
-      '.llmmap-detail-summary { color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-normal); margin: 0 0 16px; }',
-
-      // Lens blocks (label + body, separated by hairline)
-      '.llmmap-lens { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--line); }',
-      '.llmmap-lens:first-of-type { padding-top: 0; margin-top: 0; border-top: none; }',
-      '.llmmap-lens-label { font-family: var(--font-mono); font-size: var(--size-xs); font-weight: 400; letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }',
-      '.llmmap-lens-body { color: var(--ink-secondary); font-family: var(--font-display); font-size: var(--size-md); line-height: var(--lh-body); margin: 0; }',
-      '.llmmap-lens-body.feel { color: var(--ink-muted); }',
-
-      // Footer strip (post.section-rule + meta)
-      '.llmmap-footer { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-faint); }',
-    ].join('\n');
-    var style = document.createElement('style');
-    style.textContent = css;
-    document.head.appendChild(style);
-  }
+  // Styles now live in _sass/_theme.scss under "Widget specifics: LLM Mindmap".
 
   // ------------------------------------------------------------------
   // Helpers
@@ -281,7 +218,6 @@
   // Factory
   // ------------------------------------------------------------------
   window.createLLMMindMap = function (rootId) {
-    injectStyles();
 
     var root = document.getElementById(rootId);
     if (!root) return;
@@ -297,10 +233,10 @@
     var panel = el('div', 'llmmap-panel');
 
     // Cluster filter tabs at the top of the panel
-    var tabsBar = el('div', 'mcp-tabs');
+    var tabsBar = el('div', 'role-section-tab-bar');
     var clusterTabEls = {};
 
-    var allTab = el('button', 'mcp-tab active');
+    var allTab = el('button', 'role-section-tab active');
     allTab.type = 'button';
     allTab.textContent = 'All';
     allTab.addEventListener('click', function () { setClusterFilter(null); });
@@ -308,7 +244,7 @@
     clusterTabEls['all'] = allTab;
 
     Object.keys(CLUSTERS).forEach(function (k) {
-      var tab = el('button', 'mcp-tab');
+      var tab = el('button', 'role-section-tab');
       tab.type = 'button';
       tab.textContent = TAB_LABELS[k] || CLUSTERS[k].label;
       tab.addEventListener('click', function () { setClusterFilter(k); });
@@ -626,7 +562,7 @@
     function renderTabs() {
       Object.keys(clusterTabEls).forEach(function (k) {
         var isActive = (k === 'all') ? state.clusterFilter === null : state.clusterFilter === k;
-        clusterTabEls[k].className = 'mcp-tab' + (isActive ? ' active' : '');
+        clusterTabEls[k].className = 'role-section-tab' + (isActive ? ' active' : '');
       });
     }
 
