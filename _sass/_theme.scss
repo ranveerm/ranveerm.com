@@ -2453,46 +2453,17 @@ h2.role-widget-section-heading {
 .claudeenv .ce-instr-tips { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); padding-left: 18px; line-height: var(--lh-normal); margin: 0 0 14px; }
 @media (min-width: 1600px) { .claudeenv .ce-panel.ce-inspector, .claudeenv .ce-panel.ce-context { margin-bottom: 0; box-sizing: border-box; } }
 
-// ===========================================================================
-// WIDGET SPECIFICS: Year-in-Review posts
-//
-// The Year-in-Review posts (2020-2026 at time of writing) share an identical
-// inline <style> block. Lifted into the shared stylesheet so the blocks can
-// be removed from each post body and dark-mode comes for free via tokens.
-// Class names retained (.content-cell, .content-grid, .content-cell-vertical,
-// .subtitle) so existing markdown does not need to be rewritten.
-// ===========================================================================
-.content-cell {
-    display: grid;
-    grid-template-columns: 1fr 4fr;
-    grid-gap: 20px;
-    padding-bottom: 40px;
-}
-
-.content-grid {
-    grid-gap: 10px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-}
-
-.content-cell-vertical {
-    display: grid;
-    grid-template-rows: 2fr 1fr;
-    justify-items: center;
-    overflow: auto;
-}
-
-// Rounded image corners. Scoped to year-in-review containers (rather than
-// applied globally) so other posts and chrome elements aren't affected.
-.content-cell img,
-.content-grid img,
-.content-cell-vertical img {
-    border-radius: 10px;
-}
-
-// .subtitle is a muted caption used beside each entry in year-in-review
-// carousels. Token-backed so it themes correctly in both modes.
-.subtitle { color: var(--ink-muted); }
+// (The original Year-in-Review posts inlined a small <style> block defining
+// .content-cell, .content-grid, .content-cell-vertical, .subtitle plus a
+// global `img { border-radius: 10px }` rule. Audit during the consolidation
+// found none of those grid layout classes were actually referenced in any
+// post's markdown - the year-in-review pages use createCarousel + image
+// clouds, both of which style their own image children via .carousel-item img
+// in the Carousel widget specifics block above. The dead rules were removed.
+// The .subtitle class is still dual-emitted by carousel.js alongside
+// .carousel-subtitle, but the latter already applies the same ink-muted
+// recipe; the redundant dual-class emission can be cleaned up in carousel.js
+// if you want to drop the .subtitle hook entirely.)
 
 // --- Site chrome --------------------------------------------------------
 

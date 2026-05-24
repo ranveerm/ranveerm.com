@@ -229,7 +229,9 @@
     // CLUSTERS[k].label is kept for the SVG eyebrow text inside the canvas.
     var TAB_LABELS = { input: 'Input', core: 'Core', output: 'Output', training: 'Training', theory: 'Foundations' };
 
-    // ---------- Single panel: tabs + canvas + detail (mirrors .mcp-panel) ----------
+    // ---------- Single panel: tabs + canvas + detail (uses .llmmap-panel, a
+    // widget-specific variant of .role-panel-frame with the smaller 8px radius
+    // the mindmap was designed against). ----------
     var panel = el('div', 'llmmap-panel');
 
     // Cluster filter tabs at the top of the panel

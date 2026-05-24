@@ -216,7 +216,7 @@
     ENTRIES.forEach(function (e) {
       var nn = String(e.num).padStart(2, '0');
       var row = document.createElement('a');
-      row.className = 'role-toc-row role-toc-row';
+      row.className = 'role-toc-row';
       row.href = '#sec-' + nn;
       row.style.cssText = 'display: flex; align-items: baseline; gap: 12px; text-decoration: none; padding: 6px 8px; border-radius: 6px; transition: background 0.15s, color 0.15s;';
       row.innerHTML =

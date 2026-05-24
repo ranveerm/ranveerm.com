@@ -26,7 +26,7 @@
     textWrap.className = 'carousel-text';
     textWrap.innerHTML =
       '<h4 class="carousel-title"></h4>' +
-      '<p class="carousel-subtitle subtitle"></p>' +
+      '<p class="carousel-subtitle"></p>' +
       '<p class="carousel-description"></p>';
     textWrap.querySelector('.carousel-title').textContent       = entry.title       || '';
     textWrap.querySelector('.carousel-subtitle').textContent    = entry.subtitle    || '';
@@ -72,7 +72,7 @@
     textWrap.className = 'carousel-text';
     textWrap.innerHTML =
       '<h4 class="carousel-title"></h4>' +
-      '<p class="carousel-subtitle subtitle"></p>' +
+      '<p class="carousel-subtitle"></p>' +
       '<p class="carousel-description"></p>';
 
     var indicator = document.createElement('div');
