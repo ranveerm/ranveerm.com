@@ -27,12 +27,12 @@
     var wrap = div('');
     var id = 'sec-' + String(num).padStart(2, '0');
     wrap.innerHTML =
-      '<div class="role-widget-section-eyebrow" id="' + id + '">' +
+      '<div class="role-viz-section-eyebrow" id="' + id + '">' +
         '<span class="role-post-section-index">' + String(num).padStart(2, '0') + '</span>' +
         '<div class="role-post-section-rule"></div>' +
         '<span class="role-post-section-name">' + kicker + '</span>' +
       '</div>' +
-      '<h2 class="role-widget-section-heading">' + title + '</h2>';
+      '<h2 class="role-viz-section-heading">' + title + '</h2>';
     return wrap;
   }
 
@@ -129,12 +129,12 @@
     var topPanel = div('role-panel-frame');
     var withMCP = false;
 
-    var toggleBar = div('role-section-tab-bar');
+    var toggleBar = div('role-tab-bar');
     var btn1 = document.createElement('button');
-    btn1.className = 'role-section-tab active';
+    btn1.className = 'role-tab active';
     btn1.innerHTML = 'Without MCP &nbsp;<code class="inline">M × N integrations</code>';
     var btn2 = document.createElement('button');
-    btn2.className = 'role-section-tab';
+    btn2.className = 'role-tab';
     btn2.innerHTML = 'With MCP &nbsp;<code class="inline">M + N integrations</code>';
     toggleBar.appendChild(btn1);
     toggleBar.appendChild(btn2);
@@ -191,8 +191,8 @@
 
     function setMCP(val) {
       withMCP = val;
-      btn1.className = 'role-section-tab' + (val ? '' : ' active');
-      btn2.className = 'role-section-tab' + (val ? ' active' : '');
+      btn1.className = 'role-tab' + (val ? '' : ' active');
+      btn2.className = 'role-tab' + (val ? ' active' : '');
       svgCont.innerHTML = makeSVG();
     }
     btn1.onclick = function () { setMCP(false); };
@@ -378,7 +378,7 @@
     // Component selector tabs, sit at the very top of the panel so the
     // user can pick host / client / server without scrolling past the
     // visualisation first.
-    var btnsBar = div('role-section-tab-bar');
+    var btnsBar = div('role-tab-bar');
     panel.appendChild(btnsBar);
 
     var svgBg = div('');
@@ -426,7 +426,7 @@
       var userIconX = userX + (bw - 24) / 2;
       var userIconY = topY + (bh - 24) / 2;
       var userBox =
-        '<rect x="' + userX + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="3" fill="var(--paper-raised)" stroke="var(--line)"/>' +
+        '<rect class="role-viz-graphic-node" x="' + userX + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="3"/>' +
         '<g stroke="var(--ink-secondary)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="translate(' + userIconX + ' ' + userIconY + ')">' +
           '<circle cx="12" cy="9" r="4"/>' +
           '<path d="M 4 21 v -2 a 4 4 0 0 1 4 -4 h 8 a 4 4 0 0 1 4 4 v 2"/>' +
@@ -506,7 +506,7 @@
       var externals = extLabels.map(function (lbl, i) {
         var top = rowTops[i];
         return '<g>' +
-          '<rect x="' + extLeft + '" y="' + top + '" width="' + bw + '" height="' + bh + '" rx="3" fill="var(--paper-raised)" stroke="var(--line)"/>' +
+          '<rect class="role-viz-graphic-node" x="' + extLeft + '" y="' + top + '" width="' + bw + '" height="' + bh + '" rx="3"/>' +
           '<text x="' + (extLeft + bw / 2) + '" y="' + (rowYs[i] + 4) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="11" fill="var(--ink-secondary)">' + lbl + '</text>' +
           '</g>';
       }).join('');
@@ -514,7 +514,7 @@
       return '<svg viewBox="0 0 820 295" style="width:100%;max-height:305px">' +
         userBox + userToLlm +
         '<rect class="mcp-svg-host-rect" x="' + hostX + '" y="' + hostY + '" width="' + hostW_ + '" height="' + hostH_ + '" rx="7" fill="none" ' + hostStroke + ' style="cursor:pointer"/>' +
-        '<rect x="' + llmX + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="3" fill="var(--paper-raised)" stroke="var(--line)"/>' +
+        '<rect class="role-viz-graphic-node" x="' + llmX + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="3"/>' +
         '<text x="' + (llmX + bw / 2) + '" y="' + (rowY + 4) + '" text-anchor="middle" font-family="var(--font-mono)" font-size="11" fill="var(--ink-secondary)">LLM</text>' +
         groupBoxes +
         llmToClients + clients + clientsToServers + servers +
@@ -537,7 +537,7 @@
       btnsBar.innerHTML = '';
       NODES.forEach(function (n) {
         var btn = document.createElement('button');
-        btn.className = 'role-section-tab' + (n.id === active ? ' active' : '');
+        btn.className = 'role-tab' + (n.id === active ? ' active' : '');
         btn.textContent = n.label;
         btn.onclick = function () { setActive(n.id); };
         btnsBar.appendChild(btn);
@@ -658,10 +658,10 @@
     var panel = div('role-panel-frame');
     var active = 'tools';
 
-    var tabsEl = div('role-section-tab-bar');
+    var tabsEl = div('role-tab-bar');
     PRIMS.forEach(function (p) {
       var tab = document.createElement('button');
-      tab.className = 'role-section-tab' + (p.id === active ? ' active' : '');
+      tab.className = 'role-tab' + (p.id === active ? ' active' : '');
       tab.textContent = p.name;
       tab.onclick = function () { setActive(p.id); };
       tabsEl.appendChild(tab);
@@ -722,9 +722,9 @@
 
     function setActive(id) {
       active = id;
-      tabsEl.querySelectorAll('.role-section-tab').forEach(function (tab, i) {
+      tabsEl.querySelectorAll('.role-tab').forEach(function (tab, i) {
         var p = PRIMS[i];
-        tab.className = 'role-section-tab' + (p.id === active ? ' active' : '');
+        tab.className = 'role-tab' + (p.id === active ? ' active' : '');
       });
       renderContent();
     }
@@ -1071,8 +1071,8 @@
       timeline.innerHTML = MOVES.map(function (m, i) {
         var c = colorOf(m.server);
         var isA = i === active;
-        return '<div class="role-timeline-step" style="opacity:' + (i <= active ? 1 : 0.3) + '" data-step="' + i + '">' +
-          '<div class="role-timeline-num" style="background:' + (isA ? c : c + '20') + ';color:' + (isA ? 'var(--paper)' : c) + '">' + String(i + 1).padStart(2, '0') + '</div>' +
+        return '<div class="role-flow-step" style="opacity:' + (i <= active ? 1 : 0.3) + '" data-step="' + i + '">' +
+          '<div class="role-flow-num" style="background:' + (isA ? c : c + '20') + ';color:' + (isA ? 'var(--paper)' : c) + '">' + String(i + 1).padStart(2, '0') + '</div>' +
           '<div>' +
             '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px">' +
               '<code style="font-family:var(--font-mono);font-size:13px;color:' + c + '">' + m.tool + '()</code>' +
@@ -1083,7 +1083,7 @@
           '</div>';
       }).join('');
 
-      timeline.querySelectorAll('.role-timeline-step').forEach(function (item) {
+      timeline.querySelectorAll('.role-flow-step').forEach(function (item) {
         item.onclick = function () { setActive(parseInt(item.dataset.step)); };
       });
     }
@@ -1120,10 +1120,10 @@
     var panel = div('role-panel-frame');
     var active = 'claude-code';
 
-    var tabsEl = div('role-section-tab-bar');
+    var tabsEl = div('role-tab-bar');
     CLIENTS.forEach(function (c) {
       var tab = document.createElement('button');
-      tab.className = 'role-section-tab' + (c.id === active ? ' active' : '');
+      tab.className = 'role-tab' + (c.id === active ? ' active' : '');
       tab.textContent = c.name;
       tab.onclick = function () { setActive(c.id); };
       tabsEl.appendChild(tab);
@@ -1175,9 +1175,9 @@
 
     function setActive(id) {
       active = id;
-      tabsEl.querySelectorAll('.role-section-tab').forEach(function (tab, i) {
+      tabsEl.querySelectorAll('.role-tab').forEach(function (tab, i) {
         var c = CLIENTS[i];
-        tab.className = 'role-section-tab' + (c.id === active ? ' active' : '');
+        tab.className = 'role-tab' + (c.id === active ? ' active' : '');
       });
       renderCode();
     }

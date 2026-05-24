@@ -235,10 +235,10 @@
     var panel = el('div', 'llmmap-panel');
 
     // Cluster filter tabs at the top of the panel
-    var tabsBar = el('div', 'role-section-tab-bar');
+    var tabsBar = el('div', 'role-tab-bar');
     var clusterTabEls = {};
 
-    var allTab = el('button', 'role-section-tab active');
+    var allTab = el('button', 'role-tab active');
     allTab.type = 'button';
     allTab.textContent = 'All';
     allTab.addEventListener('click', function () { setClusterFilter(null); });
@@ -246,7 +246,7 @@
     clusterTabEls['all'] = allTab;
 
     Object.keys(CLUSTERS).forEach(function (k) {
-      var tab = el('button', 'role-section-tab');
+      var tab = el('button', 'role-tab');
       tab.type = 'button';
       tab.textContent = TAB_LABELS[k] || CLUSTERS[k].label;
       tab.addEventListener('click', function () { setClusterFilter(k); });
@@ -339,12 +339,9 @@
     ];
     clusterLabels.forEach(function (c) {
       var t = svgEl('text', {
+        class: 'role-viz-graphic-label',
         x: toX(c.x), y: toY(c.y),
-        'text-anchor': c.anchor,
-        'font-family': 'var(--font-mono)',
-        'font-size': '11',
-        'letter-spacing': '2',
-        fill: 'var(--ink-faint)'
+        'text-anchor': c.anchor
       });
       t.textContent = CLUSTERS[c.key].label;
       svg.appendChild(t);
@@ -564,7 +561,7 @@
     function renderTabs() {
       Object.keys(clusterTabEls).forEach(function (k) {
         var isActive = (k === 'all') ? state.clusterFilter === null : state.clusterFilter === k;
-        clusterTabEls[k].className = 'role-section-tab' + (isActive ? ' active' : '');
+        clusterTabEls[k].className = 'role-tab' + (isActive ? ' active' : '');
       });
     }
 

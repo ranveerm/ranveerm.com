@@ -486,6 +486,117 @@ h2.role-post-section-heading {
     line-height: var(--lh-normal);
 }
 
+// viz.graphic.* -- formalised shapes inside SVG diagrams ---------------
+// Synced 2026-05-24 from upstream Design Language v3 bundle
+// HAV4UvY269z6gjqP37z3ow. Class-based consumption: downstream emits
+// `<rect class="role-viz-graphic-node" .../>` so the recipe drives
+// fill/stroke/stroke-width and dark-mode re-theming happens for free.
+// Geometry (x, y, width, height, cx, cy, r, rx, ry, viewBox,
+// text-anchor) stays inline on the element; only visual properties
+// live here. rx is treated as geometry because individual widgets
+// pre-date the recipe and use a tighter radius (3) intentionally.
+//
+// Element-targeted variants split the recipe across rect.* and text.*
+// because the upstream spec attaches text styling to the same role key
+// as the parent rect.
+.role-viz-graphic-node {
+    fill: var(--paper-raised);
+    stroke: var(--line);
+    stroke-width: 1;
+}
+text.role-viz-graphic-node {
+    fill: var(--ink-secondary);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+}
+.role-viz-graphic-node-strong {
+    fill: var(--paper-raised);
+    stroke: var(--coral);
+    stroke-width: 1.25;
+}
+text.role-viz-graphic-node-strong {
+    fill: var(--coral);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+    font-weight: 500;
+}
+.role-viz-graphic-node-circle {
+    fill: var(--paper-raised);
+    stroke: var(--line);
+    stroke-width: 1;
+}
+text.role-viz-graphic-node-circle {
+    fill: var(--ink-secondary);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+}
+.role-viz-graphic-node-outline {
+    fill: var(--paper-raised);
+    stroke: var(--ink-muted);
+    stroke-width: 1;
+}
+text.role-viz-graphic-node-outline {
+    fill: var(--ink-secondary);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+}
+.role-viz-graphic-node-outline-clear {
+    fill: transparent;
+    stroke: var(--ink-muted);
+    stroke-width: 1;
+}
+text.role-viz-graphic-node-outline-clear {
+    fill: var(--ink-secondary);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+}
+.role-viz-graphic-node-outline-solid {
+    fill: var(--ink-muted);
+    stroke: var(--ink-muted);
+    stroke-width: 1;
+}
+text.role-viz-graphic-node-outline-solid {
+    fill: var(--paper-raised);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+    font-weight: 500;
+}
+.role-viz-graphic-connector {
+    stroke: var(--ink-muted);
+    stroke-width: 1;
+    fill: none;
+}
+.role-viz-graphic-connector-thick {
+    stroke: var(--ink-muted);
+    stroke-width: 1.5;
+    fill: none;
+}
+.role-viz-graphic-connector-strong {
+    stroke: var(--coral);
+    stroke-width: 1.5;
+    fill: none;
+}
+.role-viz-graphic-label {
+    fill: var(--ink-faint);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.role-viz-graphic-label-strong {
+    fill: var(--coral);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+}
+
 // code.* -- mono surfaces + syntax marks ------------------------------
 .role-code-block {
     background: var(--paper-sunk);
@@ -742,28 +853,74 @@ code.chip {
 }
 .role-panel-body { background: var(--paper-raised); }
 .role-panel-divider { border-top: 1px solid var(--line); }
+// panel.title serves a dual purpose post-2026-05-24: as the headline
+// inside an inspector/dropdown panel AND as the recipe consumed by
+// every tab label. See .role-tab below for the tab variant.
+.role-panel-title {
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: var(--track-snug);
+}
 
 // --- Tabs ---------------------------------------------------------------
-// Horizontal tab bar with a hairline under the row; active tab gets a
-// 2px coral underline. On mobile, prefer a vertical segmented list:
-// full-width rows with a 3px coral leading bar on the active row.
-.role-tab-bar { border-bottom: 1px solid var(--line); }
-.role-tab {
-    color: var(--ink-muted);
-    font-family: var(--font-mono);
-    font-size: var(--size-sm);
-    font-weight: 400;
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
+// Per upstream Design Language v3 (2026-05-24 sync): tab labels consume
+// the panel.title recipe (serif 18 / 500 / snug / ink-primary) directly.
+// Selection is signalled by paper-inset background + coral bottom-border
+// with NO font-weight swap; both states render in the same weight.
+//
+// .role-tab-bar carries the hairline-under-bar from upstream's tab.bar
+// role plus the flex / overflow layout the local widgets all rely on.
+// On mobile (<=640px) the bar collapses to a vertical segmented list
+// with a 3px coral leading bar on the active row.
+.role-tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
 }
-.role-tab-active {
-    color: var(--ink-primary);
-    font-family: var(--font-mono);
-    font-size: var(--size-sm);
+.role-tab {
+    padding: 14px 18px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--line);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 18px;
     font-weight: 500;
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
-    border-bottom: 2px solid var(--coral);
+    color: var(--ink-primary);
+    letter-spacing: var(--track-snug);
+    border-bottom: 2px solid transparent;
+    transition: background .15s, border-bottom-color .15s;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 90px;
+
+    &:last-child { border-right: none; }
+    &.active {
+        background: var(--paper-inset);
+        border-bottom-color: var(--coral);
+    }
+}
+@media (max-width: 640px) {
+    .role-tab-bar {
+        flex-direction: column;
+        border-bottom: none;
+        overflow-x: visible;
+    }
+    .role-tab {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        border-left: 3px solid transparent;
+        text-align: left;
+        padding: 14px 18px 14px 17px;
+
+        &:last-child { border-bottom: none; }
+        &.active {
+            border-bottom-color: var(--line) !important;
+            border-left-color: var(--coral) !important;
+        }
+    }
 }
 
 // --- Pill ---------------------------------------------------------------
@@ -858,19 +1015,17 @@ code.chip {
 }
 
 // ===========================================================================
-// PROPOSED ROLES (pending upstream Design Language v3 acceptance)
-//
-// Recurring component patterns lifted out of per-widget JS-injected stylesheets
-// during the page-specific-styling consolidation. Each role here is reused or
-// reusable across more than one widget. FIXME: pending upstream confirmation
-// of canonical naming (see .claude/upstream-design-additions.md).
+// ADDITIONAL ROLES (synced 2026-05-24 from upstream Design Language v3
+// bundle HAV4UvY269z6gjqP37z3ow). All entries below are now canonical
+// upstream; the previous "PROPOSED ROLES" FIXME header has been retired.
 // ===========================================================================
 
-// --- Section header (in-widget) -----------------------------------------
-// Eyebrow row + heading used at the top of each section inside an interactive
-// widget. Smaller than role-post-section-heading (which is the page-level h2);
-// scaled to read as a sub-heading inside an embedded module.
-.role-widget-section-eyebrow {
+// --- viz.section.heading (in-widget sub-heading) ------------------------
+// Eyebrow row layout + 24px sub-heading used at the top of each section
+// inside an interactive widget. Smaller than role-post-section-heading
+// (the page-level h2 at 38px). The eyebrow row reuses the existing
+// role-post-section-rule/index/name triplet for its contents.
+.role-viz-section-eyebrow {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -878,100 +1033,16 @@ code.chip {
 
     .role-post-section-rule { flex: 1; }
 }
-.role-widget-section-heading,
-h1.role-widget-section-heading,
-h2.role-widget-section-heading {
+.role-viz-section-heading,
+h1.role-viz-section-heading,
+h2.role-viz-section-heading {
     color: var(--ink-primary);
     font-family: var(--font-display);
-    font-size: var(--size-h2);
+    font-size: 24px;
     font-weight: 400;
     letter-spacing: var(--track-snug);
     line-height: var(--lh-snug);
     margin: 0 0 14px;
-}
-
-// --- Section tab (in-widget) --------------------------------------------
-// Big display-font content-switching tab. Distinct from role-tab (mono micro
-// caps); used when the tabs read as primary navigation inside a section
-// rather than a micro toggle bar. Coral underline on active.
-.role-section-tab-bar {
-    display: flex;
-    border-bottom: 1px solid var(--line);
-    overflow-x: auto;
-}
-.role-section-tab {
-    padding: 14px 18px;
-    background: transparent;
-    border: none;
-    border-right: 1px solid var(--line);
-    cursor: pointer;
-    font-family: var(--font-display);
-    font-size: var(--size-lg);
-    color: var(--ink-muted);
-    border-bottom: 2px solid transparent;
-    transition: color .15s, background .15s;
-    white-space: nowrap;
-    flex: 1;
-    min-width: 90px;
-    letter-spacing: var(--track-snug);
-
-    &:last-child { border-right: none; }
-    &.active {
-        color: var(--ink-primary);
-        background: var(--paper-inset);
-        border-bottom-color: var(--coral);
-    }
-}
-@media (max-width: 640px) {
-    .role-section-tab-bar {
-        flex-direction: column;
-        border-bottom: none;
-        overflow-x: visible;
-    }
-    .role-section-tab {
-        border-right: none;
-        border-bottom: 1px solid var(--line);
-        border-left: 3px solid transparent;
-        text-align: left;
-        padding: 14px 18px 14px 17px;
-
-        &:last-child { border-bottom: none; }
-        &.active {
-            border-bottom-color: var(--line) !important;
-            border-left-color: var(--coral) !important;
-        }
-    }
-}
-
-// --- Toggle bar (mono variant of section tabs) --------------------------
-// Two-button mono toggle (e.g. JSON / YAML switch). Uses the .role-tab
-// recipe but in a full-width segmented row with a coral underline.
-.role-toggle-bar {
-    display: flex;
-    border-bottom: 1px solid var(--line);
-}
-.role-toggle-btn {
-    flex: 1;
-    padding: 12px 16px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: var(--size-sm);
-    color: var(--ink-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border-bottom: 2px solid transparent;
-    transition: color .15s, background .15s;
-
-    &:first-child { border-right: 1px solid var(--line); }
-    &.active {
-        color: var(--ink-primary);
-        background: var(--paper-inset);
-        border-bottom-color: var(--coral);
-    }
 }
 
 // --- Control button -----------------------------------------------------
@@ -1245,10 +1316,13 @@ h2.role-widget-section-heading {
     line-height: var(--lh-normal);
 }
 
-// --- Timeline step (numbered, inline) -----------------------------------
-// Numbered step row used inside a panel (32px square num cell + body).
-// Distinct from role-timeline-entry which is the about-page card.
-.role-timeline-step {
+// --- flow.step / flow.num (numbered step row) ---------------------------
+// Per upstream Design Language v3 sync 2026-05-24: numbered step row used
+// inside a panel (32px square num cell + body). Distinct from
+// role-timeline-entry which is the about-page card. Originally proposed
+// as timeline.step/num; upstream chose flow.* to keep timeline.entry
+// reserved for the about-page card layout.
+.role-flow-step {
     display: grid;
     grid-template-columns: 32px 1fr;
     gap: 14px;
@@ -1264,7 +1338,7 @@ h2.role-widget-section-heading {
         padding-bottom: 0;
     }
 }
-.role-timeline-num {
+.role-flow-num {
     width: 32px;
     height: 32px;
     border-radius: 4px;
@@ -1308,20 +1382,23 @@ h2.role-widget-section-heading {
 // ===========================================================================
 .mcp-section { margin-bottom: 64px; }
 
-// Architecture SVG description + node-button rail. The heading + body
-// typography lives here so the JS renderDesc() can emit plain <h3>/<p>
-// elements instead of inlining type. Sizes are widget-specific (22px h3,
-// 15px body); promoting to shared roles isn't warranted for a one-off.
+// Architecture SVG description + node-button rail. The heading consumes
+// .role-panel-title (serif 18 / 500 / snug) per the 2026-05-24 upstream
+// sync; the body remains widget-specific (15 px text/ink-muted) because
+// no upstream role expresses that exact recipe.
 .mcp-arch-desc {
     border-top: 1px solid var(--line);
     padding: 20px;
     background: var(--paper-raised);
 
     h3 {
-        font-family: var(--font-display);
-        font-size: 22px;
-        font-weight: 400;
+        // Mirror .role-panel-title locally so the JS can keep emitting
+        // <h3> without a class attribute.
         color: var(--ink-primary);
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: var(--track-snug);
         margin: 0 0 10px;
     }
     p {
@@ -1867,8 +1944,9 @@ h2.role-widget-section-heading {
 //
 // Cluster mindmap (scripts/llm-mindmap.js). Most rules are SVG-positioned
 // or detail-pane layout, so they stay under .llmmap-* rather than promoting
-// to shared roles. The tabs at the top consume the shared .role-section-tab
-// pattern (formerly piggybacked on .mcp-tabs).
+// to shared roles. The tabs at the top consume the shared .role-tab pattern
+// (formerly piggybacked on .mcp-tabs, then briefly .role-section-tab during
+// the consolidation, and now unified under upstream's canonical tab.bar/tab).
 // ===========================================================================
 .llmmap { font-family: var(--font-text); color: var(--ink-primary); padding: 8px 0 24px; }
 

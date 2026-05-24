@@ -2,7 +2,7 @@
 //
 // Vanilla JS. Builds the post body so each section reuses the same
 // recipe as the MCP exploration widget, including the role-toc-* TOC
-// frame and the .role-section-tab-bar / .mcp-arch-desc panel pattern.
+// frame and the .role-tab-bar / .mcp-arch-desc panel pattern.
 //
 // All visual styling comes from foundation tokens declared in
 // _sass/_theme.scss (--paper-*, --ink-*, --line, --coral*, --font-*).
@@ -47,7 +47,7 @@
     var wrap = div('');
     var id = 'sec-' + String(num).padStart(2, '0');
     wrap.innerHTML =
-      '<div class="role-widget-section-eyebrow" id="' + id + '">' +
+      '<div class="role-viz-section-eyebrow" id="' + id + '">' +
         '<span class="role-post-section-index">' + String(num).padStart(2, '0') + '</span>' +
         '<div class="role-post-section-rule"></div>' +
       '</div>' +
@@ -85,6 +85,12 @@
     }
     var dash = opts.dashed ? ' stroke-dasharray="4 4"' : '';
     var op   = opts.opacity != null ? ' stroke-opacity="' + opts.opacity + '"' : '';
+    // Static coral 1.5px edges map cleanly to viz.graphic.connector.strong;
+    // every other combination (dashed, opacity overrides, custom width, ink
+    // colour) keeps its inline attributes since no upstream role covers it.
+    if (color === ACC && !opts.dashed && opts.opacity == null && !opts.width) {
+      return '<path class="role-viz-graphic-connector-strong" d="' + d + '"/>';
+    }
     return '<path d="' + d + '" stroke="' + color + '" stroke-width="' + (opts.width || 1.5) + '" fill="none"' + dash + op + '/>';
   }
 
@@ -266,7 +272,7 @@
     var active = 'three';
 
     var panel = div('role-panel-frame');
-    var tabsBar = div('role-section-tab-bar');
+    var tabsBar = div('role-tab-bar');
     panel.appendChild(tabsBar);
     var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
@@ -331,7 +337,7 @@
       tabsBar.innerHTML = '';
       OPTIONS.forEach(function (o) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (o.id === active ? ' active' : '');
+        b.className = 'role-tab' + (o.id === active ? ' active' : '');
         b.type = 'button';
         b.textContent = o.label;
         b.onclick = function () { active = o.id; render(); };
@@ -427,7 +433,7 @@
 
     var active = 'merge';
     var panel = div('role-panel-frame');
-    var tabsBar = div('role-section-tab-bar');
+    var tabsBar = div('role-tab-bar');
     panel.appendChild(tabsBar);
     var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
@@ -478,7 +484,7 @@
       tabsBar.innerHTML = '';
       OPTIONS.forEach(function (o) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (o.id === active ? ' active' : '');
+        b.className = 'role-tab' + (o.id === active ? ' active' : '');
         b.type = 'button';
         b.textContent = o.label;
         b.onclick = function () { active = o.id; render(); };
@@ -528,7 +534,7 @@
     var active = 'three';
 
     var panel = div('role-panel-frame');
-    var tabsBar = div('role-section-tab-bar');
+    var tabsBar = div('role-tab-bar');
     panel.appendChild(tabsBar);
     var contentArea = div('');
     panel.appendChild(contentArea);
@@ -647,7 +653,7 @@
       tabsBar.innerHTML = '';
       OPTS.forEach(function (o) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (o.id === active ? ' active' : '');
+        b.className = 'role-tab' + (o.id === active ? ' active' : '');
         b.type = 'button';
         b.textContent = o.label;
         b.onclick = function () { active = o.id; render(); };
@@ -777,7 +783,7 @@
 
     var cActive = 'conflict';
     var commitPanel = div('role-panel-frame');
-    var commitTabs  = div('role-section-tab-bar');
+    var commitTabs  = div('role-tab-bar');
     var commitArea  = div('gm-commit-area');
     commitPanel.appendChild(commitTabs);
     commitPanel.appendChild(commitArea);
@@ -786,7 +792,7 @@
       commitTabs.innerHTML = '';
       COMMIT_VARIANTS.forEach(function (v) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (v.id === cActive ? ' active' : '');
+        b.className = 'role-tab' + (v.id === cActive ? ' active' : '');
         b.type = 'button';
         b.textContent = v.label;
         b.onclick = function () { cActive = v.id; renderCommitVariant(); };
@@ -1076,7 +1082,7 @@
 
     var sActive = 'revert';
     var sPanel = div('role-panel-frame');
-    var sTabs = div('role-section-tab-bar');
+    var sTabs = div('role-tab-bar');
     var sSvgBg = div('gm-svg-bg');
     var sDesc = div('gm-arch-desc');
     sPanel.appendChild(sTabs);
@@ -1087,7 +1093,7 @@
       sTabs.innerHTML = '';
       SCENARIOS.forEach(function (s) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (s.id === sActive ? ' active' : '');
+        b.className = 'role-tab' + (s.id === sActive ? ' active' : '');
         b.type = 'button';
         b.textContent = s.label;
         b.onclick = function () { sActive = s.id; renderScenarios(); };
@@ -1212,7 +1218,7 @@
 
     var rActive = 'before';
     var panel = div('role-panel-frame');
-    var tabs = div('role-section-tab-bar');
+    var tabs = div('role-tab-bar');
     panel.appendChild(tabs);
     var svgBg = div('gm-svg-bg');
     panel.appendChild(svgBg);
@@ -1259,7 +1265,7 @@
       tabs.innerHTML = '';
       STATES.forEach(function (s) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (s.id === rActive ? ' active' : '');
+        b.className = 'role-tab' + (s.id === rActive ? ' active' : '');
         b.type = 'button';
         b.textContent = s.label;
         b.onclick = function () { rActive = s.id; render(); };
@@ -1325,7 +1331,7 @@
     var rcActive = 'paused';
 
     var rcPanel = div('role-panel-frame');
-    var rcTabs = div('role-section-tab-bar');
+    var rcTabs = div('role-tab-bar');
     rcPanel.appendChild(rcTabs);
     var rcSvgBg = div('gm-svg-bg');
     rcPanel.appendChild(rcSvgBg);
@@ -1405,7 +1411,7 @@
       rcTabs.innerHTML = '';
       CONFLICT_STATES.forEach(function (s) {
         var b = document.createElement('button');
-        b.className = 'role-section-tab' + (s.id === rcActive ? ' active' : '');
+        b.className = 'role-tab' + (s.id === rcActive ? ' active' : '');
         b.type = 'button';
         b.textContent = s.label;
         b.onclick = function () { rcActive = s.id; renderRc(); };
