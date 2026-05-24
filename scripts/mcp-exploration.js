@@ -175,15 +175,16 @@
   // ------------------------------------------------------------------
   function buildTOC(root) {
     var ENTRIES = [
-      { num: 1, title: 'The integration problem MCP exists to solve' },
-      { num: 2, title: 'Host, Client and Server' },
-      { num: 3, title: 'MCP Primitives' },
-      { num: 4, title: 'MCP vs. Claude’s native tool use API' },
-      { num: 5, title: '“Convert the typeface on my landing page”' },
-      { num: 6, title: 'How a server is configured and launched' },
-      { num: 7, title: 'Many servers, one conversation' },
-      { num: 8, title: 'Same server. Same protocol. Any host' },
-      { num: 9, title: 'What you now have a model of' }
+      { num: 1,  title: 'The integration problem MCP exists to solve' },
+      { num: 2,  title: 'When should you deploy MCP?' },
+      { num: 3,  title: 'Host, Client and Server' },
+      { num: 4,  title: 'MCP Primitives' },
+      { num: 5,  title: 'MCP vs. Claude’s native tool use API' },
+      { num: 6,  title: '“Convert the typeface on my landing page”' },
+      { num: 7,  title: 'How a server is configured and launched' },
+      { num: 8,  title: 'Many servers, one conversation' },
+      { num: 9,  title: 'Same server. Same protocol. Any host' },
+      { num: 10, title: 'What you now have a model of' }
     ];
 
     var sec = div('mcp-section');
@@ -408,7 +409,52 @@
   }
 
   // ------------------------------------------------------------------
-  // §02 Architecture, clickable SVG
+  // §02 When to use MCP
+  // ------------------------------------------------------------------
+  function buildWhenToUseMCP(root) {
+    var SIGNALS = [
+      {
+        label: 'Client-agnostic capability',
+        body: 'MCP is worth reaching for when you want the integration to work regardless of what the host can do natively. A server that owns its own process runs its tools without depending on the host having shell access, a particular runtime, or any specific built-in capability. The host just needs to speak the protocol.'
+      },
+      {
+        label: 'Server-owned auth and process lifetime',
+        body: 'When the integration involves credentials or a long-lived connection, keeping those concerns inside the server is the cleaner arrangement. The server manages the OAuth flow or the open socket; the host stays unaware of the details and simply calls tools through the MCP boundary.'
+      }
+    ];
+
+    var sec = div('mcp-section');
+    sec.appendChild(sectionHeader(2, 'The decision', 'When should you deploy MCP?'));
+
+    var intro = div('mcp-body');
+    intro.innerHTML = "The M+N argument is the canonical motivation, but it isn’t the only one worth internalising. There are two more specific signals that suggest MCP is the right layer to reach for.";
+    sec.appendChild(intro);
+
+    var panel = div('mcp-panel');
+
+    SIGNALS.forEach(function (s, i) {
+      var row = div('');
+      row.style.cssText = 'padding: 20px 22px;' + (i > 0 ? 'border-top: 1px solid var(--line);' : '');
+
+      var labelEl = div('');
+      labelEl.style.cssText = 'font-family: var(--font-mono); font-size: var(--size-xs); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--coral); margin-bottom: 10px;';
+      labelEl.textContent = String(i + 1).padStart(2, '0') + '  ' + s.label;
+      row.appendChild(labelEl);
+
+      var bodyEl = div('');
+      bodyEl.style.cssText = 'font-family: var(--font-text); font-size: 15px; color: var(--ink-secondary); line-height: var(--lh-body);';
+      bodyEl.textContent = s.body;
+      row.appendChild(bodyEl);
+
+      panel.appendChild(row);
+    });
+
+    sec.appendChild(panel);
+    root.appendChild(sec);
+  }
+
+  // ------------------------------------------------------------------
+  // §03 Architecture, clickable SVG
   // ------------------------------------------------------------------
   function buildArchitecture(root) {
     var NODES = [
@@ -424,7 +470,7 @@
     ];
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(2, 'The architecture', 'Host, Client and Server'));
+    sec.appendChild(sectionHeader(3, 'The architecture', 'Host, Client and Server'));
 
     var body = div('mcp-body');
     body.innerHTML = 'MCP defines 3 components: host, client and server. Unlike the client-server model, the <code class="inline">client</code> isn’t the user-facing application. Each client is, more or less, a single open phone line to one server- an in-process object inside the host that holds the JSON-RPC session for that one connection. A host with three servers configured ends up with three of these lines open simultaneously.';
@@ -639,7 +685,7 @@
     window.__mcpSelectArchNode = function (id) {
       if (!NODES.find(function (n) { return n.id === id; })) return;
       setActive(id);
-      var anchor = document.getElementById('sec-02');
+      var anchor = document.getElementById('sec-03');
       if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
@@ -674,7 +720,7 @@
         controlledByTarget: 'host',
         example: 'read_file',
         rpcMethod: 'tools/list',
-        summary: 'Functions that the underlying model chooses to invoke. The model is presented with a list of available tools and decides for itself when each is appropriate. The <a href="#sec-04">next section</a> returns to this, drawing out the distinction between MCP tools and Claude’s native tool use.',
+        summary: 'Functions that the underlying model chooses to invoke. The model is presented with a list of available tools and decides for itself when each is appropriate. The <a href="#sec-05">next section</a> returns to this, drawing out the distinction between MCP tools and Claude’s native tool use.',
         codeTitle: 'Server reply',
         code: '{\n  "tools": [\n    {\n      "name": "read_file",\n      "description": "Read contents of a file",\n      "inputSchema": {\n        "type": "object",\n        "properties": { "path": { "type": "string" } },\n        "required": ["path"]\n      }\n    }\n  ]\n}' },
       { id: 'resources', name: 'Resources', color: 'var(--coral)', colorLit: '#C96442',
@@ -705,10 +751,10 @@
     ];
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(3, 'The components', 'MCP Primitives'));
+    sec.appendChild(sectionHeader(4, 'The components', 'MCP Primitives'));
 
     var body = div('mcp-body');
-    body.innerHTML = 'The protocol is intentionally small. The host learns which servers exist from a configuration file (<a href="#sec-06">covered below</a>). How and when those connections are formed is left to the host. Some hosts spawn or open every configured server at startup and keep it alive for the session, which sidesteps the per-invocation startup cost. Others take an ephemeral approach, spawning the server only when one of its tools is required and tearing it down afterwards, which keeps the resource footprint minimal. Either way, every fresh connection is preceded by the same brief <strong>handshake</strong>- the host sends an <code class="inline">initialize</code> request that names the protocol version it speaks and the capabilities it can act as a client for. The server replies with the protocol version it has settled on along with the primitives it supports, and the host closes the loop with an <code class="inline">initialized</code> notification. Only then does it begin enumerating and using whatever the server has on offer. Different primitives are controlled by different entities.';
+    body.innerHTML = 'The protocol is intentionally small. The host learns which servers exist from a configuration file (<a href="#sec-07">covered below</a>). How and when those connections are formed is left to the host. Some hosts spawn or open every configured server at startup and keep it alive for the session, which sidesteps the per-invocation startup cost. Others take an ephemeral approach, spawning the server only when one of its tools is required and tearing it down afterwards, which keeps the resource footprint minimal. Either way, every fresh connection is preceded by the same brief <strong>handshake</strong>- the host sends an <code class="inline">initialize</code> request that names the protocol version it speaks and the capabilities it can act as a client for. The server replies with the protocol version it has settled on along with the primitives it supports, and the host closes the loop with an <code class="inline">initialized</code> notification. Only then does it begin enumerating and using whatever the server has on offer. Different primitives are controlled by different entities.';
     sec.appendChild(body);
 
     var panel = div('mcp-panel');
@@ -790,7 +836,7 @@
   // ------------------------------------------------------------------
   function buildMCPvsTools(root) {
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(4, 'The distinction', "MCP vs. Claude’s native Tool use"));
+    sec.appendChild(sectionHeader(5, 'The distinction', "MCP vs. Claude’s native Tool use"));
 
     var body1 = div('mcp-body');
     body1.innerHTML = 'LLM applications such as <a href="/jekyll/update/2026/04/22/The-Claude-Code-Environment.html">Claude Code</a> themselves contain a tool layer. A tool is, in effect, a function-like abstraction: a named operation with typed inputs that the model can invoke when it judges the moment appropriate. Both approaches end up offering the model functions to call, but the difference is where the functions live, who defines them, and how they travel between applications. Under the hood, MCP tools are surfaced to the model as Claude tools (so the model itself is essentially unaware of the difference).';
@@ -820,7 +866,7 @@
     var LANES = [{ id: 'user', label: 'User' }, { id: 'host', label: 'Host' }, { id: 'client', label: 'Client' }, { id: 'server', label: 'Server' }, { id: 'system', label: 'System' }];
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(5, 'A worked example', '“Convert the typeface on my landing page”'));
+    sec.appendChild(sectionHeader(6, 'A worked example', '”Convert the typeface on my landing page”'));
 
     var body = div('mcp-body');
     body.textContent = 'The walkthrough below traces a single prompt from the user, through the host and down to the MCP servers it ends up exercising, and then back again.';
@@ -928,7 +974,7 @@
     };
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(6, 'Inputs', 'How a server is configured and launched'));
+    sec.appendChild(sectionHeader(7, 'Inputs', 'How a server is configured and launched'));
 
     var body = div('mcp-body');
     body.innerHTML = 'For local stdio servers in particular, configuration reduces to little more than <em>“how to start this process.”</em> The host reads a config file, spawns each server in turn, and pipes JSON-RPC over stdin/stdout (the simplicity here is, arguably, deliberate). Hovering over any of the highlighted fields below should clarify its specific role.';
@@ -1061,7 +1107,7 @@
     var SERVERS = ['github', 'postgres', 'filesystem', 'slack'];
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(7, 'Composition', 'Many servers, one conversation'));
+    sec.appendChild(sectionHeader(8, 'Composition', 'Many servers, one conversation'));
 
     var body = div('mcp-body');
     body.innerHTML = "It’s perhaps worth being explicit here: MCP does not define server-to-server pipelines, and there is no built-in chaining mechanism. Instead, the <em>model</em> takes on the role of orchestrator, calling any connected server’s tools across a single turn and weaving the outputs of one into the inputs of another.";
@@ -1164,7 +1210,7 @@
     ];
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(8, 'Portability', 'Same server. Same protocol. Any host'));
+    sec.appendChild(sectionHeader(9, 'Portability', 'Same server. Same protocol. Any host'));
 
     var body = div('mcp-body');
     body.innerHTML = "This is, more or less, the whole point of an open protocol: a server author writes one thing, and every host that speaks MCP is able to make use of it. Config <em>files</em> do differ slightly between hosts (each one having its own preferred way to express what is fundamentally the same launch command), but the server binary, the protocol it speaks, and the tools it exposes are otherwise identical.";
@@ -1254,7 +1300,7 @@
     ];
 
     var sec = div('mcp-section');
-    sec.appendChild(sectionHeader(9, 'Recap', 'What you now have a model of'));
+    sec.appendChild(sectionHeader(10, 'Recap', 'What you now have a model of'));
 
     var grid = div('mcp-recap-grid');
     ITEMS.forEach(function (item, i) {
@@ -1287,6 +1333,7 @@
     startTypewriter();
     buildTOC(container);
     buildProblem(container);
+    buildWhenToUseMCP(container);
     buildArchitecture(container);
     buildPrimitives(container);
     buildMCPvsTools(container);
