@@ -85,6 +85,9 @@ permalink: /journal-mapper/
 
   <p class="role-post-body">Add notes and images to each annotation to associate them with a traditional journal.</p>
   <img src="/assets/images/journal-mapper/location.png" alt="Annotation detail">
+
+  <img src="/assets/images/journal-mapper/sticker.png" alt="Sticker annotation on the map">
+  <p class="role-post-body">Display an annotation as a sticker: a cut-out image that sits directly on the map, turning a point of interest into an instantly recognisable landmark.</p>
 </div>
 
 <hr class="jm-rule">
