@@ -3128,3 +3128,107 @@ blockquote {
 // inlines per-element backgrounds on matrix cells / metric cards via
 // the categorical hue palette -- those remain hard-coded since they
 // carry information (TP/FN/FP/TN, PPV/NPV).
+
+// Widget specifics: llm-pipeline diagram (post: Call My "Agent").
+// Static SVG figure -- a three-node directed graph (Input Prompt ->
+// Large Language Model -> Output Response) assembled from
+// role-viz-graphic-* shapes inside a role-viz-frame surface. Only
+// layout lives here; every colour and type value comes from the role
+// classes so dark mode re-themes for free.
+.llm-pipeline-figure {
+    margin: 16px 0 24px;
+    padding: 24px 18px;
+    display: flex;
+    justify-content: center;
+}
+.llm-pipeline-figure svg {
+    width: 100%;
+    height: auto;
+    max-width: 560px;
+    display: block;
+}
+
+// Widget specifics: chaining animation (post: Call My "Agent").
+// Interactive SVG state machine -- one iteration of a chain
+// (Input -> LLM, with Tools hanging below the LLM, -> Output -> Verify)
+// reveals one element at a time, then offers a pass/fail decision above
+// the Verify circle. PASS grows an arrow out of Verify into a fresh Input,
+// then replays the build node-by-node while a fixed horizontal "window"
+// pans left at constant speed (the user cannot scroll it by hand): the new
+// nodes fade in as they cross into view and spent ones clip out the left
+// edge, until the next Verify parks at the decision point. FAIL routes the
+// Verify down to a Fail node with a Restart control. Node + connector colour/type come from the role-viz-graphic-*
+// classes (Verify uses role-viz-graphic-node-circle); only the reveal +
+// scroll animation, interaction affordances, and the categorical pass/fail
+// hues (the sanctioned informational-colour exception) live here.
+.llm-pipeline-figure.chain-fig svg { max-width: 640px; }
+
+// The window: clip everything outside the viewBox so scrolled-off blocks
+// vanish at the edges.
+.chain-svg { overflow: hidden; }
+
+// Continuation ellipsis -- the dots left of a looped iteration's incoming
+// arrow. Muted to read as part of the flow line.
+.chain-tail circle { fill: var(--ink-muted); }
+
+// The conveyor of iteration blocks. On pass it pans left at a *constant*
+// speed (linear) over one build cycle: each node of the incoming iteration
+// fades in as it crosses into view while spent nodes slide off the left.
+// Linear timing keeps the staggered reveals aligned with the pan position.
+// transform-box keeps the px translation in viewBox units regardless of the
+// rendered scale.
+.chain-track {
+    transform-box: view-box;
+    transform-origin: 0 0;
+    transition: transform 2.6s linear;
+}
+.chain-track.chain-no-anim { transition: none; }
+
+.chain-el { opacity: 0; transition: opacity 0.4s ease; }
+.chain-el.chain-on { opacity: 1; }
+.chain-el:not(.chain-on) { pointer-events: none; }
+
+.chain-btn { cursor: pointer; }
+// Suppress the UA focus ring for pointer activation (the button hides on
+// click, which would otherwise strand the default outline); keep a coral
+// ring for keyboard focus.
+.chain-btn:focus { outline: none; }
+.chain-btn:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+
+// Pass / fail decision buttons -- green/red are categorical outcome hues.
+.chain-check circle { fill: var(--paper-raised); stroke: var(--hl-add-rule); stroke-width: 1.5; }
+.chain-check path   { stroke: var(--hl-add-rule); stroke-width: 3; fill: none; }
+.chain-cross circle { fill: var(--paper-raised); stroke: var(--hl-del-rule); stroke-width: 1.5; }
+.chain-cross path   { stroke: var(--hl-del-rule); stroke-width: 3; fill: none; }
+.chain-check:hover circle { fill: var(--hl-add-bg); }
+.chain-cross:hover circle { fill: var(--hl-del-bg); }
+
+// Fail node -- red (the categorical failure hue). Its inbound arrow uses the
+// neutral role-viz-graphic-connector-thick, matching every other flow arrow.
+.chain-fail-node  { fill: var(--paper-raised); stroke: var(--hl-del-rule); stroke-width: 1.25; }
+text.chain-fail-label {
+    fill: var(--hl-del-rule);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-smd);
+    font-weight: 500;
+}
+
+// Restart pill -- coral (the site accent for the actionable control).
+.chain-restart rect { fill: var(--paper-raised); stroke: var(--coral); stroke-width: 1.25; }
+text.chain-restart-label {
+    fill: var(--coral);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+.chain-restart:hover rect { stroke: var(--coral-strong); }
+.chain-restart:hover .chain-restart-label { fill: var(--coral-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+    .chain-el { transition: none; }
+    .chain-track { transition: none; }
+}
+
