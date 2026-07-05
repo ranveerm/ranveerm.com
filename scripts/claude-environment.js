@@ -76,9 +76,8 @@
       badge: '⚒️',
       sublabel: 'Primitive actions',
       color: '#db2777',
-      description: 'The fundamental actions Claude can take. Built-ins like Read, Write, Bash, Grep are always available. Everything else in the environment either restricts these, orchestrates them, or extends them.',
-      aggregation: 'Built-in tool definitions are always present in the system prompt. Settings and agents can only **restrict** them; MCP and skills can **extend** them.',
-      nodes: ['builtin-tools']
+      description: 'The fundamental actions Claude can take to read and mutate state.',
+      nodes: ['builtin-tools', 'mcp']
     },
     invocable: {
       label: '4. Invocable Knowledge',
@@ -105,16 +104,8 @@
       aggregation: 'Hooks fire deterministically on tool lifecycle events. **Zero model context cost** - they run shell-side, outside the model loop. Hooks **merge across all sources** (user, project, plugin); every registered hook fires for its matching event regardless of where it was defined.',
       nodes: ['hooks']
     },
-    external: {
-      label: '7. External Tools',
-      sublabel: 'Protocol-based integrations',
-      color: '#2563eb',
-      description: 'MCP is the odd one out: an OPEN PROTOCOL, not a Claude Code convention. Portable across Cursor, VS Code, and other clients.',
-      aggregation: 'When an MCP server is connected, its tool definitions are added to the system prompt - same context cost model as built-in tools. On name collision, MCP servers resolve `local > project > user`. Plugins can also bundle MCP servers, which load alongside the per-scope ones.',
-      nodes: ['mcp']
-    },
     state: {
-      label: '8. State and Isolation',
+      label: '7. State and Isolation',
       sublabel: 'Session management',
       color: '#64748b',
       description: 'How Claude remembers across sessions and isolates parallel work.',
@@ -329,6 +320,7 @@
     skills: {
       layer: 'invocable', label: 'skills/', icon: 'file-code-o',
       title: 'skills/',
+      lede: 'Utilises the `Skill` tool and enables reusable prompt-based workflows.',
       description: "Each skill is a folder containing a `SKILL.md` plus any supporting files it bundles (templates, scripts, reference docs). Both you and Claude can invoke them: typed explicitly as `/skill-name`, or auto-invoked by Claude when your prompt matches the skill's `description` frontmatter. Frontmatter flags (`disable-model-invocation`, `user-invocable`) can lock invocation to one direction. **Not** part of MCP, Claude Code-specific convention.",
       exampleHeader: '.claude/skills/deploy/SKILL.md',
       example: '---\nname: deploy\ndescription: Triggered when user says\n  "deploy", "ship it", "push to prod"\nallowed-tools: [Read, Bash]\n---\n1. Run full test suite\n2. Bump version in package.json\n3. Create git tag\n4. Push to main',
@@ -379,7 +371,7 @@
       tokenNote: 'Shell-side. Zero model context cost.'
     },
     mcp: {
-      layer: 'external', label: '.mcp.json', icon: 'server',
+      layer: 'tools', label: '.mcp.json', icon: 'server',
       title: '.mcp.json',
       description: 'MCP server configuration. Lives at the **project root** (not inside `.claude/`), committed for the team to share. Personal/per-user servers go to `~/.claude.json` instead. Unlike everything else here, MCP is an OPEN PROTOCOL, portable across Cursor, VS Code, and other clients. Extends Claude with external tools (databases, GitHub, Jira).',
       example: '{\n  "mcpServers": {\n    "postgres": {\n      "command": "npx",\n      "args": ["@modelcontextprotocol/server-postgres"]\n    },\n    "github": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-github"]\n    }\n  }\n}',
@@ -664,7 +656,7 @@
 
     // Layer 0 (entry) renders as its own full-width row above the grid; the
     // remaining layers stack inside the grid's left column.
-    var LAYER_ORDER = ['memory', 'config', 'tools', 'invocable', 'delegation', 'automation', 'external', 'state'];
+    var LAYER_ORDER = ['memory', 'config', 'tools', 'invocable', 'delegation', 'automation', 'state'];
 
     // ─────────────────────────── render funcs ──────────────────────────
 
@@ -1799,13 +1791,24 @@
           body.appendChild(desc);
         }
 
+        // Tools layer is split into two subsections (Internal + External).
+        // Internal Tools currently has no body (filled in a follow-up);
+        // External Tools points at the MCP post for the deeper explanation.
+        if (state.selectedLayer === 'tools') {
+          body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Internal Tools'));
+          body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'External Tools'));
+          var extP = el('p', { class: 'ce-inspector-desc' });
+          extP.appendChild(renderInline('Ability to add custom tools via [MCP Server](/jekyll/update/2026/04/27/Exploring-Model-Context-Protocol-MCP.html)'));
+          body.appendChild(extP);
+        }
+
         // Precedence chain (only for layers with multiple ordered files, not memory)
         if (state.selectedLayer !== 'memory' && layer.precedenceFiles && layer.precedenceFiles.length > 1) {
           body.appendChild(el('div', { class: 'ce-inspector-section-label' }, 'Precedence (highest → lowest)'));
           var chain = el('div', { class: 'ce-precedence-chain' });
           layer.precedenceFiles.forEach(function(fid, idx) {
             if (idx > 0) chain.appendChild(el('span', { class: 'ce-precedence-sep' }, '>'));
-            var btn = el('button', { type: 'button', class: 'ce-precedence-file' }, NODES[fid].label);
+            var btn = el('button', { type: 'button', class: 'role-code-inline ce-precedence-file' }, NODES[fid].label);
             hook(btn, function() { selectNode(fid); });
             chain.appendChild(btn);
           });
@@ -1843,6 +1846,15 @@
       hook(layerLink, function() { selectLayer(node.layer); });
       crumb.appendChild(layerLink);
       body.appendChild(crumb);
+
+      // Optional lede paragraph that sits at the top of a node's inspector
+      // (above the main description). Used to surface the one-line "what
+      // this is" framing before the longer body.
+      if (node.lede) {
+        var lede = el('p', { class: 'ce-inspector-desc' });
+        lede.appendChild(renderDescription(node.lede));
+        body.appendChild(lede);
+      }
 
       var desc2 = el('p', { class: 'ce-inspector-desc' });
       desc2.appendChild(renderDescription(node.description));
@@ -1917,15 +1929,16 @@
       }
       if (node.seeAlso) {
         body.appendChild(el('div', { class: 'ce-inspector-section-label', style: 'margin-top: 8px;' }, 'See also'));
-        var seeAlsoBtn = el('button', { class: 'ce-precedence-file', type: 'button' }, node.seeAlso.label);
+        var seeAlsoBtn = el('button', { class: 'role-code-inline ce-precedence-file', type: 'button' }, node.seeAlso.label);
         hook(seeAlsoBtn, function() { selectNode(node.seeAlso.nodeId); });
         body.appendChild(seeAlsoBtn);
       }
     }
 
     function renderPortabilityNote() {
-      // Only relevant when Layer 7 (External Tools / MCP) is the focus.
-      var visible = activeLayer() === 'external';
+      // Shown when the MCP file is the focus, since External Tools is now
+      // a subsection of the Tools layer rather than its own layer.
+      var visible = state.selectedNode === 'mcp';
       mcpCallout.style.display = visible ? '' : 'none';
     }
 

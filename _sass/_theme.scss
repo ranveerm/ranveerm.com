@@ -2412,12 +2412,26 @@ h2.role-viz-section-heading {
 .claudeenv .ce-inspector-pill { background: var(--paper-inset); border-left: 3px solid var(--coral); padding: 8px 14px; margin-bottom: 10px; font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); line-height: var(--lh-normal); border-radius: 0 6px 6px 0; }
 .claudeenv .ce-inspector-pill.flow { border-left-color: var(--coral-strong); background: var(--coral-wash); }
 .claudeenv .ce-inspector-pill.aggregation { border-left-color: var(--coral); background: var(--coral-wash); color: var(--ink-secondary); line-height: var(--lh-normal); font-family: var(--font-display); font-size: var(--size-md); }
-.claudeenv .ce-precedence-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-bottom: 12px; font-family: var(--font-mono); font-size: var(--size-smd); }
-.claudeenv .ce-precedence-file { background: var(--paper-inset); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font: inherit; font-family: var(--font-mono); font-size: var(--size-sm); cursor: pointer; color: var(--sx-keyword); }
-.claudeenv .ce-precedence-file:hover { border-color: var(--coral); color: var(--coral-strong); }
+// Precedence chain reads as a horizontal sequence of inline-code tokens
+// joined by `>`. The chip itself consumes .role-code-inline (the shared
+// `code.inline` recipe); the rules below add only the interactive
+// affordances the role does not carry (cursor + hover lift to coral).
+// The wrapper sets font-size to match adjacent prose (.ce-inspector-desc
+// at 15px) so the 0.92em chip glyphs land at the same scale as inline
+// code in body text.
+.claudeenv .ce-precedence-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-bottom: 12px; font-size: 15px; }
+.claudeenv .ce-precedence-file { cursor: pointer; transition: color .15s ease; }
+.claudeenv .ce-precedence-file:hover { color: var(--coral); }
 .claudeenv .ce-precedence-sep { color: var(--ink-muted); font-family: var(--font-mono); }
 .claudeenv .ce-inspector-pill.token { border-left-color: var(--coral-strong); background: var(--coral-wash); color: var(--ink-secondary); line-height: var(--lh-normal); font-family: var(--font-display); font-size: var(--size-md); }
-.claudeenv .ce-inspector-section-label { font-family: var(--font-display); font-size: var(--size-h2b); font-weight: 500; color: var(--ink-primary); line-height: var(--lh-snug); letter-spacing: var(--track-snug); margin: 18px 0 8px; }
+// Section-label shares the canonical inspector-title recipe with
+// `.ce-inspector h3` (font-size var(--size-h2), weight 500, snug). The
+// 18px top margin gives section dividers their vertical rhythm, but the
+// first label in the inspector body (e.g. the memory layer, which opens
+// with "Intent" rather than an h3 sublabel) is flushed to the top so it
+// matches the other layers' "Behavioural controls"-style headline.
+.claudeenv .ce-inspector-section-label { font-family: var(--font-display); font-size: var(--size-h2); font-weight: 500; color: var(--ink-primary); line-height: var(--lh-snug); letter-spacing: var(--track-snug); margin: 18px 0 8px; }
+.claudeenv .ce-inspector-body > .ce-inspector-section-label:first-child { margin-top: 0; }
 .claudeenv .ce-inspector-extended-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 12px; background: var(--table-body); border: 1px solid var(--table-line); border-radius: 14px; overflow: hidden; }
 .claudeenv .ce-inspector-extended-table tr { background: transparent; }
 .claudeenv .ce-inspector-extended-table tr:nth-child(even) { background: transparent; }
@@ -2528,7 +2542,12 @@ h2.role-viz-section-heading {
 .claudeenv .ce-instr-table tr:first-child td { border-top: none; }
 .claudeenv .ce-instr-table td:first-child { font-size: 1.05rem; width: 28px; text-align: center; padding-right: 8px; }
 .claudeenv .ce-instr-table td:nth-child(2) { white-space: nowrap; }
-.claudeenv .ce-instr-tips { font-family: var(--font-text); font-size: var(--size-smd); color: var(--ink-secondary); padding-left: 18px; line-height: var(--lh-normal); margin: 0 0 14px; }
+// Bullet lists under inspector section headings (Intent, Suggestion,
+// Resources, /init, etc.). Body recipe mirrors .ce-inspector-desc so a
+// tip list reads at the same point size as the description paragraphs in
+// the same panel: 15px display, lh 1.65, ink-secondary. Only the
+// list-specific bits (indent + bottom margin) are widget-local.
+.claudeenv .ce-instr-tips { font-family: var(--font-display); font-size: 15px; color: var(--ink-secondary); padding-left: 18px; line-height: 1.65; margin: 0 0 14px; }
 @media (min-width: 1600px) { .claudeenv .ce-panel.ce-inspector, .claudeenv .ce-panel.ce-context { margin-bottom: 0; box-sizing: border-box; } }
 
 // (The original Year-in-Review posts inlined a small <style> block defining
