@@ -7,13 +7,14 @@
  *   LLM (a call arrow down and a response arrow back up).
  * The first iteration reveals one element at a time, in place. Once built, a
  * pass/fail decision appears above the Verify circle:
- *   - PASS (check): an arrow grows out of Verify into a fresh Input and the
- *     build replays node-by-node, while a fixed horizontal window pans left
- *     at a constant speed -- new nodes fade in as they cross into view and
- *     spent ones clip off the left edge, until the next Verify parks again.
- *     The reader cannot scroll it by hand; the animation drives it.
- *   - FAIL (cross): the flow routes down to a Fail node and a Restart control
- *     appears.
+ *   - PASS (check): the required condition has been met, so the loop ends --
+ *     the flow routes down to a Done node and a Restart control appears.
+ *   - FAIL (cross): the condition was not met, so the loop keeps iterating --
+ *     an arrow grows out of Verify into a fresh Input and the build replays
+ *     node-by-node, while a fixed horizontal window pans left at a constant
+ *     speed -- new nodes fade in as they cross into view and spent ones clip
+ *     off the left edge, until the next Verify parks again. The reader
+ *     cannot scroll it by hand; the animation drives it.
  *
  * Node/connector colour + type come from the upstream .role-viz-graphic-*
  * classes; the Verify node uses .role-viz-graphic-node-circle. This file only
@@ -80,22 +81,22 @@
     var s = [];
     s.push('<svg class="chain-svg" viewBox="-106 0 646 250" xmlns="' + SVGNS + '" ' +
       'aria-label="Interactive chaining diagram. One iteration runs Input, LLM (with a Tools node below it), Output and a Verify step. ' +
-      'Choose pass to chain a fresh iteration on to the right, or fail to route to a Fail node and restart.">');
+      'Choose pass to end the loop at a Done node, or fail to chain a fresh iteration on to the right and keep iterating.">');
     s.push('<title>Agentic chaining window</title>');
     // The scrolling conveyor of iteration blocks.
     s.push('<g class="chain-track"></g>');
     // Fixed decision overlay above the parked Verify (x=470). No connecting lines.
     s.push('<g class="chain-el chain-decision">');
-    s.push('<g class="chain-btn chain-check" role="button" tabindex="-1" aria-label="Pass: chain on to the next iteration">' +
+    s.push('<g class="chain-btn chain-check" role="button" tabindex="-1" aria-label="Pass: condition met, end the loop">' +
       '<circle cx="452" cy="30" r="15"/><path d="M446 30 L450 35 L459 23"/></g>');
-    s.push('<g class="chain-btn chain-cross" role="button" tabindex="-1" aria-label="Fail: route to the fail node">' +
+    s.push('<g class="chain-btn chain-cross" role="button" tabindex="-1" aria-label="Fail: condition not met, chain on to the next iteration">' +
       '<circle cx="488" cy="30" r="15"/><path d="M483 25 L493 35 M493 25 L483 35"/></g>');
     s.push('</g>');
-    // Fixed fail overlay below the parked Verify.
-    s.push('<g class="chain-el chain-fail">');
+    // Fixed done overlay below the parked Verify.
+    s.push('<g class="chain-el chain-done">');
     s.push('<path class="role-viz-graphic-connector-thick" d="M470 124 L470 148 M464 142 L470 148 L476 142" stroke-linecap="round" stroke-linejoin="round"/>');
-    s.push('<rect class="chain-fail-node" x="428" y="150" width="84" height="48" rx="8"/>');
-    s.push('<text class="chain-fail-label" x="470" y="179" text-anchor="middle">Fail</text>');
+    s.push('<rect class="chain-done-node" x="428" y="150" width="84" height="48" rx="8"/>');
+    s.push('<text class="chain-done-label" x="470" y="179" text-anchor="middle">Done</text>');
     s.push('</g>');
     s.push('<g class="chain-el chain-btn chain-restart" role="button" tabindex="-1" aria-label="Restart the animation">' +
       '<rect x="422" y="214" width="96" height="24" rx="12"/>' +
@@ -114,7 +115,7 @@
     var gen = 0;
     var timers = [];
     var cur = 0;
-    var phase = 'idle';   // idle | building | decision | scrolling | fail -- gates the buttons
+    var phase = 'idle';   // idle | building | decision | scrolling | done -- gates the buttons
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function clearTimers() { timers.forEach(function (t) { clearTimeout(t); }); timers = []; }
@@ -154,7 +155,7 @@
       track.innerHTML = '';
       cur = 0;
       setTrack(BASE, false);
-      on('.chain-decision, .chain-fail, .chain-restart', false);
+      on('.chain-decision, .chain-done, .chain-restart', false);
       focusable('.chain-check, .chain-cross, .chain-restart', false);
 
       appendBlock(0, false);
@@ -174,9 +175,9 @@
       focusable('.chain-check, .chain-cross', true);
     }
 
-    // Pass: chain a fresh iteration on to the right and pan the window left
-    // while it rebuilds node-by-node.
-    function pass() {
+    // Fail: the condition wasn't met, so chain a fresh iteration on to the
+    // right and pan the window left while it rebuilds node-by-node.
+    function loop() {
       if (phase !== 'decision') return;
       gen++;
       var g = gen;
@@ -208,15 +209,17 @@
       later(settle, SCROLL_MS + 150, g);
     }
 
-    function fail() {
+    // Pass: the required condition has been met, so the loop terminates at
+    // a Done node and a Restart control appears.
+    function done() {
       if (phase !== 'decision') return;
       gen++;
       var g = gen;
-      phase = 'fail';
+      phase = 'done';
       clearTimers();
       focusable('.chain-check, .chain-cross', false);
       on('.chain-decision', false);
-      on('.chain-fail', true);
+      on('.chain-done', true);
       later(function () { on('.chain-restart', true); focusable('.chain-restart', true); }, 450, g);
     }
 
@@ -231,8 +234,8 @@
         if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); act(); }
       });
     }
-    bindBtn('.chain-check', pass);
-    bindBtn('.chain-cross', fail);
+    bindBtn('.chain-check', done);
+    bindBtn('.chain-cross', loop);
     bindBtn('.chain-restart', build);
 
     var started = false;

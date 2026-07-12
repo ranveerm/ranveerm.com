@@ -3203,11 +3203,11 @@ blockquote {
 .chain-check:hover circle { fill: var(--hl-add-bg); }
 .chain-cross:hover circle { fill: var(--hl-del-bg); }
 
-// Fail node -- red (the categorical failure hue). Its inbound arrow uses the
+// Done node -- green (the categorical success hue). Its inbound arrow uses the
 // neutral role-viz-graphic-connector-thick, matching every other flow arrow.
-.chain-fail-node  { fill: var(--paper-raised); stroke: var(--hl-del-rule); stroke-width: 1.25; }
-text.chain-fail-label {
-    fill: var(--hl-del-rule);
+.chain-done-node  { fill: var(--paper-raised); stroke: var(--hl-add-rule); stroke-width: 1.25; }
+text.chain-done-label {
+    fill: var(--hl-add-rule);
     stroke: none;
     font-family: var(--font-mono);
     font-size: var(--size-smd);
