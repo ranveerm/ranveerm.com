@@ -3232,3 +3232,84 @@ text.chain-restart-label {
     .chain-track { transition: none; }
 }
 
+// Widget specifics: title transform (post-title easter egg, scripts/title-transform.js).
+// Clicking a post title cycles it through thematic representations of the same
+// text: binary -> letterpress -> mediaeval blackletter -> back to normal.
+// .tt-face carries the opacity/blur dissolve used for the plain-text swaps; the
+// nested .tt-type carries the per-state transform and typeface. Two of the states
+// reveal character by character via .tt-ch spans: binary resolves one octet at a
+// time left to right, and the blackletter is inked in glyph by glyph like a
+// scribe's hand. The letterpress state sits mirrored, then prints the right way
+// round via a scaleX flip. Every transformed state shares var(--ink-primary) so
+// the colour stays consistent across representations and re-themes for dark on
+// its own. The two display faces load from Google Fonts on first intent.
+.tt {
+    position: relative;
+    cursor: pointer;
+}
+.tt:focus-visible { outline: 2px solid var(--coral); outline-offset: 6px; border-radius: 2px; }
+
+.tt-face {
+    display: inline-block;
+    transition: opacity 0.28s ease, filter 0.28s ease;
+}
+.tt-face.tt-out { opacity: 0; filter: blur(6px); }
+
+.tt-type {
+    display: inline-block;
+    color: var(--ink-primary);
+    transition: transform 0.55s ease, color 0.5s ease;
+}
+.tt-type.tt-instant { transition: none; }
+.tt-type.tt-instant .tt-ch { transition: none; }   // snap staged glyphs into place
+
+// Per-character carrier shared by the binary and mediaeval staged animations.
+.tt-ch { display: inline-block; white-space: pre; }
+
+// State: binary -- 8-bit character codes, revealed one octet at a time, left to right.
+.tt-binary .tt-type {
+    font-family: var(--font-mono);
+    font-size: clamp(0.72rem, 2.1vw, 1.05rem);
+    line-height: 1.55;
+    letter-spacing: 0.03em;
+    word-break: break-word;
+}
+.tt-binary .tt-ch {
+    margin-right: 0.45em;                 // space the octets apart
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.tt-binary .tt-ch.tt-ch-hidden {          // not yet revealed: waiting just to the left
+    opacity: 0;
+    transform: translateX(-0.25em);
+}
+
+// State: letterpress -- the type sits mirrored on the press, then prints the
+// right way round. The scaleX flip animates via .tt-type's transform transition.
+.tt-mirror .tt-type {
+    font-family: "IM Fell English", Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 6vw, var(--size-h1l));
+    letter-spacing: normal;
+    transform: scaleX(-1);
+}
+.tt-mirror.tt-printed .tt-type { transform: scaleX(1); }
+
+// State: mediaeval manuscript -- a scribal blackletter, inked in glyph by glyph.
+.tt-medieval .tt-type {
+    font-family: "UnifrakturMaguntia", "IM Fell English", serif;
+    font-size: clamp(2.2rem, 6.5vw, calc(var(--size-h1l) * 1.05));
+    letter-spacing: normal;
+    line-height: 1.1;
+}
+.tt-medieval .tt-ch {
+    transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
+}
+.tt-medieval .tt-ch.tt-ch-hidden {   // not yet written: wet ink about to settle
+    opacity: 0;
+    transform: translateY(0.22em);
+    filter: blur(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tt-face, .tt-type, .tt-ch { transition: none; }
+}
+
