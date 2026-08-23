@@ -3313,3 +3313,281 @@ text.chain-restart-label {
     .tt-face, .tt-type, .tt-ch { transition: none; }
 }
 
+// Widget specifics: type anatomy (post: The Anatomy of Type,
+// scripts/type-anatomy.js). A glyph-editor inspector for letterform anatomy.
+// The foreign React prototype's palette is remapped onto site tokens: the
+// coral accent lights up the selected part, the categorical info-blue draws
+// the metric guides, and paper/ink surfaces carry the chrome, so the widget
+// re-themes for dark for free. --ta-serif is a widget-local specimen stack:
+// serif-dependent anatomy (serifs, brackets, contrast) needs a serif face to
+// point at, which the site's Gill Sans UI face cannot provide.
+.ta-root {
+    --ta-serif: Georgia, "Times New Roman", Times, serif;
+    // Swash forms do not exist in a text serif, so the Swash term alone sets
+    // its specimen in a calligraphic face. Must match SWASH in
+    // scripts/type-anatomy.js, which measures against the same stack.
+    --ta-swash: "Snell Roundhand", "Apple Chancery", "Monotype Corsiva", "Lucida Calligraphy", cursive;
+    // The Spur term borrows a high-contrast face, whose G draws a real spur
+    // where the body serif's does not. Must match DIDOT in
+    // scripts/type-anatomy.js, which measures against the same stack.
+    --ta-didot: Didot, "Bodoni 72", "Playfair Display", Georgia, serif;
+    // The Stress term sets one letter in each of two faces to compare their
+    // axes: an old-style face leans it, a modern one stands it upright.
+    // Must match OLDSTYLE / MODERN in scripts/type-anatomy.js.
+    --ta-oldstyle: Palatino, "Palatino Linotype", "Iowan Old Style", "Times New Roman", Georgia, serif;
+    --ta-modern: "Bodoni 72", Didot, "Playfair Display", Georgia, serif;
+    color: var(--ink-secondary);
+    font-family: var(--font-text);
+}
+.ta-root * { box-sizing: border-box; }
+
+// Stage (visual) stacked over inspector (description), one role-panel-frame
+// card -- the same top/bottom recipe as .gm-svg-bg + .gm-arch-desc in the
+// "Merge Conventions" panel (Exploring Git Merge post): visual surface on
+// top, prose below, a single hairline divider between. .ta-main only needs
+// to add role-panel-frame; background/border/radius/corner-clipping all come
+// from that shared role, not a widget-local rule.
+.ta-root { --ta-panel-h: 480px; }
+.ta-stage {
+    height: var(--ta-panel-h);
+    background: var(--paper-inset);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ta-svg { display: block; width: 100%; height: auto; }
+
+// SVG: sidebearings, guides, specimen, leader, marks, nodes
+.ta-sidebearing { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 8; }
+
+// Metric guides use the standard viz palette. An inactive guide line carries
+// the same --ink-muted as its own label rather than the fainter --line, so
+// the full set of reference lines stays legible while the active one is
+// coral; a line the reader cannot see is not a reference. Every active guide
+// gets the SAME emphasis -- a markedly thicker line and a markedly larger,
+// bold label -- whether or not the term also highlights something on the
+// glyph itself. Consistent weight is what tells the reader "this line is
+// part of the current term"; a weaker "just active" tier would read as a
+// lesser, unclear signal. Label sizes come from the standard type scale
+// (--size-md / --size-h2), not hand-picked pixel values. .ta-glead is the
+// curved leader drawn when two lines sit too close for centre-aligned
+// labels and a label has to be eased outward.
+.ta-g line { stroke: var(--ink-muted); stroke-width: 1; }
+.ta-g text {
+    fill: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: var(--size-md);
+    letter-spacing: 0.04em;
+}
+.ta-g .ta-glead { stroke: var(--ink-muted); stroke-width: 1; }
+.ta-g.on line { stroke: var(--coral); stroke-width: 4; }
+.ta-g.on text { fill: var(--coral); }
+.ta-g.on .ta-glead { stroke: var(--coral); }
+.ta-g-label.on { font-weight: 600; font-size: var(--size-h2); }
+.ta-g-val.on { font-size: var(--size-lg); }
+
+// Leading's two-line specimen: thin grey baselines, coral bracket + ticks
+// spanning line 1's baseline to line 2's, matching the guide-label recipe.
+.ta-lead-baseline { stroke: var(--line); stroke-width: 1; }
+.ta-lead-bracket, .ta-lead-tick { stroke: var(--coral); stroke-width: 2; }
+
+// Kerning's measured gap: a soft coral wash marking the pinch-point column
+// between two letters, distinct from the solid clipped highlight used
+// everywhere else (there is no ink here to recolour, only empty space).
+.ta-mk-band { fill: var(--coral); fill-opacity: 0.16; stroke: var(--coral); stroke-width: 1.5; }
+
+.ta-specimen { fill: var(--ink-primary); font-family: var(--ta-serif); }
+.ta-specimen.ta-i { font-style: italic; }
+// Per-term face overrides (Swash, Spur, Stress).
+.ta-specimen.ta-swash,
+.ta-hl.ta-swash,
+.ta-mini.ta-swash { font-family: var(--ta-swash); }
+.ta-specimen.ta-didot,
+.ta-hl.ta-didot,
+.ta-mini.ta-didot { font-family: var(--ta-didot); }
+.ta-specimen.ta-oldstyle { font-family: var(--ta-oldstyle); }
+.ta-specimen.ta-modern { font-family: var(--ta-modern); }
+
+.ta-leader { stroke: var(--coral); stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.32; }
+
+// The highlight is a coral copy of the specimen glyph, clipped to the feature
+// region, so it tracks the letter's real contour.
+.ta-hl { fill: var(--coral); font-family: var(--ta-serif); }
+.ta-hl.ta-i { font-style: italic; }
+// Coral overlays for the few marks that denote a line/axis/open counter
+// rather than a stroke (baseline, stress axis, counter).
+.ta-mk { fill: none; stroke: var(--coral); }
+.ta-mk.ta-hollow { stroke-width: 3; }
+// Filled region for marks that shade whitespace (counter, aperture): there
+// is no ink to recolour, so the traced region itself is painted, slightly
+// translucent so it reads as marked space rather than added ink.
+.ta-mk-fill { fill: var(--coral); opacity: 0.5; }
+.ta-mk-line { stroke: var(--coral); fill: none; opacity: 0.6; }
+.ta-mk-line.ta-dash { stroke-dasharray: 4 8; opacity: 0.9; }
+.ta-mark { animation: ta-pulse 2s ease-in-out infinite; }
+
+.ta-enter { animation: ta-in 0.5s ease both; }
+@keyframes ta-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ta-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+// Inspector: the prose panel beneath the stage, mirroring .gm-arch-desc
+// (paper-raised, top hairline divider, natural height -- no forced scroll).
+.ta-insp {
+    background: var(--paper-raised);
+    border-top: 1px solid var(--line);
+    padding: 22px 22px 18px;
+}
+.ta-insp-foot { padding-top: 18px; }
+.ta-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--size-h2b);
+    letter-spacing: var(--track-snug);
+    margin: 0 0 2px;
+    color: var(--ink-primary);
+}
+.ta-mini {
+    font-family: var(--ta-serif);
+    font-size: 46px;
+    line-height: 1;
+    color: var(--ink-primary);
+    margin: 10px 0 16px;
+    letter-spacing: 0.06em;
+}
+.ta-mini.ta-i { font-style: italic; }
+.ta-def {
+    font-size: var(--size-lg);
+    line-height: var(--lh-body);
+    color: var(--ink-secondary);
+    margin: 0;
+}
+.ta-def b { color: var(--coral); font-weight: 500; }
+// Cross-reference to another term (from a [[Name|display]] token in def
+// text), e.g. "ascenders" inside X-height's definition. Styled exactly
+// like the site's standard prose links (coral, underlined), so a
+// reference reads as a link rather than a custom hover affordance.
+.ta-def-link {
+    font: inherit;
+    color: var(--color-accent);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.ta-def-link:hover { color: var(--color-accent-ink); }
+.ta-def-link:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+
+.ta-controls { display: flex; gap: 10px; align-items: center; }
+
+// Page sections around the widget (post: Components of a Type). These are
+// separated by the site's own hairline rule rather than the numbered
+// eyebrow other pages use, so the spacing lives on the rule itself.
+.ta-section { padding: 0 0 4px; }
+.ta-section > hr.post-divider { margin: 46px 0 24px; }
+.ta-section > h2.role-post-section-heading { margin: 0 0 18px; }
+.ta-section-prose { margin: 0 0 18px; }
+// Terminology table: the term column shrinks to its content, as the
+// category column does in the components table.
+.ta-term-cell { width: 1%; white-space: nowrap; }
+.ta-resources {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: 18px;
+    line-height: var(--lh-loose);
+    margin: 14px 0 22px 22px;
+    padding: 0;
+
+    li + li { margin-top: 6px; }
+}
+
+// Navigator (table of every term). When the page hosts it inside its own
+// section scaffolding the section header already supplies the space above,
+// so the standalone top margin is dropped.
+.ta-nav { margin-top: 32px; }
+.ta-nav.ta-nav-hosted { margin-top: 0; }
+.ta-navhead {
+    font-family: var(--font-mono);
+    font-size: var(--size-sm);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 18px;
+}
+// Reset minima's global table recipe (striped rows, bordered cells, shaded
+// th) so the standard role-table-frame/head/cell recipes paint the table.
+.ta-table { width: 100%; border-collapse: collapse; margin: 0; border: none; color: inherit; }
+.ta-table tr,
+.ta-table tr:nth-child(even) { background: transparent; }
+.ta-table th,
+.ta-table td { border: none; background: transparent; text-align: left; padding: 12px 16px; vertical-align: top; }
+// Category column shrinks to its content; the components column takes the
+// rest. Category labels render as the same selectable pills as the
+// components beside them (see .ta-term-link), so no extra recipe here.
+.ta-cat-cell { width: 1%; white-space: nowrap; }
+.ta-parts { display: flex; flex-wrap: wrap; gap: 8px; }
+// Term links share the site tag-pill recipe (sans the leading coral dot);
+// the selected term gets the coral-wash treatment.
+.ta-term-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 11px;
+    border-radius: 999px;
+    background: var(--color-tag-bg);
+    color: var(--color-tag-ink);
+    border: 1px solid var(--line);
+    font-family: var(--font-text);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    line-height: 1.55;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ta-term-link:hover {
+    background: var(--paper-inset);
+    color: var(--ink-primary);
+    border-color: var(--coral);
+}
+.ta-term-link.sel {
+    background: var(--coral-wash);
+    color: var(--coral-strong);
+    border-color: var(--coral);
+}
+.ta-term-link:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+
+// Home-page thumbnail (_includes/type-anatomy-guides-thumb.html). A static
+// copy of the stage that cycles through four parts of the R on a 2s beat,
+// one 8s loop shared by every layer with a per-layer delay. Each part fades
+// up quickly, holds, and fades out before the next begins.
+.ta-thumb .tath-cycle,
+.ta-thumb .tath-name {
+    opacity: 0;
+    animation: tath-cycle 8s linear infinite;
+}
+.ta-thumb .tath-1 { animation-delay: 0s; }
+.ta-thumb .tath-2 { animation-delay: 2s; }
+.ta-thumb .tath-3 { animation-delay: 4s; }
+.ta-thumb .tath-4 { animation-delay: 6s; }
+.ta-thumb .tath-name {
+    fill: var(--coral);
+    font-family: var(--font-mono);
+    font-size: var(--size-md);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+}
+@keyframes tath-cycle {
+    0%        { opacity: 0; }
+    3%, 22%   { opacity: 1; }
+    25%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ta-mark { animation: none; opacity: 0.9; }
+    .ta-enter { animation: none; }
+    .ta-term-link { transition: none; }
+    // Hold the first part rather than cycling.
+    .ta-thumb .tath-cycle, .ta-thumb .tath-name { animation: none; opacity: 0; }
+    .ta-thumb .tath-1 { opacity: 1; }
+}
+
