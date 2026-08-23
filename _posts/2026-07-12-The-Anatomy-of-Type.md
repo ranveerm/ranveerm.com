@@ -93,7 +93,7 @@ Explore the invisible lines and shapes that are instrumental for constructing sy
 
 <p class="role-post-body ta-section-prose"><strong>Readability</strong> is a property of the setting, meaning how comfortably a passage can be read at length. This is where the spacing terms earn their keep. Generous leading stops the eye from dropping a line. Line length governs how far the eye must travel before finding the next line's start. A face can be highly legible and still read poorly if it is set too tight, too wide, or too small.</p>
 
-<p class="role-post-body ta-section-prose">Type succeeds by not being noticed, because the moment a reader registers the letterforms, attention has moved from the text to its container. Everything on this page, the measured heights, the small curve softening the join where a stem meets its serif, the pair of letters nudged closer together, exists to be invisible. <strong>When legibility and readability are achieved, the details become hidden in plain sight.</strong></p>
+<p class="role-post-body ta-section-prose">Type succeeds by not being noticed, because the moment a reader registers the letterforms, attention has moved from the text to its container. Everything on this page, the measured heights, the small curve softening the join where a stem meets its serif, the pair of letters nudged closer together, exists to be invisible. When legibility and readability are achieved, the details become hidden in plain sight.</p>
 </section>
 
 <section class="ta-section">

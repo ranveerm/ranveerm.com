@@ -3438,7 +3438,9 @@ text.chain-restart-label {
     border-top: 1px solid var(--line);
     padding: 22px 22px 18px;
 }
-.ta-insp-foot { padding-top: 18px; }
+// Prev/Next sit above the name and definition, so the gap this used to add
+// above itself now separates it from the copy below instead.
+.ta-insp-controls { padding-bottom: 18px; }
 .ta-name {
     font-family: var(--font-display);
     font-weight: 500;

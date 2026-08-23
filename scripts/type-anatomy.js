@@ -1165,9 +1165,20 @@
     function buildInspector(item) {
       insp.innerHTML = '';
 
-      // Top block: name, sample letters, definition. The name alone carries
-      // the identity; the pill in the table below already shows which
-      // category the reader is in, so no eyebrow is repeated here.
+      // Controls first, ahead of the identity/definition: prev/next steps
+      // through terms far more often than the reader scrolls the panel, so
+      // they sit where the eye already is rather than below the copy.
+      var prev = el('button', { class: 'role-control-btn', type: 'button', 'aria-label': 'Previous term' }, '‹ Prev');
+      prev.addEventListener('click', function () { go(-1); });
+      var next = el('button', { class: 'role-control-btn', type: 'button', 'aria-label': 'Next term' }, 'Next ›');
+      next.addEventListener('click', function () { go(1); });
+      insp.appendChild(el('div', { class: 'ta-insp-controls' }, [
+        el('div', { class: 'ta-controls' }, [prev, next]),
+      ]));
+
+      // Name, sample letters, definition. The name alone carries the
+      // identity; the pill in the table below already shows which category
+      // the reader is in, so no eyebrow is repeated here.
       var body;
       if (item.kind === 'term') {
         var term = item.term;
@@ -1185,16 +1196,6 @@
         function (target) { select(target.idx); }));
       body.appendChild(def);
       insp.appendChild(body);
-
-      // Foot block: controls, pinned to the bottom of the panel.
-      var prev = el('button', { class: 'role-control-btn', type: 'button', 'aria-label': 'Previous term' }, '‹ Prev');
-      prev.addEventListener('click', function () { go(-1); });
-      var next = el('button', { class: 'role-control-btn', type: 'button', 'aria-label': 'Next term' }, 'Next ›');
-      next.addEventListener('click', function () { go(1); });
-
-      insp.appendChild(el('div', { class: 'ta-insp-foot' }, [
-        el('div', { class: 'ta-controls' }, [prev, next]),
-      ]));
     }
 
     function buildNav() {
